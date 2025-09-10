@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cannon : MonoBehaviour
+public class Cannon : MonoBehaviour, Interactable
 {
     private Vector3 cannonBase;
     private Vector3 baseToCenter = Vector3.up * 2.3f;
     public Vector3 direction = Vector3.up*3.7f + Vector3.forward*6.5f;
 
     private float speed = 80;
+    private float power = 32f;
+    private bool cannonLoaded = false;
     private BlobController blob = null;
     private AudioSource audioSource;
     private SphereCollider cannonCollider;
@@ -24,27 +26,36 @@ public class Cannon : MonoBehaviour
         transform.Rotate(Vector3.up, angle);
         direction = Quaternion.AngleAxis(angle, Vector3.up) * direction;
 
-        if (blob != null) {
-            blob.teleport(cannonBase + baseToCenter);
+        if (cannonLoaded && Input.GetButtonDown("Jump")) {
+            Fire();
         }
     }
 
-    public void Insert(BlobController blob) {
-        cannonCollider.enabled = false;
+    public void OnInteract(BlobController blob)
+    { // Insert the blob
+        cannonCollider.isTrigger = true;
 
         this.blob = blob;
-        blob.cannon = this;
+        cannonLoaded = true;
+        blob.SetInputEnabled(false);
+        blob.SetGravity(false);
+        blob.Teleport(cannonBase + baseToCenter);
+        blob.ApplyForces(Vector3.zero, Vector3.zero, false);
     }
 
     public void Fire() {
-        if (blob != null) {
-            audioSource.Play();
-            blob.teleport(cannonBase + baseToCenter + direction);
+        if (cannonLoaded)
+        {
+            blob.Teleport(cannonBase + baseToCenter + direction);
+            blob.SetGravity(true);
+            blob.ApplyForces(null, power * direction.normalized, false);
+            blob.SetInputEnabled(true, 0.5f);
 
-            blob.cannon = null;
             blob = null;
+            cannonLoaded = false;
         }
 
-        cannonCollider.enabled = true;
+        audioSource.Play();
+        cannonCollider.isTrigger = false;
     }
 }
