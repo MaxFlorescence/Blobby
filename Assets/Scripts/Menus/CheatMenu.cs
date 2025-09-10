@@ -7,7 +7,7 @@ public class CheatMenu : Menu
     public BlobController blobController;
 
     private void Teleport(Vector3 to) {
-        blobController.teleport(to);
+        blobController.Teleport(to);
         HideMenu();
     }
 
