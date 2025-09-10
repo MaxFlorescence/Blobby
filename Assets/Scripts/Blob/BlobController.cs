@@ -18,7 +18,7 @@ public class BlobController : MonoBehaviour
     public float cameraDistance;
 
     // Private members
-    private float movementIntensity = 8f;
+    private float movementIntensity = 10f;
     private float jumpIntensity = 8f;
     private Vector3 jumpDirection = Vector3.zero;
     private AtomController[] atomControllers;
