@@ -1,4 +1,3 @@
-
 public static class LevelStartupInfo
 {
     public static bool StartCutscene {get; set;}
