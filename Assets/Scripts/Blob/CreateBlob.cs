@@ -323,7 +323,6 @@ public class CreateBlob : MonoBehaviour
         controller.blobAtoms = blobAtoms;
         controller.rigidBodies = rigidBodies;
         controller.N = NUM_ATOMS;
-        controller.finishMenu = finishMenu;
         controller.cheatMenu = cheatMenu;
         controller.pauseMenu = pauseMenu;
 

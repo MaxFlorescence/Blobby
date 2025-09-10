@@ -11,7 +11,6 @@ public class BlobController : MonoBehaviour
     public GameObject mainCamera;
     public GameObject[] blobAtoms;
     public Rigidbody[] rigidBodies;
-    public FinishMenu finishMenu;
     public CheatMenu cheatMenu;
     public PauseMenu pauseMenu;
     public Squisher squisher;
@@ -136,7 +135,7 @@ public class BlobController : MonoBehaviour
     {
         foreach (AtomController atom in atomControllers)
         {
-            atom.useGravity(gravity);
+            atom.SetGravity(gravity);
         }
     }
 
@@ -297,21 +296,17 @@ public class BlobController : MonoBehaviour
         }
     }
 
-    // TODO: make a menuController
-    public void Win(GameObject platform)
+    /// <summary>
+    ///    Return a boolean indicating if the blob character is holding an object with the specified tag.
+    /// </summary>
+    /// <param name="tag">
+    ///     The tag to check for.
+    /// </param>
+    /// <returns>
+    ///     <tt>true</tt> iff the held object has the tag.
+    /// </returns>
+    public bool HoldingObjectWithTag(string tag)
     {
-        if (grabbedObject != null && grabbedObject.tag == "Flag")
-        {
-            platform.GetComponent<AudioSource>().Play();
-
-            finishMenu.hasWon = true;
-            finishMenu.ShowMenu();
-        }
-    }
-
-    public void Lose()
-    {
-        finishMenu.hasWon = false;
-        finishMenu.ShowMenu();
+        return grabbedObject != null && grabbedObject.CompareTag(tag);
     }
 }

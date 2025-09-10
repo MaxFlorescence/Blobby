@@ -32,10 +32,9 @@ public class AtomController : MonoBehaviour
         impulse = Vector3.zero;
     }
 
-    public void useGravity(bool use)
+    public void SetGravity(bool gravity)
     {
-        if (rigidBody != null)
-            rigidBody.useGravity = use;
+        rigidBody.useGravity = gravity;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -48,8 +47,6 @@ public class AtomController : MonoBehaviour
 
             if (NotBounds(obj) && !touching.Contains(obj))
             {
-                touchedHazard(obj);
-                touchedGoal(obj);
                 Interactable interactableObj = obj.GetComponent<Interactable>();
                 if (interactableObj != null)
                 {
@@ -62,22 +59,6 @@ public class AtomController : MonoBehaviour
                     touchCount++;
                 }
             }
-        }
-    }
-
-    void touchedHazard(GameObject obj)
-    {
-        if (obj.tag == "Hazard")
-        {
-            blobController.Lose();
-        }
-    }
-
-    void touchedGoal(GameObject obj)
-    {
-        if (obj.tag == "Start Platform")
-        {
-            blobController.Win(obj);
         }
     }
 
