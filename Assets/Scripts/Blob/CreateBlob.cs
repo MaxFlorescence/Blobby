@@ -1,16 +1,20 @@
-using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+/// <summary>
+///     This class (1) creates the blob character and (2) maintains its appearance as the game is played.
+///     <para/>
+///     The blob character is composed of "atoms", spheres interconnected by spring joints.
+///     There is one atom at each surface vertex (for the default icosahedron shape, that makes 12 atoms),
+///     plus one extra atom at the center of the blob (13 total).
+///     The surface atoms ensure that the overall shape of the blob is maintained, while the center
+///     atom ensures that the blob doesn't collapse on itself.
+/// </summary>
 public class CreateBlob : MonoBehaviour
 {
-    /// <summary>
-    ///     This class (1) creates the blob character and (2) maintains its appearance as the game is played.
-    /// </summary>
-
     // Public members
-    public float springForce;
-    public float atomScale;
+    public float springForce; // spring constant for the springs maintaining the blob's shape.
+    public float atomScale; // how big each atom of the blob is.
     public const int BLOB_ID = 0; // TODO: id strings
 
     // TODO: can these be found automatically?
@@ -39,12 +43,11 @@ public class CreateBlob : MonoBehaviour
     private BlobController blobController;
     private int[] meshToAtomMap;
 
+    /// <summary>
+    ///     Create the blob. This assumes the script is a component of an icosahedron mesh, which may change later.
+    /// </summary>
     void Start()
     {
-        /// <summary>
-        ///     Create the blob. This assumes the script is a component of an icosahedron mesh, which may change later.
-        /// </summary>
-
         spawnPoint = transform.position;
         blobMesh = GetComponent<MeshFilter>().mesh;
 
@@ -63,31 +66,31 @@ public class CreateBlob : MonoBehaviour
         blobController = AttachController(centerAtom);
     }
 
+    /// <summary>
+    ///     Spawns one atom (sphere) at the given center, and one at each vertex of the given mesh.
+    /// </summary>
+    /// <param name="mesh">
+    ///     The mesh to build from.
+    /// </param>
+    /// <param name="ID">
+    ///     The ID of this mesh.
+    /// </param>
+    /// <param name="expectedCount">
+    ///     How many atoms the caller expects there to be when this method returns.
+    /// </param>
+    /// <param name="vertexToAtomMap">
+    ///     A list mapping which mesh verices correspond to which atoms.
+    ///     vertexToAtomMap[i] = j iff mesh.vertices[i] corresponds to the returned array's j-th element. 
+    /// </param>
+    /// <param name="center">
+    ///     The center of the mesh.
+    ///     If not given, defaults to the average position of the mesh's vertices.
+    /// </param>
+    /// <returns>
+    ///     An array of GameObjects containing the spawned atoms.
+    ///     The first atom (index 0) is the atom spawned at the center.
+    /// </returns>
     private GameObject[] MakeAtomsFromMesh(Mesh mesh, int ID, int expectedCount, out int[] vertexToAtomMap, Vector3? center = null) {
-        /// <summary>
-        ///     Spawns one atom (sphere) at the given center, and one at each vertex of the given mesh.
-        /// </summary>
-        /// <param name="mesh">
-        ///     The mesh to build from.
-        /// </param>
-        /// <param name="ID">
-        ///     The ID of this mesh.
-        /// </param>
-        /// <param name="expectedCount">
-        ///     How many atoms the caller expects there to be when this method returns.
-        /// </param>
-        /// <param name="vertexToAtomMap">
-        ///     A list mapping which mesh verices correspond to which atoms.
-        ///     vertexToAtomMap[i] = j iff mesh.vertices[i] corresponds to the returned array's j-th element. 
-        /// </param>
-        /// <param name="center">
-        ///     The center of the mesh.
-        ///     If not given, defaults to the average position of the mesh's vertices.
-        /// </param>
-        /// <returns>
-        ///     (GameObject[]) An array containing the spawned atoms.
-        ///     The first atom (index 0) is the atom spawned at the center.
-        /// </returns>
         
         GameObject[] atoms = new GameObject[expectedCount];
         vertexToAtomMap = new int[mesh.vertexCount];
@@ -141,34 +144,34 @@ public class CreateBlob : MonoBehaviour
         return atoms;
     }
 
+    /// <summary>
+    ///     Instantiates one atom (sphere) at the given position, parented to the given parent's transform.
+    /// </summary>
+    /// <param name="position">
+    ///     The position at which to spawn this atom.
+    /// </param>
+    /// <param name="scale">
+    ///     The scale to give this atom.
+    /// </param>
+    /// <param name="ID">
+    ///     The ID of this atom.
+    /// </param>
+    /// <param name="parentID">
+    ///     The ID of this atom's parent.
+    /// </param>
+    /// <param name="parentTransform">
+    ///     The transform of this atom's parent.
+    /// </param>
+    /// <returns>
+    ///     The atom GameObject.
+    /// </returns>
     private GameObject SpawnAtom(Vector3 position, float scale, int ID, int parentID, Transform parentTransform) {
-        /// <summary>
-        ///     Instantiates one atom (sphere) at the given position, parented to the given parent's transform.
-        /// </summary>
-        /// <param name="position">
-        ///     The position at which to spawn this atom.
-        /// </param>
-        /// <param name="scale">
-        ///     The scale to give this atom.
-        /// </param>
-        /// <param name="ID">
-        ///     The ID of this atom.
-        /// </param>
-        /// <param name="parentID">
-        ///     The ID of this atom's parent.
-        /// </param>
-        /// <param name="parentTransform">
-        ///     The transform of this atom's parent.
-        /// </param>
-        /// <returns>
-        ///     (GameObject) The atom.
-        /// </returns>
-
         GameObject atom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         atom.GetComponent<MeshRenderer>().enabled = false; // make it invisible
 
         atom.name = string.Format("Mesh {0} Atom {1}", parentID, ID);
         atom.layer = LayerMask.NameToLayer(IGNORE_CAMERA_LAYER);
+        atom.tag = "Atom";
 
         atom.transform.localScale = scale * Vector3.one;
         atom.transform.position = position;
@@ -177,18 +180,17 @@ public class CreateBlob : MonoBehaviour
         return atom;
     }
 
+    /// <summary>
+    ///     Adds a Rigidbody component to every object in an array.
+    /// </summary>
+    /// <param name="objects">
+    ///     The array of objects.
+    /// </param>
+    /// <returns>
+    ///     The array of Rigidbodies added.
+    ///     objects[i] has the Rigidbody at index i.
+    /// </returns>
     private Rigidbody[] AddRigidBodies(GameObject[] objects) {
-        /// <summary>
-        ///     Adds a Rigidbody component to every object in an array.
-        /// </summary>
-        /// <param name="objects">
-        ///     The array of objects.
-        /// </param>
-        /// <returns>
-        ///     (Rigidbody[]) The array of Rigidbodies added.
-        ///     objects[i] has the Rigidbody at index i.
-        /// </returns>
-
         Rigidbody[] rigidBodies = new Rigidbody[objects.Length];
         for (int i = 0; i < objects.Length; i++) {
             rigidBodies[i] = objects[i].AddComponent<Rigidbody>();
@@ -197,48 +199,46 @@ public class CreateBlob : MonoBehaviour
         return rigidBodies;
     }
 
+    /// <summary>
+    ///     Adds a physic material to the collider of every object in an array.
+    /// </summary>
+    /// <param name="objects">
+    ///     The array of objects.
+    /// </param>
+    /// <param name="material">
+    ///     The material to apply.
+    /// </param>
     private void AddPhysicMaterials(GameObject[] objects, PhysicMaterial physicMaterial) {
-        /// <summary>
-        ///     Adds a physic material to the collider of every object in an array.
-        /// </summary>
-        /// <param name="objects">
-        ///     The array of objects.
-        /// </param>
-        /// <param name="material">
-        ///     The material to apply.
-        /// </param>
-
         for (int i = 0; i < objects.Length; i++) {
             objects[i].GetComponent<Collider>().material = physicMaterial;
         }
     }
 
+    /// <summary>
+    ///     Inter-connects the objects with spring joints.
+    /// </summary>
+    /// <param name="objects">
+    ///     The array of objects to connect.
+    /// </param>
+    /// <param name="springForce">
+    ///     The spring constant to apply to each spring joint.
+    /// </param>
+    /// <param name="expectedCount">
+    ///     How many spring joints are expected to be created
+    /// </param>
+    /// <param name="distance">
+    ///     The threshold that determines which pairs of objects will be connected.
+    ///     The center object (index 0) will always be connected to all other objects.
+    /// </param>
+    /// <param name="ballAdjacency">
+    ///     Option for deciding how to interpret the `distance` threshold.
+    ///     `true` indicates that objects are connected iff they are at most `distance` apart.
+    ///     `false` indicates that objects are connected iff they are approximately `distance` apart.
+    /// </param>
+    /// <returns>
+    ///     The array of SpringJoints added, in no particular order.
+    /// </returns>
     private SpringJoint[] ConnectAtoms(GameObject[] objects, float springForce, int expectedCount, float distance, bool ballAdjacency) {
-        /// <summary>
-        ///     Inter-connects the objects with spring joints.
-        /// </summary>
-        /// <param name="objects">
-        ///     The array of objects to connect.
-        /// </param>
-        /// <param name="springForce">
-        ///     The spring constant to apply to each spring joint.
-        /// </param>
-        /// <param name="expectedCount">
-        ///     How many spring joints are expected to be created
-        /// </param>
-        /// <param name="distance">
-        ///     The threshold that determines which pairs of objects will be connected.
-        ///     The center object (index 0) will always be connected to all other objects.
-        /// </param>
-        /// <param name="ballAdjacency">
-        ///     Option for deciding how to interpret the `distance` threshold.
-        ///     `true` indicates that objects are connected iff they are at most `distance` apart.
-        ///     `false` indicates that objects are connected iff they are approximately `distance` apart.
-        /// </param>
-        /// <returns>
-        ///     (SpringJoint[]) The array of SpringJoints added, in no particular order.
-        /// </returns>
-
         SpringJoint[] springJoints = new SpringJoint[expectedCount];
         int newIndex = 0;
 
@@ -271,31 +271,30 @@ public class CreateBlob : MonoBehaviour
         return springJoints;
     }
 
+    /// <summary>
+    ///     Tests if objects i and j are adjacent by the given parameters.
+    /// </summary>
+    /// <param name="objects">
+    ///     The array of objects
+    /// </param>
+    /// <param name="i">
+    ///     The index of the first object.
+    /// </param>
+    /// <param name="j">
+    ///     The index of the second object.
+    /// </param>
+    /// <param name="distance">
+    ///     The threshold that determines if the two objects are adjacent.
+    /// </param>
+    /// <param name="ballAdjacency">
+    ///     Option for deciding how to interpret the `distance` threshold.
+    ///     `true` indicates the objects are adjacent iff they are at most `distance` apart.
+    ///     `false` indicates the objects are adjacent iff they are approximately `distance` apart.
+    /// </param>
+    /// <returns>
+    ///     A boolean indicating if i and j are adjacent.
+    /// </returns>
     private bool AreAdjacent(GameObject[] objects, int i, int j, float distance, bool ballAdjacency) {
-        /// <summary>
-        ///     Tests if objects i and j are adjacent by the given parameters.
-        /// </summary>
-        /// <param name="objects">
-        ///     The array of objects
-        /// </param>
-        /// <param name="i">
-        ///     The index of the first object.
-        /// </param>
-        /// <param name="j">
-        ///     The index of the second object.
-        /// </param>
-        /// <param name="distance">
-        ///     The threshold that determines if the two objects are adjacent.
-        /// </param>
-        /// <param name="ballAdjacency">
-        ///     Option for deciding how to interpret the `distance` threshold.
-        ///     `true` indicates the objects are adjacent iff they are at most `distance` apart.
-        ///     `false` indicates the objects are adjacent iff they are approximately `distance` apart.
-        /// </param>
-        /// <returns>
-        ///     (bool) Are objects i and j adjacent?
-        /// </returns>
-
         float separation = (objects[i].transform.position - objects[j].transform.position).magnitude;
 
         if (ballAdjacency) {
@@ -306,18 +305,17 @@ public class CreateBlob : MonoBehaviour
         }
     }
 
+    /// <summary>
+    ///     Attaches a blob controller component to the given gameObject.
+    ///     This controller handles player input, motion, and world interaction.
+    /// </summary>
+    /// <param name="gameObject">
+    ///     The object to attach the blob controller to.
+    /// </param>
+    /// <returns>
+    ///     The attached BlobController.
+    /// </returns>
     private BlobController AttachController(GameObject gameObject) {
-        /// <summary>
-        ///     Attaches a blob controller component to the given gameObject.
-        ///     This controller handles player input, motion, and world interaction.
-        /// </summary>
-        /// <param name="gameObject">
-        ///     The object to attach the blob controller to.
-        /// </param>
-        /// <returns>
-        ///     (BlobController) The attached blob controller.
-        /// </returns>
-
         BlobController controller = gameObject.AddComponent<BlobController>();
 
         // Inherit some class members. Is there a better way to do this?
@@ -339,12 +337,10 @@ public class CreateBlob : MonoBehaviour
         return controller;
     }
 
-
+    /// <summary>
+    ///     Maintains the blob's appearance by keeping the eyes and mesh in place and looking as they should.
+    /// </summary>
     void Update() {
-        /// <summary>
-        ///     Maintains the blob's appearance by keeping the eyes and mesh in place and looking as they should.
-        /// </summary>
-
         // Move the blob mesh and snap its vertices to the atoms.
         transform.position = centerAtom.transform.position;
         SnapMeshToAtoms(blobMesh, blobAtoms, meshToAtomMap, MESH_SCALE);
@@ -356,39 +352,37 @@ public class CreateBlob : MonoBehaviour
         SnapEyes();
     }
 
+    ///<summary>
+    ///     Helper function to snap both the left and right eyes.
+    ///</summary>
     private void SnapEyes() {
-        ///<summary>
-        ///     Helper function to snap both the left and right eyes.
-        ///</summary>
-        
         SnapToTriangle(leftEye, blobAtoms, 1, 2, 3, MESH_SCALE);
         SnapToTriangle(rightEye, blobAtoms, 1, 3, 4, MESH_SCALE);
     }
 
+    /// <summary>
+    ///     Transforms the `objectToSnap` such that it is positioned between the three given objects.
+    ///     The distance between the objects and the center object (index 0) is first scaled.
+    /// </summary>
+    /// <param name="objectToSnap">
+    ///     The object that is being transformed.
+    /// </param>
+    /// <param name="objects">
+    ///     The array of objects.
+    /// </param>
+    /// <param name="i">
+    ///     The index of the first object.
+    /// </param>
+    /// <param name="j">
+    ///     The index of the second object.
+    /// </param>
+    /// <param name="k">
+    ///     The index of the third object.
+    /// </param>
+    /// <param name="scale">
+    ///     The scale between the given objects and the center object.
+    /// </param>
     private void SnapToTriangle(GameObject objectToSnap, GameObject[] objects, int i, int j, int k, float scale) {
-        /// <summary>
-        ///     Transforms the `objectToSnap` such that it is positioned between the three given objects.
-        ///     The distance between the objects and the center object (index 0) is first scaled.
-        /// </summary>
-        /// <param name="objectToSnap">
-        ///     The object that is being transformed.
-        /// </param>
-        /// <param name="objects">
-        ///     The array of objects.
-        /// </param>
-        /// <param name="i">
-        ///     The index of the first object.
-        /// </param>
-        /// <param name="j">
-        ///     The index of the second object.
-        /// </param>
-        /// <param name="k">
-        ///     The index of the third object.
-        /// </param>
-        /// <param name="scale">
-        ///     The scale between the given objects and the center object.
-        /// </param>
-        
         Vector3 center = objects[0].transform.position;
         Vector3 pos1 = objects[i].transform.position;
         Vector3 pos2 = objects[j].transform.position;
@@ -401,57 +395,55 @@ public class CreateBlob : MonoBehaviour
         objectToSnap.transform.LookAt(position + direction, Vector3.up);
     }
 
+    /// <summary>
+    ///     Calculates the barycenter of the triangle formed by the tips of three vectors scaled away from a center.
+    /// </summary>
+    /// <param name="center">
+    ///     The center position.
+    /// </param>
+    /// <param name="pos1">
+    ///     The first position.
+    /// </param>
+    /// <param name="pos2">
+    ///     The second position.
+    /// </param>
+    /// <param name="pos3">
+    ///     The third position.
+    /// </param>
+    /// <param name="scale">
+    ///     The scale between the given positions and the center.
+    /// </param>
+    /// <returns>
+    ///     The barycenter of the three positions as a Vector3, scaled away from the center.
+    /// </returns>
     private Vector3 ScaledBarycenter(Vector3 center, Vector3 pos1, Vector3 pos2, Vector3 pos3, float scale) {
-        /// <summary>
-        ///     Calculates the barycenter of the triangle formed by the tips of three vectors scaled away from a center.
-        /// </summary>
-        /// <param name="center">
-        ///     The center position.
-        /// </param>
-        /// <param name="pos1">
-        ///     The first position.
-        /// </param>
-        /// <param name="pos2">
-        ///     The second position.
-        /// </param>
-        /// <param name="pos3">
-        ///     The third position.
-        /// </param>
-        /// <param name="scale">
-        ///     The scale between the given positions and the center.
-        /// </param>
-        /// <returns>
-        ///     (Vector3) The barycenter of the three positions, scaled away from the center.
-        /// </returns>
-        
         Vector3 barycenter = (pos1 + pos2 + pos3) / 3;
 
         return (barycenter - center)*scale + center;
     }
 
+    /// <summary>
+    ///     Calculates the normal vector of the triangle formed by the tips of three vectors, oriented away from the center.
+    /// </summary>
+    /// <param name="center">
+    ///     The center position.
+    /// </param>
+    /// <param name="pos1">
+    ///     The first position.
+    /// </param>
+    /// <param name="pos2">
+    ///     The second position.
+    /// </param>
+    /// <param name="pos3">
+    ///     The third position.
+    /// </param>
+    /// <param name="barycenter">
+    ///     The barycenter of the triangle.
+    /// </param>
+    /// <returns>
+    ///     The normal Vector3 of the triangle.
+    /// </returns>
     private Vector3 NormalVector(Vector3 center, Vector3 pos1, Vector3 pos2, Vector3 pos3, Vector3 barycenter) {
-        /// <summary>
-        ///     Calculates the normal vector of the triangle formed by the tips of three vectors, oriented away from the center.
-        /// </summary>
-        /// <param name="center">
-        ///     The center position.
-        /// </param>
-        /// <param name="pos1">
-        ///     The first position.
-        /// </param>
-        /// <param name="pos2">
-        ///     The second position.
-        /// </param>
-        /// <param name="pos3">
-        ///     The third position.
-        /// </param>
-        /// <param name="barycenter">
-        ///     The barycenter of the triangle.
-        /// </param>
-        /// <returns>
-        ///     (Vector3) The normal vector of the triangle.
-        /// </returns>
-        
         Vector3 dir12 = pos2 - pos1;
         Vector3 dir13 = pos3 - pos1;
 
@@ -464,24 +456,23 @@ public class CreateBlob : MonoBehaviour
         }
     }
 
+    /// <summary>
+    ///     Sets the vertex positions for the mesh to equal the given object positions, mapped and scaled accordingly.
+    /// </summary>
+    /// <param name="mesh">
+    ///     The mesh whose vertices will be snapped.
+    /// </param>
+    /// <param name="objects">
+    ///     The objects to snap the mesh to.
+    /// </param>
+    /// <param name="vertexToObjectMap">
+    ///     The mapping between mesh vertices and object indices.
+    ///     vertexToObjectMap[i] = j indicates that vertex i corresponds to object j.
+    /// </param>
+    /// <param name="scale">
+    ///     The scaling to apply to the mesh.
+    /// </param>
     private void SnapMeshToAtoms(Mesh mesh, GameObject[] objects, int[] vertexToObjectMap, float scale) {
-        /// <summary>
-        ///     Sets the vertex positions for the mesh to equal the given object positions, mapped and scaled accordingly.
-        /// </summary>
-        /// <param name="mesh">
-        ///     The mesh whose vertices will be snapped.
-        /// </param>
-        /// <param name="objects">
-        ///     The objects to snap the mesh to.
-        /// </param>
-        /// <param name="vertexToObjectMap">
-        ///     The mapping between mesh vertices and object indices.
-        ///     vertexToObjectMap[i] = j indicates that vertex i corresponds to object j.
-        /// </param>
-        /// <param name="scale">
-        ///     The scaling to apply to the mesh.
-        /// </param>
-
         Vector3[] newVertices = mesh.vertices;
 
         for (int i = 0; i < newVertices.Length; i++) {
