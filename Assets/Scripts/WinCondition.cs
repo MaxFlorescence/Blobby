@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WinCondition : MonoBehaviour, Interactable
+public class WinCondition : Interactable
 {
     public AudioSource fanfare;
     
@@ -11,7 +11,7 @@ public class WinCondition : MonoBehaviour, Interactable
         finishMenu = GameObject.FindGameObjectWithTag("FinishMenu").GetComponent<FinishMenu>();
     }
 
-    public void OnInteract(BlobController blob)
+    protected override void OnInteract(BlobController blob)
     {
         if (blob.HoldingObjectWithTag("Flag"))
         {

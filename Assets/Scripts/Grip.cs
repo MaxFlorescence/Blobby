@@ -1,27 +1,29 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public enum GripState
 {
     Idle, Grabbing, Releasing, Held
 }
 
-public class Grip : MonoBehaviour
+[RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Rigidbody))]
+public class Grip : Interactable
 {
     public float finalScale = 0.5f;
     public AudioSource gripSound;
 
-    private float movementFactor = 0.04f;
-    private float finishingDistance = 0.05f;
+    private float movementFactor = 0.1f;
+    private float grabbingDistance = 0.2f;
     private float initialDistance = -1;
     private float currentScale = 1f;
-    private float cooldown = 3f;
     private float maxCooldown = 3f;
-    private float finishCooldownScale = 0.5f;
+    private float cooldownScaleDuration = 0.5f;
     private GripState state = GripState.Idle;
     private Vector3 initialScale;
     private Collider gripCollider;
     private Rigidbody gripRigidbody;
-    private GameObject grabbedBy;
+    private BlobController grabbedBy;
 
     void Start()
     {
@@ -30,35 +32,23 @@ public class Grip : MonoBehaviour
         initialScale = transform.localScale;
     }
 
-    void Update()
+    public void FixedUpdate()
     {
         if (state == GripState.Grabbing)
         {
             Vector3 translation = grabbedBy.transform.position - transform.position;
+            float distance = translation.magnitude;
 
-            if (translation.magnitude <= finishingDistance)
+            ShrinkByDistance(distance);
+
+            if (distance > grabbingDistance)
             {
-                transform.position = grabbedBy.transform.position;
-                transform.rotation = grabbedBy.transform.rotation;
+                float move = Mathf.Max(grabbingDistance, movementFactor * distance);
+                transform.Translate(move * translation.normalized, relativeTo: Space.World);
+            }
+            else
+            {
                 state = GripState.Held;
-            }
-            else
-            {
-                ScaleByDistance(translation);
-                transform.Translate(movementFactor * translation.normalized, relativeTo: Space.World);
-            }
-        }
-        else if (state == GripState.Releasing)
-        {
-            if (cooldown >= maxCooldown)
-            {
-                IgnoreAtomCollisions(false);
-                state = GripState.Idle;
-            }
-            else
-            {
-                ScaleByCooldown();
-                cooldown += Time.deltaTime;
             }
         }
         else if (state == GripState.Held)
@@ -67,12 +57,20 @@ public class Grip : MonoBehaviour
         }
     }
 
-    public bool GetGrabbed(GameObject obj)
+    protected override void OnUpdate()
     {
-        if (cooldown >= maxCooldown)
+        if (state == GripState.Releasing) // && CoolingDown() // iff GripState.Releasing
         {
-            initialDistance = (obj.transform.position - transform.position).magnitude;
-            grabbedBy = obj;
+            GrowByCooldown();
+        }
+    }
+
+    protected override void OnInteract(BlobController blob)
+    {
+        if (blob.TryToGrab(gameObject))
+        {
+            initialDistance = (blob.transform.position - transform.position).magnitude;
+            grabbedBy = blob;
 
             gripCollider.isTrigger = true;
             gripRigidbody.useGravity = false;
@@ -80,22 +78,29 @@ public class Grip : MonoBehaviour
             state = GripState.Grabbing;
 
             gripSound.Play();
-
-            return true;
+            SetInteractionEnabled(false);
         }
-        return false;
     }
 
-    public void GetReleased()
+    public void Release()
     {
         initialDistance = -1;
         gripCollider.isTrigger = false;
         gripRigidbody.useGravity = true;
         grabbedBy = null;
-        cooldown = 0;
-        IgnoreAtomCollisions(true);
+        StartInteractionCooldown(maxCooldown);
+    }
 
+    protected override void OnInteractionCooldownStart()
+    {
+        IgnoreAtomCollisions(true);
         state = GripState.Releasing;
+    }
+
+    protected override void OnInteractionCooldownEnd()
+    {
+        IgnoreAtomCollisions(false);
+        state = GripState.Idle;
     }
 
     private void IgnoreAtomCollisions(bool ignore)
@@ -107,9 +112,9 @@ public class Grip : MonoBehaviour
         }
     }
 
-    private void ScaleByDistance(Vector3 diff)
+    private void ShrinkByDistance(float dist)
     {
-        float scale = diff.magnitude * (1 - finalScale) / initialDistance + finalScale;
+        float scale = dist * (1 - finalScale) / initialDistance + finalScale;
         if (scale < 0)
         {
             scale = 0;
@@ -126,9 +131,9 @@ public class Grip : MonoBehaviour
         }
     }
 
-    private void ScaleByCooldown()
+    private void GrowByCooldown()
     {
-        float scale = cooldown * (1 - finalScale)/finishCooldownScale + finalScale;
+        float scale = finalScale + (cooldownTime - maxCooldown) * (finalScale - 1) / cooldownScaleDuration;
         if (scale < 0)
         {
             scale = 0;

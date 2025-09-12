@@ -233,19 +233,19 @@ public class BlobController : MonoBehaviour
     void Update()
     {
         if (!LevelStartupInfo.StartCutscene) // don't allow input during cutscene
-            {
+        {
             if (movementInputEnabled && Input.GetButtonDown("Jump"))
-                {
+            {
                 doJump = true;
-                }
+            }
 
-                if (Time.timeScale > 0) // only process if game is not paused
+            if (Time.timeScale > 0) // only process if game is not paused
+            {
+                if (audioIsPaused)
                 {
-                    if (audioIsPaused)
-                    {
-                        roundaboutAudio.UnPause();
-                        audioIsPaused = false;
-                    }
+                    roundaboutAudio.UnPause();
+                    audioIsPaused = false;
+                }
 
                 if (Input.GetKeyDown("q"))
                 {
@@ -254,20 +254,20 @@ public class BlobController : MonoBehaviour
 
 
                 // TODO: move functionality to menus
-                    if (Input.GetKeyDown("t"))
-                    {
-                        roundaboutAudio.Pause();
-                        audioIsPaused = true;
-                        cheatMenu.ShowMenu();
-                    }
-                    if (Input.GetKeyDown("e"))
-                    {
-                        roundaboutAudio.Pause();
-                        audioIsPaused = true;
-                        pauseMenu.ShowMenu();
-                    }
+                if (Input.GetKeyDown("t"))
+                {
+                    roundaboutAudio.Pause();
+                    audioIsPaused = true;
+                    cheatMenu.ShowMenu();
+                }
+                if (Input.GetKeyDown("e"))
+                {
+                    roundaboutAudio.Pause();
+                    audioIsPaused = true;
+                    pauseMenu.ShowMenu();
                 }
             }
+        }
     }
 
     /// <summary>
@@ -321,27 +321,28 @@ public class BlobController : MonoBehaviour
     {
         if (grabbedObject == null)
         {
-            Grip grip = obj.GetComponent<Grip>();
-            if (grip != null && grip.GetGrabbed(centerAtom))
-            {
-                grabbedObject = obj;
-                return true;
-            }
+            grabbedObject = obj;
+            return true;
         }
 
         return false;
     }
 
     /// <summary>
-    ///     Release the currently grabbed object, if it exists.
+    ///     Release the currently grabbed object.
     /// </summary>
     public void Release()
     {
         if (grabbedObject != null)
         {
-            grabbedObject.GetComponent<Grip>().GetReleased();
-            grabbedObject = null;
+            grabbedObject.GetComponent<Grip>().Release();
         }
+        grabbedObject = null;
+    }
+
+    public bool IsHolding(GameObject obj)
+    {
+        return grabbedObject == obj;
     }
 
     /// <summary>

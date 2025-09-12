@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Hazard : MonoBehaviour, Interactable
+public class Hazard : Interactable
 {
     private FinishMenu finishMenu;
 
@@ -9,7 +9,7 @@ public class Hazard : MonoBehaviour, Interactable
         finishMenu = GameObject.FindGameObjectWithTag("FinishMenu").GetComponent<FinishMenu>();
     }
 
-    public void OnInteract(BlobController blob)
+    protected override void OnInteract(BlobController blob)
     {
         finishMenu.hasWon = false;
         finishMenu.ShowMenu();

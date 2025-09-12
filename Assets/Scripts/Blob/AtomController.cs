@@ -86,13 +86,12 @@ public class AtomController : MonoBehaviour
             // touching them. This prevents players from skipping sections by moving along the boundaries.
             if (NotBounds(obj) && !touching.Contains(obj))
             {
-                Interactable interactableObj = obj.GetComponent<Interactable>();
-                if (interactableObj != null)
+                if (obj.TryGetComponent<Interactable>(out var interactableObj))
                 {
-                    interactableObj.OnInteract(blobController);
+                    interactableObj.Interact(blobController);
                 }
 
-                if (!blobController.TryToGrab(obj))
+                if (!blobController.IsHolding(obj))
                 { // don't count grabbed objects as touching
                     touching.Add(obj);
                 }
