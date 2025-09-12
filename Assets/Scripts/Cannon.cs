@@ -1,5 +1,7 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(SphereCollider))]
 public class Cannon : Interactable
 {
     private Vector3 cannonCenter = Vector3.up * 2.3f;

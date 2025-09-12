@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+[RequireComponent(typeof(Rigidbody))]
 /// <summary>
 ///    This class defines the behavior of each individual atom in the blob.
 /// </summary>

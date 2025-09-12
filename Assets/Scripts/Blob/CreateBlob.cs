@@ -3,6 +3,7 @@ using UnityEngine.Assertions;
 
 // TODO: CreateBlob -> BlobFactory, BlobController handles mesh stuff
 
+[RequireComponent(typeof(MeshFilter))]
 /// <summary>
 ///     This class (1) creates the blob character and (2) maintains its appearance as the game is played.
 ///     <para/>
