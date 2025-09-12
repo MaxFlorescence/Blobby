@@ -1,26 +1,36 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 /// <summary>
 ///    This class defines the behavior of each individual atom in the blob.
 /// </summary>
 public class AtomController : MonoBehaviour
 {
-    // Public members
+    // PUBLIC MEMBERS
     public BlobController blobController;
-    public Squisher squisher;
-    public Vector3 force;
-    public Vector3 impulse;
-    public int touchCount = 0;
 
-    // Private members
+    // PRIVATE MEMBERS
+    /// <summary>
+    ///     Makes squishy noises on collisions.
+    /// </summary>
+    private Squisher squisher;
     private Rigidbody rigidBody;
+    /// <summary>
+    ///     Typical force vector to apply every fixed update.
+    /// </summary>
+    private Vector3 force;
+    /// <summary>
+    ///     Impulse force vector to apply every fixed update. Set to zero at the end of each one.
+    /// </summary>
+    private Vector3 impulse;
+    /// <summary>
+    ///     Set of objects that this atom is currently colliding with. Movement input only registers 
+    ///     if this is non-empty.
+    /// </summary>
     private HashSet<GameObject> touching = new HashSet<GameObject>();
 
     /// <summary>
-    ///     Initialize components.
+    ///     Initialize rigidbody and audio.
     /// </summary>
     void Start()
     {
@@ -33,8 +43,6 @@ public class AtomController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        Assert.IsTrue(touchCount >= 0);
-
         rigidBody.AddForce(force, ForceMode.Force);
         rigidBody.AddForce(impulse, ForceMode.Impulse);
         impulse = Vector3.zero;
@@ -52,13 +60,24 @@ public class AtomController : MonoBehaviour
     }
 
     /// <summary>
+    ///    Set the velocity of this atom.
+    /// </summary>
+    /// <param name="velocity">
+    ///     The new velocity for the atom.
+    /// </param>
+    public void SetVelocity(Vector3 velocity)
+    {
+        rigidBody.velocity = velocity;
+    }
+
+    /// <summary>
     ///     Handle activating interactable objects, grabbable objects, and tracking the touch count.
     /// </summary>
     void OnCollisionEnter(Collision collision)
     {
         GameObject obj = collision.gameObject;
 
-        if (NotMyAtoms(obj))
+        if (!blobController.IsAtom(obj))
         { // do nothing special when colliding with other atoms
             squisher.squish();
 
@@ -76,7 +95,6 @@ public class AtomController : MonoBehaviour
                 if (!blobController.TryToGrab(obj))
                 { // don't count grabbed objects as touching
                     touching.Add(obj);
-                    touchCount++;
                 }
             }
         }
@@ -88,25 +106,10 @@ public class AtomController : MonoBehaviour
     void OnCollisionExit(Collision collision)
     {
         GameObject obj = collision.gameObject;
-        if (NotMyAtoms(obj) && NotBounds(obj) && touching.Contains(obj))
+        if (!blobController.IsAtom(obj) && NotBounds(obj) && touching.Contains(obj))
         {
             touching.Remove(obj);
-            touchCount--;
         }
-    }
-
-    /// <summary>
-    ///     Return true if the given object is not one of this blob's atoms.
-    /// </summary>
-    /// <param name="obj">
-    ///     The GameObject to check.
-    /// </param>
-    /// <returns>
-    ///     <tt>false</tt> iff the object is one of this blob's atoms.
-    /// </returns>
-    bool NotMyAtoms(GameObject obj)
-    {
-        return !blobController.blobAtoms.Contains(obj);
     }
 
     /// <summary>
@@ -121,5 +124,18 @@ public class AtomController : MonoBehaviour
     bool NotBounds(GameObject obj)
     {
         return !obj.CompareTag("Bounds");
+    }
+
+    public void SetForce(Vector3 force)
+    {
+        this.force = force;
+    }
+    public void SetImpulse(Vector3 impulse)
+    {
+        this.impulse = impulse;
+    }
+    public int GetTouchCount()
+    {
+        return touching.Count;
     }
 }

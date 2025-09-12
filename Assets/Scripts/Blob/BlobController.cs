@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -6,43 +7,80 @@ using UnityEngine;
 /// </summary>
 public class BlobController : MonoBehaviour
 {
-    // Public members
-    public int N;
-    public GameObject mainCamera;
-    public GameObject[] blobAtoms;
-    public Rigidbody[] rigidBodies;
-    public CheatMenu cheatMenu;
-    public PauseMenu pauseMenu;
+    // PUBLIC MEMBERS
     public Squisher squisher;
     public RoundaboutPlayer roundabout;
-    public float cameraDistance;
 
-    // Private members
+    // TODO: move functionality to menus
+    public CheatMenu cheatMenu;
+    public PauseMenu pauseMenu;
+
+    // PRIVATE MEMBERS
+    // Input
+    /// <summary>
+    ///     Strength of the blob's movement.
+    /// </summary>
     private float movementIntensity = 10f;
+    /// <summary>
+    ///     Strength of the blob's jumps.
+    /// </summary>
     private float jumpIntensity = 8f;
-    private Vector3 jumpDirection = Vector3.zero;
-    private AtomController[] atomControllers;
-    private GameObject grabbedObject;
+    private Vector3 jumpDirection = Vector3.up;
+    private bool doJump = false;
+    private bool movementInputEnabled = true;
+
+    // Atoms
+    private CreateBlob createBlob;
+    /// <summary>
+    ///     Quick reference for <tt>blobAtoms[0]</tt>.
+    /// </summary>
     private GameObject centerAtom;
+    private int numAtoms;
+    private AtomController[] atomControllers;
+
+    // Behavior
+    private GameObject grabbedObject;
+
+    // Camera
+    private GameObject mainCamera;
+    /// <summary>
+    ///    Distance from the camera to the blob character.
+    /// </summary>
+    private float cameraDistance = 10f;
+
+    // Audio
     private AudioSource roundaboutAudio;
     private bool audioIsPaused = false;
-    private bool inputEnabled = true;
 
     /// <summary>
     ///     Create the atom controllers and set up the audio sources.
     /// </summary>
     void Start()
     {
-        atomControllers = new AtomController[blobAtoms.Length];
-        centerAtom = blobAtoms[0];
+        mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        numAtoms = createBlob.GetAtoms().Length;
+        centerAtom = createBlob.GetAtoms()[0];
 
-        for (int i = 0; i < blobAtoms.Length; i++)
+        // Allow the camera to track the blob.
+        mainCamera.GetComponent<CameraController>().TrackObject(centerAtom, cameraDistance);
+
+        // Allow the cheats menu to teleport the blob.
+        cheatMenu.blobController = this;
+
+        atomControllers = new AtomController[numAtoms];
+
+        for (int i = 0; i < numAtoms; i++)
         {
-            atomControllers[i] = blobAtoms[i].AddComponent<AtomController>();
+            atomControllers[i] = createBlob.GetAtoms()[i].AddComponent<AtomController>();
             atomControllers[i].blobController = this;
         }
 
         SetupSounds();
+    }
+
+    public void setCreateBlob(CreateBlob createBlob)
+    {
+        this.createBlob = createBlob;
     }
 
     /// <summary>
@@ -79,16 +117,14 @@ public class BlobController : MonoBehaviour
         }
         movementForce *= movementIntensity;
 
-        Vector3 jumpForce = jumpIntensity * jumpDirection;
+        // Jumps should only require a single keypress which might not align with physics updates,
+        // so detect the keypress in Update() and perform the action in FixedUpdate().
+        Vector3 jumpForce = doJump ? (jumpIntensity * jumpDirection) : Vector3.zero;
+        doJump = false;
 
-        if (inputEnabled)
+        if (movementInputEnabled)
         {
             ApplyForces(movementForce, jumpForce, true);
-        }
-
-        if (jumpDirection != Vector3.zero)
-        {
-            jumpDirection = Vector3.zero;
         }
     }
 
@@ -116,11 +152,11 @@ public class BlobController : MonoBehaviour
         {
             if (force.HasValue)
             {
-                atom.force = force.Value;
+                atom.SetForce(force.Value);
             }
             if (impulse.HasValue)
             {
-                atom.impulse = impulse.Value;
+                atom.SetImpulse(impulse.Value);
             }
         }
     }
@@ -148,25 +184,25 @@ public class BlobController : MonoBehaviour
     /// <param name="delay">
     ///     How long to wait in seconds before enabling/disabling input.
     /// </param>
-    public void SetInputEnabled(bool enabled, float delay = 0f)
+    public void SetMovementInputEnabled(bool enabled, float delay = 0f)
     {
         if (delay > 0)
         {
-            StartCoroutine(DelayedSetInputEnabled(enabled, delay));
+            StartCoroutine(DelayedSetMovementInputEnabled(enabled, delay));
         }
         else
         {
-            inputEnabled = enabled;
+            movementInputEnabled = enabled;
         }
     }
 
     /// <summary>
     ///     Helper function for SetInputEnabled to incorporate a delay.
     /// </summary>
-    private IEnumerator DelayedSetInputEnabled(bool enabled, float delay)
+    private IEnumerator DelayedSetMovementInputEnabled(bool enabled, float delay)
     {
         yield return new WaitForSeconds(delay);
-        SetInputEnabled(enabled);
+        SetMovementInputEnabled(enabled);
     }
 
     /// <summary>
@@ -176,8 +212,19 @@ public class BlobController : MonoBehaviour
     {
         foreach (AtomController atom in atomControllers)
         {
-            atom.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            atom.SetVelocity(Vector3.zero);
         }
+    }
+
+    /// <summary>
+    ///    Get the blob character's velocity.
+    /// </summary>
+    /// <returns>
+    ///     The velocity Vector3 of the center atom.
+    /// </returns>
+    public Vector3 GetVelocity()
+    {
+        return centerAtom.GetComponent<Rigidbody>().velocity;
     }
 
     /// <summary>
@@ -187,9 +234,9 @@ public class BlobController : MonoBehaviour
     {
         if (!LevelStartupInfo.StartCutscene) // don't allow input during cutscene
             {
-                if (inputEnabled && Input.GetButtonDown("Jump"))
+            if (movementInputEnabled && Input.GetButtonDown("Jump"))
                 {
-                    jumpDirection = Vector3.up;
+                doJump = true;
                 }
 
                 if (Time.timeScale > 0) // only process if game is not paused
@@ -200,23 +247,24 @@ public class BlobController : MonoBehaviour
                         audioIsPaused = false;
                     }
 
+                if (Input.GetKeyDown("q"))
+                {
+                    Release();
+                }
+
+
+                // TODO: move functionality to menus
                     if (Input.GetKeyDown("t"))
                     {
                         roundaboutAudio.Pause();
                         audioIsPaused = true;
                         cheatMenu.ShowMenu();
                     }
-
                     if (Input.GetKeyDown("e"))
                     {
                         roundaboutAudio.Pause();
                         audioIsPaused = true;
                         pauseMenu.ShowMenu();
-                    }
-
-                    if (Input.GetKeyDown("q"))
-                    {
-                        Release();
                     }
                 }
             }
@@ -233,7 +281,7 @@ public class BlobController : MonoBehaviour
         StopMovement();
         Vector3 translation = newPosition - centerAtom.transform.position;
 
-        foreach (GameObject atom in blobAtoms)
+        foreach (GameObject atom in createBlob.GetAtoms())
         {
             atom.transform.position += translation;
         }
@@ -247,9 +295,9 @@ public class BlobController : MonoBehaviour
     /// </returns>
     private bool TouchingSomething()
     {
-        foreach (AtomController controller in atomControllers)
+        foreach (AtomController atom in atomControllers)
         {
-            if (controller.touchCount > 0)
+            if (atom.GetTouchCount() > 0)
             {
                 return true;
             }
@@ -308,5 +356,24 @@ public class BlobController : MonoBehaviour
     public bool HoldingObjectWithTag(string tag)
     {
         return grabbedObject != null && grabbedObject.CompareTag(tag);
+    }
+
+    /// <summary>
+    ///     Return true if the given object is one of this blob's atoms.
+    /// </summary>
+    /// <param name="obj">
+    ///     The GameObject to check.
+    /// </param>
+    /// <returns>
+    ///     <tt>true</tt> iff the object is one of this blob's atoms.
+    /// </returns>
+    public bool IsAtom(GameObject obj)
+    {
+        return createBlob.GetAtoms().Contains(obj);
+    }
+
+    public Vector3 GetPosition()
+    {
+        return centerAtom.transform.position;
     }
 }
