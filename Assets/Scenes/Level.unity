@@ -6147,11 +6147,9 @@ MonoBehaviour:
   atomScale: 0.5
   leftEye: {fileID: 970641665}
   rightEye: {fileID: 894424656}
-  mainCamera: {fileID: 963194225}
-  finishMenu: {fileID: 1684617461}
+  experimenter: {fileID: 20985396}
   cheatMenu: {fileID: 619419953}
   pauseMenu: {fileID: 1523055190}
-  experimenter: {fileID: 20985396}
 --- !u!1001 &792459453
 PrefabInstance:
   m_ObjectHideFlags: 0

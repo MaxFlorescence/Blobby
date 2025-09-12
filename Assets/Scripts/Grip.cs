@@ -48,7 +48,14 @@ public class Grip : Interactable
             }
             else
             {
-                state = GripState.Held;
+                if (grabbedBy.TryToGrab(gameObject))
+                {
+                    state = GripState.Held;
+                }
+                else
+                {
+                    Release();
+                }
             }
         }
         else if (state == GripState.Held)
@@ -67,7 +74,7 @@ public class Grip : Interactable
 
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.TryToGrab(gameObject))
+        if (blob.IsHolding(null))
         {
             initialDistance = (blob.transform.position - transform.position).magnitude;
             grabbedBy = blob;
@@ -84,9 +91,6 @@ public class Grip : Interactable
 
     public void Release()
     {
-        initialDistance = -1;
-        gripCollider.isTrigger = false;
-        gripRigidbody.useGravity = true;
         grabbedBy = null;
         StartInteractionCooldown(maxCooldown);
     }
@@ -94,6 +98,9 @@ public class Grip : Interactable
     protected override void OnInteractionCooldownStart()
     {
         IgnoreAtomCollisions(true);
+        initialDistance = -1;
+        gripCollider.isTrigger = false;
+        gripRigidbody.useGravity = true;
         state = GripState.Releasing;
     }
 
