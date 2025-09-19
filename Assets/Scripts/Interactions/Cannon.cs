@@ -91,6 +91,7 @@ public class Cannon : Interactable
             blob.SetGravity(false);
             blob.Teleport(cannonCenter);
             blob.ApplyForces(Vector3.zero, Vector3.zero, false);
+            blob.HoldCenterAtom(true);
 
             SetInteractionEnabled(false);
         }
@@ -107,6 +108,7 @@ public class Cannon : Interactable
             blob.SetGravity(true);
             blob.ApplyForces(null, firePower * direction.normalized, false);
             blob.SetMovementInputEnabled(true, 0.5f);
+            blob.HoldCenterAtom(false);
 
             blob = null;
             cannonLoaded = false;
@@ -128,6 +130,7 @@ public class Cannon : Interactable
             blob.SetGravity(true);
             blob.ApplyForces(null, cancelPower * (entryPosition - cannonCenter).normalized, false);
             blob.SetMovementInputEnabled(true, 0.5f);
+            blob.HoldCenterAtom(false);
 
             blob = null;
             cannonLoaded = false;

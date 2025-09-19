@@ -37,6 +37,7 @@ public class BlobController : MonoBehaviour
     private GameObject centerAtom;
     private int numAtoms;
     private AtomController[] atomControllers;
+    private Vector3? centerHoldPosition = null;
 
     // Behavior
     private GameObject grabbedObject;
@@ -99,8 +100,11 @@ public class BlobController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
+        if (centerHoldPosition != null)
+            centerAtom.transform.position = (Vector3)centerHoldPosition;
+
         if (!movementInputEnabled || mainCamera == null)
-            return;
+                return;
 
         // Ensure forward/rightward movement occurs in the horizontal plane.
         Vector3 forwardForce = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
@@ -265,7 +269,7 @@ public class BlobController : MonoBehaviour
 
 
                 // TODO: move functionality to menus
-                if (Input.GetKeyDown("t"))
+                if (movementInputEnabled && Input.GetKeyDown("t"))
                 {
                     roundaboutAudio.Pause();
                     audioIsPaused = true;
@@ -295,6 +299,24 @@ public class BlobController : MonoBehaviour
         foreach (GameObject atom in createBlob.GetAtoms())
         {
             atom.transform.position += translation;
+        }
+    }
+
+    /// <summary>
+    ///     Hold the blob's center atom in place or release it.
+    /// </summary>
+    /// <param name="hold">
+    ///     <tt>true</tt> to begin holding the center atom, <tt>false</tt> to release it.
+    /// </param>
+    public void HoldCenterAtom(bool hold)
+    {
+        if (hold)
+        {
+            centerHoldPosition = centerAtom.transform.position;
+        }
+        else
+        {
+            centerHoldPosition = null;
         }
     }
 
