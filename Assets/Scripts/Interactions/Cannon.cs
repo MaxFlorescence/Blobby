@@ -4,26 +4,60 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class Cannon : Interactable
 {
+    // Properties  
+    /// <summary>
+    ///     The direction the cannon barrel faces.
+    /// </summary>
+    private Vector3 direction = Vector3.up * 3.7f + Vector3.forward * 6.5f;
+    /// <summary>
+    ///    The position of the cannon center.
+    /// </summary>
     private Vector3 cannonCenter = Vector3.up * 2.3f;
-    public Vector3 direction = Vector3.up*3.7f + Vector3.forward*6.5f;
+    /// <summary>
+    ///    The speed at which the cannon rotates (degrees per second).
+    /// </summary>
+    private float angularSpeed = 80;
 
-    private float speed = 80;
+    // Exiting
+    /// <summary>
+    ///    The force magnitude with which to fire the cannon.
+    /// </summary>
     private float firePower = 32f;
+    /// <summary>
+    ///    The force magnitude with which to exit the cannon.
+    /// </summary>
     private float cancelPower = 2f;
+
+    // Loading
     private bool cannonLoaded = false;
+    /// <summary>
+    ///     The blob currently in the cannon, or null if none.
+    /// </summary>
     private BlobController blob = null;
+    /// <summary>
+    ///     The position the blob entered the cannon from.
+    /// </summary>
     private Vector3 entryPosition = Vector3.zero;
-    private AudioSource audioSource;
+
+    // Components
+    /// <summary>
+    ///     The audio source to play when the cannon fires.
+    /// </summary>
+    private AudioSource cannonFireAudio;
     private SphereCollider cannonCollider;
 
     void Start(){
         cannonCenter += transform.position;
-        audioSource = GetComponent<AudioSource>();
+        cannonFireAudio = GetComponent<AudioSource>();
         cannonCollider = GetComponent<SphereCollider>();
     }
 
-    protected override void OnUpdate() {
-        float angle = speed * Time.deltaTime;
+    /// <summary>
+    ///    Rotate the cannon and check for input to fire or cancel.
+    /// </summary>
+    protected override void OnUpdate()
+    {
+        float angle = angularSpeed * Time.deltaTime;
         transform.Rotate(Vector3.up, angle);
         direction = Quaternion.AngleAxis(angle, Vector3.up) * direction;
 
@@ -41,22 +75,32 @@ public class Cannon : Interactable
         }
     }
 
+    /// <summary>
+    ///     Insert the interacting blob into the cannon and keep it still.
+    /// </summary>
     protected override void OnInteract(BlobController blob)
-    { // Insert the blob
-        cannonCollider.isTrigger = true;
-        cannonLoaded = true;
-        entryPosition = blob.GetPosition();
-        this.blob = blob;
+    {
+        if (!cannonLoaded)
+        {
+            cannonCollider.isTrigger = true;
+            cannonLoaded = true;
+            entryPosition = blob.GetPosition();
+            this.blob = blob;
 
-        blob.SetMovementInputEnabled(false);
-        blob.SetGravity(false);
-        blob.Teleport(cannonCenter);
-        blob.ApplyForces(Vector3.zero, Vector3.zero, false);
+            blob.SetMovementInputEnabled(false);
+            blob.SetGravity(false);
+            blob.Teleport(cannonCenter);
+            blob.ApplyForces(Vector3.zero, Vector3.zero, false);
 
-        SetInteractionEnabled(false);
+            SetInteractionEnabled(false);
+        }
     }
 
-    public void Fire() {
+    /// <summary>
+    ///    Fire the blob out of the cannon in the direction the cannon is facing.
+    /// </summary>
+    public void Fire()
+    {
         if (cannonLoaded)
         {
             blob.Teleport(cannonCenter + direction);
@@ -69,11 +113,15 @@ public class Cannon : Interactable
             SetInteractionEnabled(true);
         }
 
-        audioSource.Play();
+        cannonFireAudio.Play();
         cannonCollider.isTrigger = false;
     }
 
-    public void Cancel() {
+    /// <summary>
+    ///     Eject the currently inserted blob from the cannon without firing.
+    /// </summary>
+    public void Cancel()
+    {
         if (cannonLoaded)
         {
             blob.Teleport(entryPosition);
