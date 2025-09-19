@@ -42,7 +42,7 @@ public class BlobController : MonoBehaviour
     private GameObject grabbedObject;
 
     // Camera
-    private GameObject mainCamera;
+    public GameObject mainCamera;
     /// <summary>
     ///    Distance from the camera to the blob character.
     /// </summary>
@@ -57,12 +57,9 @@ public class BlobController : MonoBehaviour
     /// </summary>
     void Start()
     {
-        mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         numAtoms = createBlob.GetAtoms().Length;
         centerAtom = createBlob.GetAtoms()[0];
-
-        // Allow the camera to track the blob.
-        mainCamera.GetComponent<CameraController>().TrackObject(centerAtom, cameraDistance);
+        FindMainCamera();
 
         // Allow the cheats menu to teleport the blob.
         cheatMenu.blobController = this;
@@ -102,6 +99,9 @@ public class BlobController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
+        if (!movementInputEnabled || mainCamera == null)
+            return;
+
         // Ensure forward/rightward movement occurs in the horizontal plane.
         Vector3 forwardForce = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
         forwardForce *= Input.GetAxis("Vertical");
@@ -122,10 +122,7 @@ public class BlobController : MonoBehaviour
         Vector3 jumpForce = doJump ? (jumpIntensity * jumpDirection) : Vector3.zero;
         doJump = false;
 
-        if (movementInputEnabled)
-        {
-            ApplyForces(movementForce, jumpForce, true);
-        }
+        ApplyForces(movementForce, jumpForce, true);
     }
 
     /// <summary>
@@ -173,6 +170,20 @@ public class BlobController : MonoBehaviour
         {
             atom.SetGravity(gravity);
         }
+    }
+
+    /// <summary>
+    ///     Get a reference to the main camera and have it track this blob.
+    /// </summary>
+    public void FindMainCamera()
+    {
+        mainCamera = GameObject.FindGameObjectWithTag("CameraManager")
+            .GetComponent<CameraSwitcher>()
+            .GetMainCamera()
+            .gameObject;
+
+        // Allow the camera to track the blob.
+        mainCamera.GetComponent<MainCameraController>().TrackObject(centerAtom, cameraDistance);
     }
 
     /// <summary>
@@ -373,6 +384,7 @@ public class BlobController : MonoBehaviour
         return createBlob.GetAtoms().Contains(obj);
     }
 
+    // Getters and setters
     public Vector3 GetPosition()
     {
         return centerAtom.transform.position;
