@@ -127,6 +127,7 @@ public class AtomController : MonoBehaviour
         return !obj.CompareTag("Bounds");
     }
 
+    // Getters and setters
     public void SetForce(Vector3 force)
     {
         this.force = force;

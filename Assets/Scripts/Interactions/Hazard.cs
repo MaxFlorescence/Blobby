@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+///     Triggers the losing condition when a blob interacts with it.
+/// </summary>
 public class Hazard : Interactable
 {
     private FinishMenu finishMenu;
@@ -9,6 +12,9 @@ public class Hazard : Interactable
         finishMenu = GameObject.FindGameObjectWithTag("FinishMenu").GetComponent<FinishMenu>();
     }
 
+    /// <summary>
+    ///     Lose the game if the blob interacts.
+    /// </summary>
     protected override void OnInteract(BlobController blob)
     {
         finishMenu.hasWon = false;

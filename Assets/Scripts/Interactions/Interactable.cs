@@ -5,9 +5,18 @@ using UnityEngine;
 /// </summary>
 public abstract class Interactable : MonoBehaviour
 {
+    /// <summary>
+    ///     Time remaining on the interaction cooldown timer.
+    /// </summary>
     protected float cooldownTime = 0f;
+    /// <summary>
+    ///    Interaction is disabled during the cooldown.
+    /// </summary>
     private bool interactionEnabled = true;
 
+    /// <summary>
+    ///     If needed, wait for cooldown and then re-enable interaction.
+    /// </summary>
     public void Update()
     {
         if (cooldownTime > 0)
@@ -68,6 +77,12 @@ public abstract class Interactable : MonoBehaviour
         OnInteractionCooldownStart();
     }
 
+    /// <summary>
+    ///     Check if the cooldown timer is still running.
+    /// </summary>
+    /// <returns>
+    ///     <tt>true</tt> if the cooldown timer is still running, <tt>false</tt> otherwise.
+    /// </returns>
     public bool CoolingDown()
     {
         return cooldownTime > 0;

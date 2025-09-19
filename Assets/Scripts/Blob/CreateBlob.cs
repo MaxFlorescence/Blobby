@@ -550,6 +550,7 @@ public class CreateBlob : MonoBehaviour
         mesh.vertices = newVertices;
     }
 
+    // Getters and setters
     public GameObject[] GetAtoms()
     {
         return blobAtoms;
