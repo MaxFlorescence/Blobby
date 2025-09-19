@@ -12,6 +12,7 @@ TagManager:
   - Cannon
   - Floor
   - FinishMenu
+  - CameraManager
   layers:
   - Default
   - TransparentFX
