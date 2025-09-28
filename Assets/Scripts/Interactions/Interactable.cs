@@ -19,18 +19,21 @@ public abstract class Interactable : MonoBehaviour
     /// </summary>
     public void Update()
     {
-        if (cooldownTime > 0)
+        if (!LevelStartupInfo.GameIsPaused)
         {
-            cooldownTime -= Time.deltaTime;
-            if (cooldownTime <= 0)
+            if (cooldownTime > 0)
             {
-                interactionEnabled = true;
-                cooldownTime = 0f;
-                OnInteractionCooldownEnd();
+                cooldownTime -= Time.deltaTime;
+                if (cooldownTime <= 0)
+                {
+                    interactionEnabled = true;
+                    cooldownTime = 0f;
+                    OnInteractionCooldownEnd();
+                }
             }
-        }
 
-        OnUpdate();
+            OnUpdate();  
+        }
     }
 
     /// <summary>

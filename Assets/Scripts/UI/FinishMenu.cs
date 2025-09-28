@@ -9,12 +9,12 @@ public class FinishMenu : Menu
 
     public bool hasWon = false;
 
-    public override void OnHide() {
+    protected override void OnHide() {
         winText.SetActive(false);
         failBackground.SetActive(false);
     }
 
-    public override void OnShow() {
+    protected override void OnShow() {
         if (hasWon) {
             winText.SetActive(true);
         } else {

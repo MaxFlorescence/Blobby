@@ -1,18 +1,40 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Menu : MonoBehaviour
 {
-    public GameObject instance;
+    public GameObject graphics;
+    protected bool menuActive = false;
+    protected string key = null;
 
-    private void Start() {
+    void Start()
+    {
+        OnStart();
         HideMenu();
     }
 
+    virtual protected void OnStart() {}
+
+    protected void Update()
+    {
+        if (key is not null && Input.GetKeyDown(key))
+        {
+            if (menuActive)
+            {
+                HideMenu();
+            }
+            else
+            {
+                ShowMenu();
+            }
+        }
+    }
+
     public void HideMenu() {
+        menuActive = false;
+        LevelStartupInfo.GameIsPaused = false;
+
         Time.timeScale = 1;
-        instance.SetActive(false);
+        graphics.SetActive(false);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -20,17 +42,23 @@ public class Menu : MonoBehaviour
         OnHide();
     }
 
-    virtual public void OnHide() {}
+    virtual protected void OnHide() {}
 
     public void ShowMenu() {
-        Time.timeScale = 0;
-        instance.SetActive(true);
-        
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        if (!LevelStartupInfo.GameIsPaused)
+        {
+            menuActive = true;
+            LevelStartupInfo.GameIsPaused = true;
 
-        OnShow();
+            Time.timeScale = 0;
+            graphics.SetActive(true);
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            OnShow();
+        }
     }
 
-    virtual public void OnShow() {}
+    virtual protected void OnShow() {}
 }

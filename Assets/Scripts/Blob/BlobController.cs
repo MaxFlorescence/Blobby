@@ -274,7 +274,7 @@ public class BlobController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (!LevelStartupInfo.StartCutscene) // don't allow input during cutscene
+        if (!LevelStartupInfo.StartCutscene && !LevelStartupInfo.GameIsPaused)
         {
             if (movementInputEnabled)
             {
@@ -296,34 +296,16 @@ public class BlobController : MonoBehaviour
                 }
             }
 
-            if (Time.timeScale > 0) // only process if game is not paused
-                {
-                    if (audioIsPaused)
-                    {
-                        roundaboutAudio.UnPause();
-                        audioIsPaused = false;
-                    }
+            if (audioIsPaused)
+            {
+                roundaboutAudio.UnPause();
+                audioIsPaused = false;
+            }
 
-                    if (Input.GetKeyDown("q"))
-                    {
-                        Release();
-                    }
-
-
-                    // TODO: move functionality to menus
-                    if (movementInputEnabled && Input.GetKeyDown("t"))
-                    {
-                        roundaboutAudio.Pause();
-                        audioIsPaused = true;
-                        cheatMenu.ShowMenu();
-                    }
-                    if (Input.GetKeyDown("e"))
-                    {
-                        roundaboutAudio.Pause();
-                        audioIsPaused = true;
-                        pauseMenu.ShowMenu();
-                    }
-                }
+            if (Input.GetKeyDown("q"))
+            {
+                Release();
+            }
         }
     }
 

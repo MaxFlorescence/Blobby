@@ -87,33 +87,36 @@ public class Grip : Interactable
     /// </summary>
     public void FixedUpdate()
     {
-        if (state == GripState.Grabbing)
+        if (!LevelStartupInfo.GameIsPaused)
         {
-            Vector3 translation = grabbedBy.transform.position - transform.position;
-            float distance = translation.magnitude;
-
-            ShrinkByDistance(distance);
-
-            if (distance > grabbingDistance)
+            if (state == GripState.Grabbing)
             {
-                float move = Mathf.Max(grabbingDistance, movementFactor * distance);
-                transform.Translate(move * translation.normalized, relativeTo: Space.World);
-            }
-            else
-            {
-                if (grabbedBy.TryToGrab(gameObject))
+                Vector3 translation = grabbedBy.transform.position - transform.position;
+                float distance = translation.magnitude;
+
+                ShrinkByDistance(distance);
+
+                if (distance > grabbingDistance)
                 {
-                    state = GripState.Held;
+                    float move = Mathf.Max(grabbingDistance, movementFactor * distance);
+                    transform.Translate(move * translation.normalized, relativeTo: Space.World);
                 }
                 else
                 {
-                    Release();
+                    if (grabbedBy.TryToGrab(gameObject))
+                    {
+                        state = GripState.Held;
+                    }
+                    else
+                    {
+                        Release();
+                    }
                 }
             }
-        }
-        else if (state == GripState.Held)
-        {
-            transform.position = grabbedBy.transform.position;
+            else if (state == GripState.Held)
+            {
+                transform.position = grabbedBy.transform.position;
+            }
         }
     }
 
