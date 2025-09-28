@@ -86,7 +86,7 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///    Ratio of blob mesh radius to actual blob radius.
     /// </summary>
-    private const float MESH_SCALE = 1.5f;
+    private float meshScale = 1.5f;
     private Mesh blobMesh;
     /// <summary>
     ///     Maps mesh vertices <tt>i</tt> to blob atoms <tt>meshToAtomMap[i]</tt>.
@@ -419,7 +419,7 @@ public class CreateBlob : MonoBehaviour
     {
         // Move the blob mesh and snap its vertices to the atoms.
         transform.position = centerAtom.transform.position;
-        SnapMeshToAtoms(blobMesh, blobAtoms, meshToAtomMap, MESH_SCALE);
+        SnapMeshToAtoms(blobMesh, blobAtoms, meshToAtomMap, meshScale);
 
         // Maintain accurate reflections and colors.
         blobMesh.RecalculateNormals();
@@ -433,8 +433,8 @@ public class CreateBlob : MonoBehaviour
     ///</summary>
     private void SnapEyes()
     {
-        SnapToTriangle(leftEye, blobAtoms, 1, 2, 3, MESH_SCALE);
-        SnapToTriangle(rightEye, blobAtoms, 1, 3, 4, MESH_SCALE);
+        SnapToTriangle(leftEye, blobAtoms, 1, 2, 3, meshScale);
+        SnapToTriangle(rightEye, blobAtoms, 1, 3, 4, meshScale);
     }
 
     /// <summary>
@@ -575,7 +575,7 @@ public class CreateBlob : MonoBehaviour
     {
         return blobAtoms;
     }
-    
+
     public float GetSpringLengthFactor()
     {
         return springLengthFactor;
@@ -593,6 +593,9 @@ public class CreateBlob : MonoBehaviour
         for (int i = 0; i < NUM_SPRINGS; i++)
         {
             springJoints[i].connectedAnchor = factor * connectedAnchors[i];
+            springJoints[i].spring = factor * springForce;
         }
+
+        meshScale = 1f + atomScale/factor;
     }
 }
