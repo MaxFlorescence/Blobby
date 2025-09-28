@@ -37,7 +37,6 @@ public class BlobController : MonoBehaviour
     private GameObject centerAtom;
     private int numAtoms;
     private AtomController[] atomControllers;
-    private Vector3? centerHoldPosition = null;
 
     // Behavior
     private GameObject grabbedObject;
@@ -100,9 +99,6 @@ public class BlobController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        if (centerHoldPosition != null)
-            centerAtom.transform.position = (Vector3)centerHoldPosition;
-
         if (!movementInputEnabled || mainCamera == null)
                 return;
 
@@ -310,13 +306,14 @@ public class BlobController : MonoBehaviour
     /// </param>
     public void HoldCenterAtom(bool hold)
     {
+        Rigidbody centerAtomRigidbody = centerAtom.GetComponent<Rigidbody>();
         if (hold)
         {
-            centerHoldPosition = centerAtom.transform.position;
+            centerAtomRigidbody.constraints = RigidbodyConstraints.FreezePosition;
         }
         else
         {
-            centerHoldPosition = null;
+            centerAtomRigidbody.constraints = RigidbodyConstraints.None;
         }
     }
 
