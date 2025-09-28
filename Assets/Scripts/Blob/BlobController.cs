@@ -45,9 +45,13 @@ public class BlobController : MonoBehaviour
     // Behavior
     private GameObject grabbedObject;
     /// <summary>
-    ///     The factor by which the blob can grow or shrink from its original size.
+    ///     The factor by which the blob can grow from its original size.
     /// </summary>
-    private float blobSizeFactor = 1.5f;
+    private float blobGrowingFactor = 1.5f;
+    /// <summary>
+    ///     The factor by which the blob can shrink from its original size.
+    /// </summary>
+    private float blobShrinkingFactor = 0.5f;
 
     // Camera
     public GameObject mainCamera;
@@ -280,11 +284,11 @@ public class BlobController : MonoBehaviour
                 }
                 if (Input.GetMouseButtonDown(0)) // left mouse shrinks
                 {
-                    createBlob.SetSpringLengthFactor(1/blobSizeFactor);
+                    createBlob.SetSpringLengthFactor(blobShrinkingFactor);
                 }
                 if (Input.GetMouseButtonDown(1)) // right mouse grows
                 {
-                    createBlob.SetSpringLengthFactor(blobSizeFactor);
+                    createBlob.SetSpringLengthFactor(blobGrowingFactor);
                 }
                 if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
                 {
