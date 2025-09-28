@@ -75,7 +75,12 @@ public class CreateBlob : MonoBehaviour
     ///     Distance between blob's surface atoms. Equal to side length of radius 1 icosahedron: csc(2/5 * pi).
     /// </summary>
     private const float SIDE_LENGTH = 1.051462224f;
+    /// <summary>
+    ///     Scalar for each spring's length. 1 corresponds to spring lengths equal to <tt>SIDE_LENGTH</tt>.
+    /// </summary>
+    private float springLengthFactor = 1f;
     private SpringJoint[] springJoints;
+    private Vector3[] connectedAnchors;
 
     // Mesh
     /// <summary>
@@ -273,6 +278,11 @@ public class CreateBlob : MonoBehaviour
 
     /// <summary>
     ///     Inter-connects the objects with spring joints.
+    ///     <br/>
+    ///     Note: For object A's spring joint connected to object B, the anchor (relative to A)
+    ///     "wants" to rest at the connectedAnchor (relative to B).
+    ///     e.g. anchor=(0,0,0), connectedAnchor=(0,1,0) => A's origin "wants" to rest one unit
+    ///     above B's origin.
     /// </summary>
     /// <param name="objects">
     ///     The array of objects to connect.
@@ -298,6 +308,7 @@ public class CreateBlob : MonoBehaviour
     private SpringJoint[] ConnectAtoms(GameObject[] objects, float springForce, int expectedCount, float distance, bool ballAdjacency)
     {
         SpringJoint[] springJoints = new SpringJoint[expectedCount];
+        connectedAnchors = new Vector3[expectedCount];
         int newIndex = 0;
 
         // For each unique pair of objects, try to connect them.
@@ -313,11 +324,20 @@ public class CreateBlob : MonoBehaviour
                         string.Format("Number of necessary springs is greater than expected. ({0} >= {1})", newIndex, expectedCount)
                     );
 
+                    Rigidbody from = objects[i].GetComponent<Rigidbody>();
+                    Rigidbody to = objects[j].GetComponent<Rigidbody>();
+
                     springJoints[newIndex] = objects[i].AddComponent<SpringJoint>();
-                    springJoints[newIndex].connectedBody = objects[j].GetComponent<Rigidbody>();
+                    springJoints[newIndex].connectedBody = to;
 
                     springJoints[newIndex].enableCollision = true;
                     springJoints[newIndex].spring = springForce;
+
+                    // manually set anchor positions
+                    springJoints[newIndex].autoConfigureConnectedAnchor = false;
+                    springJoints[newIndex].anchor = Vector3.zero;
+                    connectedAnchors[newIndex] = to.transform.InverseTransformPoint(from.position);
+                    springJoints[newIndex].connectedAnchor = connectedAnchors[newIndex];
 
                     newIndex++;
                 }
@@ -554,5 +574,25 @@ public class CreateBlob : MonoBehaviour
     public GameObject[] GetAtoms()
     {
         return blobAtoms;
+    }
+    
+    public float GetSpringLengthFactor()
+    {
+        return springLengthFactor;
+    }
+
+    /// <summary>
+    ///     Modify each spring's connectedAnchor to be <tt>factor</tt> times the original value.
+    /// </summary>
+    /// <param name="factor">
+    ///     The new spring length factor.
+    /// </param>
+    public void SetSpringLengthFactor(float factor = 1)
+    {
+        springLengthFactor = factor;
+        for (int i = 0; i < NUM_SPRINGS; i++)
+        {
+            springJoints[i].connectedAnchor = factor * connectedAnchors[i];
+        }
     }
 }

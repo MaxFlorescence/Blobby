@@ -37,9 +37,17 @@ public class BlobController : MonoBehaviour
     private GameObject centerAtom;
     private int numAtoms;
     private AtomController[] atomControllers;
+    /// <summary>
+    ///     Stores the blob's spring length factor to restore after overrides.
+    /// </summary>
+    private float savedSpringFactor = 1f;
 
     // Behavior
     private GameObject grabbedObject;
+    /// <summary>
+    ///     The factor by which the blob can grow or shrink from its original size.
+    /// </summary>
+    private float blobSizeFactor = 1.5f;
 
     // Camera
     public GameObject mainCamera;
@@ -100,7 +108,7 @@ public class BlobController : MonoBehaviour
     void FixedUpdate()
     {
         if (!movementInputEnabled || mainCamera == null)
-                return;
+            return;
 
         // Ensure forward/rightward movement occurs in the horizontal plane.
         Vector3 forwardForce = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
@@ -239,45 +247,79 @@ public class BlobController : MonoBehaviour
     }
 
     /// <summary>
+    ///     Force the blob's spring length factor to be <tt>factor</tt>. The current factor can be
+    ///     can be restored with <tt>RestoreSpringLengths()</tt>.
+    /// </summary>
+    public void OverrideSpringLengths(float factor)
+    {
+        savedSpringFactor = createBlob.GetSpringLengthFactor();
+        createBlob.SetSpringLengthFactor(factor);
+    }
+
+    /// <summary>
+    ///     Restore the blob's spring length factor to the value previously saved by
+    ///     <tt>OverrideSpringLengths()</tt>.
+    /// </summary>
+    public void RestoreSpringLengths()
+    {
+        createBlob.SetSpringLengthFactor(savedSpringFactor);
+    }
+
+    /// <summary>
     ///     Apply user input for non-movement actions and unpause audio if needed.
     /// </summary>
     void Update()
     {
         if (!LevelStartupInfo.StartCutscene) // don't allow input during cutscene
         {
-            if (movementInputEnabled && Input.GetButtonDown("Jump"))
+            if (movementInputEnabled)
             {
-                doJump = true;
+                if (Input.GetButtonDown("Jump"))
+                {
+                    doJump = true;
+                }
+                if (Input.GetMouseButtonDown(0)) // left mouse shrinks
+                {
+                    createBlob.SetSpringLengthFactor(1/blobSizeFactor);
+                }
+                if (Input.GetMouseButtonDown(1)) // right mouse grows
+                {
+                    createBlob.SetSpringLengthFactor(blobSizeFactor);
+                }
+                if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
+                {
+                    createBlob.SetSpringLengthFactor();
+                }
             }
 
             if (Time.timeScale > 0) // only process if game is not paused
-            {
-                if (audioIsPaused)
                 {
-                    roundaboutAudio.UnPause();
-                    audioIsPaused = false;
-                }
+                    if (audioIsPaused)
+                    {
+                        roundaboutAudio.UnPause();
+                        audioIsPaused = false;
+                    }
 
-                if (Input.GetKeyDown("q"))
-                {
-                    Release();
-                }
+                    if (Input.GetKeyDown("q"))
+                    {
+                        Release();
+                    }
 
 
-                // TODO: move functionality to menus
-                if (movementInputEnabled && Input.GetKeyDown("t"))
-                {
-                    roundaboutAudio.Pause();
-                    audioIsPaused = true;
-                    cheatMenu.ShowMenu();
+                    // TODO: move functionality to menus
+                    if (movementInputEnabled && Input.GetKeyDown("t"))
+                    {
+                        roundaboutAudio.Pause();
+                        audioIsPaused = true;
+                        cheatMenu.ShowMenu();
+                    }
+                    if (Input.GetKeyDown("e"))
+                    {
+                        roundaboutAudio.Pause();
+                        audioIsPaused = true;
+                        pauseMenu.ShowMenu();
+                    }
                 }
-                if (Input.GetKeyDown("e"))
-                {
-                    roundaboutAudio.Pause();
-                    audioIsPaused = true;
-                    pauseMenu.ShowMenu();
-                }
-            }
         }
     }
 
