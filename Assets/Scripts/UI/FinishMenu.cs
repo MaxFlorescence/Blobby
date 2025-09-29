@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FinishMenu : Menu
@@ -8,6 +6,11 @@ public class FinishMenu : Menu
     public GameObject failBackground;
 
     public bool hasWon = false;
+
+    protected override void OnStart()
+    {
+        menuPausesAudio = false;
+    }
 
     protected override void OnHide() {
         winText.SetActive(false);

@@ -8,11 +8,27 @@ public class RoundaboutPlayer : MonoBehaviour
     private GameObject floorObject;
     private float dropTime = 3.6f;
     private float time = 0;
+    private bool audioIsPaused = false;
 
     void Start() {
         audioSource.clip = Resources.Load("Sounds/roundabout", typeof(AudioClip)) as AudioClip;
         
         floorObject = GameObject.FindGameObjectsWithTag("Floor")[0];
+    }
+
+    void Update()
+    {
+        if (LevelStartupInfo.PauseAudio && !audioIsPaused)
+        {
+            audioIsPaused = true;
+            audioSource.Pause();
+        }
+
+        if (!LevelStartupInfo.PauseAudio && audioIsPaused)
+        {
+            audioIsPaused = false;
+            audioSource.UnPause();
+        }
     }
 
     void FixedUpdate() {

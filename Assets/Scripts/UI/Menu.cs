@@ -5,6 +5,7 @@ public class Menu : MonoBehaviour
     public GameObject graphics;
     protected bool menuActive = false;
     protected string key = null;
+    protected bool menuPausesAudio = true;
 
     void Start()
     {
@@ -32,6 +33,7 @@ public class Menu : MonoBehaviour
     public void HideMenu() {
         menuActive = false;
         LevelStartupInfo.GameIsPaused = false;
+        LevelStartupInfo.PauseAudio = false;
 
         Time.timeScale = 1;
         graphics.SetActive(false);
@@ -49,6 +51,8 @@ public class Menu : MonoBehaviour
         {
             menuActive = true;
             LevelStartupInfo.GameIsPaused = true;
+            if (menuPausesAudio) LevelStartupInfo.PauseAudio = true;
+            
 
             Time.timeScale = 0;
             graphics.SetActive(true);

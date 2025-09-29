@@ -62,7 +62,6 @@ public class BlobController : MonoBehaviour
 
     // Audio
     private AudioSource roundaboutAudio;
-    private bool audioIsPaused = false;
 
     /// <summary>
     ///     Create the atom controllers and set up the audio sources.
@@ -294,12 +293,6 @@ public class BlobController : MonoBehaviour
                 {
                     createBlob.SetSpringLengthFactor();
                 }
-            }
-
-            if (audioIsPaused)
-            {
-                roundaboutAudio.UnPause();
-                audioIsPaused = false;
             }
 
             if (Input.GetKeyDown("q"))
