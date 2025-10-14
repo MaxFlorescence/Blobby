@@ -407,7 +407,6 @@ public class CreateBlob : MonoBehaviour
         // Inherit some class members. Is there a better way to do this?
         controller.setCreateBlob(this);
         controller.cheatMenu = cheatMenu;
-        controller.pauseMenu = pauseMenu;
 
         return controller;
     }

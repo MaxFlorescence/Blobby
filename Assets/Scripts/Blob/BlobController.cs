@@ -13,7 +13,6 @@ public class BlobController : MonoBehaviour
 
     // TODO: move functionality to menus
     public CheatMenu cheatMenu;
-    public PauseMenu pauseMenu;
 
     // PRIVATE MEMBERS
     // Input
