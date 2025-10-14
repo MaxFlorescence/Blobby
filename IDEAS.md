@@ -20,6 +20,7 @@
     * Half size blobs, one eye each
     * Health system? Heal by touching current liquid
 - Googly eye customization
+- Add rigidity?
 
 # Code
 - Update input to Unity's new system
