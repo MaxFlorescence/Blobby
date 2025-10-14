@@ -405,7 +405,7 @@ public class CreateBlob : MonoBehaviour
         BlobController controller = gameObject.AddComponent<BlobController>();
 
         // Inherit some class members. Is there a better way to do this?
-        controller.setCreateBlob(this);
+        controller.SetCreateBlob(this);
         controller.cheatMenu = cheatMenu;
 
         return controller;

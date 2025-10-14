@@ -57,17 +57,6 @@ public abstract class Interactable : MonoBehaviour
     }
 
     /// <summary>
-    ///    Enable/disable interaction.
-    /// </summary>
-    /// <param name="enabled">
-    ///     <tt>true</tt> to enable interaction, <tt>false</tt> to disable it.
-    /// </param>
-    protected void SetInteractionEnabled(bool enabled)
-    {
-        interactionEnabled = enabled;
-    }
-
-    /// <summary>
     ///    Disable interaction and start a cooldown timer. Re-enable interaction when it ends.
     /// </summary>
     /// <param name="duration">
@@ -113,4 +102,15 @@ public abstract class Interactable : MonoBehaviour
     ///    Code to run when the cooldown timer is up. Can be overridden by the extending class.
     /// </summary>
     protected virtual void OnInteractionCooldownEnd() {}
+
+    // Getters and setters
+    protected void SetInteractionEnabled(bool enabled)
+    {
+        interactionEnabled = enabled;
+    }
+
+    public bool GetInteractionEnabled()
+    {
+        return interactionEnabled;
+    }
 }

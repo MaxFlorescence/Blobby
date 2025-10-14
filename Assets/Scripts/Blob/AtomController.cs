@@ -3,6 +3,7 @@ using UnityEngine;
 
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(MeshRenderer))]
 /// <summary>
 ///    This class defines the behavior of each individual atom in the blob.
 /// </summary>
@@ -30,6 +31,13 @@ public class AtomController : MonoBehaviour
     ///     if this is non-empty.
     /// </summary>
     private HashSet<GameObject> touching = new HashSet<GameObject>();
+
+    // Sticking
+    private SpringJoint stickyJoint;
+    /// <summary>
+    ///     Spring constant for when the atom sticks to an object.
+    /// </summary>
+    private float stickyStrength = 1000;
 
     /// <summary>
     ///     Initialize rigidbody and audio.
@@ -73,7 +81,8 @@ public class AtomController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Handle activating interactable objects, grabbable objects, and tracking the touch count.
+    ///     Handle activating interactable objects, grabbable objects, sticking to objects,
+    ///     and tracking the touch count.
     /// </summary>
     void OnCollisionEnter(Collision collision)
     {
@@ -86,16 +95,25 @@ public class AtomController : MonoBehaviour
             // Don't interact with boundaries or already-touched objects.
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.
-            if (NotBounds(obj) && !touching.Contains(obj))
+            if (NotBounds(obj))
             {
-                if (obj.TryGetComponent<Interactable>(out var interactableObj))
+                if (!touching.Contains(obj))
                 {
-                    interactableObj.Interact(blobController);
-                }
+                    Interactable interactableObj = obj.GetComponent<Interactable>();
+                    if (interactableObj != null)
+                    {
+                        interactableObj.Interact(blobController);
+                    }
 
-                if (!blobController.IsHolding(obj))
-                { // don't count grabbed objects as touching
-                    touching.Add(obj);
+                    if (!blobController.IsHolding(obj))
+                    { // don't count grabbed objects as touching
+                        touching.Add(obj);
+                    }
+                    
+                    if (interactableObj == null || interactableObj.GetInteractionEnabled())
+                    {
+                        blobController.TrySticking(gameObject, obj);
+                    }
                 }
             }
         }
@@ -127,6 +145,34 @@ public class AtomController : MonoBehaviour
         return !obj.CompareTag("Bounds");
     }
 
+    /// <summary>
+    ///     Create a new spring joint to stick this atom to the <tt>obj</tt>.
+    /// </summary>
+    /// <param name="obj">
+    ///     The object to stick this atom to.
+    /// </param>
+    public void StickTo(Rigidbody obj)
+    {
+        stickyJoint = gameObject.AddComponent<SpringJoint>();
+        stickyJoint.connectedBody = obj;
+
+        stickyJoint.enableCollision = true;
+        stickyJoint.spring = stickyStrength;
+
+        // manually set anchor positions
+        stickyJoint.autoConfigureConnectedAnchor = false;
+        stickyJoint.anchor = Vector3.zero;
+        stickyJoint.connectedAnchor = obj.transform.InverseTransformPoint(transform.position);
+    }
+
+    /// <summary>
+    ///     Destroy the spring joint sticking this atom to an object.
+    /// </summary>
+    public void Unstick()
+    {
+        Destroy(stickyJoint);
+    }
+
     // Getters and setters
     public void SetForce(Vector3 force)
     {
@@ -139,5 +185,9 @@ public class AtomController : MonoBehaviour
     public int GetTouchCount()
     {
         return touching.Count;
+    }
+    private void SetVisible(bool visible)
+    {
+        GetComponent<MeshRenderer>().enabled = visible;
     }
 }

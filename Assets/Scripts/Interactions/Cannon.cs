@@ -67,7 +67,7 @@ public class Cannon : Interactable
             {
                 Fire();
             }
-            else if (Input.GetKeyDown("left shift"))
+            else if (Input.GetKeyDown(KeyCode.LeftShift))
             {
                 Cancel();
             }

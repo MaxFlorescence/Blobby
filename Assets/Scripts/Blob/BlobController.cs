@@ -41,7 +41,26 @@ public class BlobController : MonoBehaviour
     /// </summary>
     private float savedSpringFactor = 1f;
 
-    // Behavior
+    // Sticking
+    /// <summary>
+    ///     How many atoms can be sticky at once.
+    /// </summary>
+    private const int STICKY_COUNT = 2;
+    /// <summary>
+    ///     Index of the last sticky atom, or null if fewer than <tt>STICKY_COUNT</tt> atoms are
+    ///     currently sticky.
+    /// </summary>
+    private int stickyHead = 0;
+    /// <summary>
+    ///     Circular buffer of capacity <tt>STICKY_COUNT</tt> for holding sticky atoms.
+    /// </summary>
+    private GameObject[] atomStickies = new GameObject[STICKY_COUNT];
+    /// <summary>
+    ///     Indicates if atoms can become sticky. If <tt>false</tt>, no atoms are sticky.
+    /// </summary>
+    private bool stickyMode = false;
+
+    // Misc behavior
     private GameObject grabbedObject;
     /// <summary>
     ///     The factor by which the blob can grow from its original size.
@@ -51,7 +70,7 @@ public class BlobController : MonoBehaviour
     ///     The factor by which the blob can shrink from its original size.
     /// </summary>
     private float blobShrinkingFactor = 0.5f;
-
+    
     // Camera
     public GameObject mainCamera;
     /// <summary>
@@ -85,9 +104,66 @@ public class BlobController : MonoBehaviour
         SetupSounds();
     }
 
-    public void setCreateBlob(CreateBlob createBlob)
+    /// <summary>
+    ///     Returns the index of the given <tt>atom</tt> in the <tt>atomStickies</tt> buffer.
+    /// </summary>
+    /// <param name="atom">
+    ///     The atom to search for.
+    /// </param>
+    /// <returns>
+    ///     The index of the <tt>atom</tt>, if present, -1 if not.
+    /// </returns>
+    private int StickyIndex(GameObject atom)
     {
-        this.createBlob = createBlob;
+        for (int i = 0; i < STICKY_COUNT; i++)
+        {
+            if (atom == atomStickies[i]) return i;
+        }
+        return -1;
+    }
+
+    /// <summary>
+    ///     Try making the <tt>atom</tt> stick to the <tt>obj</tt>. If the <tt>atomStickies</tt>
+    ///     buffer is at capacity, replace the oldest sticky atom.
+    /// </summary>
+    /// <param name="atom">
+    ///     The atom to make sticky.
+    /// </param>
+    /// <param name="obj">
+    ///     The game object to stick the <tt>atom</tt> to.
+    /// </param>
+    /// <returns>
+    ///     <tt>true</tt> if successful, <tt>false</tt> otherwise.
+    /// </returns>
+    public bool TrySticking(GameObject atom, GameObject obj)
+    {
+        if (!stickyMode || StickyIndex(atom) != -1) return false;
+
+        Unstick(stickyHead);
+        atom.GetComponent<AtomController>().StickTo(obj.GetComponent<Rigidbody>());
+
+        atomStickies[stickyHead] = atom;
+        stickyHead = (stickyHead + 1) % STICKY_COUNT;
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Unstick the atom at index <tt>i</tt>, if present.
+    /// </summary>
+    /// <param name="i">
+    ///     The index to remove.
+    /// </param>
+    public void Unstick(int i)
+    {
+        if (0 <= i && i < STICKY_COUNT)
+        {
+            if (atomStickies[i] != null)
+            {
+                atomStickies[i].GetComponent<AtomController>().Unstick();
+            }
+            atomStickies[i] = null;
+        }
     }
 
     /// <summary>
@@ -292,9 +368,17 @@ public class BlobController : MonoBehaviour
                 {
                     createBlob.SetSpringLengthFactor();
                 }
+                if (Input.GetKeyDown(KeyCode.LeftShift))
+                {
+                    SetStickyMode(true);
+                }
+                if (Input.GetKeyUp(KeyCode.LeftShift))
+                {
+                    SetStickyMode(false);
+                }
             }
 
-            if (Input.GetKeyDown("q"))
+            if (Input.GetKeyDown(KeyCode.Q))
             {
                 Release();
             }
@@ -309,6 +393,7 @@ public class BlobController : MonoBehaviour
     /// </param>
     public void Teleport(Vector3 newPosition)
     {
+        SetStickyMode(false);
         StopMovement();
         Vector3 translation = newPosition - centerAtom.transform.position;
 
@@ -345,13 +430,24 @@ public class BlobController : MonoBehaviour
     /// </returns>
     private bool TouchingSomething()
     {
-        foreach (AtomController atom in atomControllers)
+        if (stickyMode)
         {
-            if (atom.GetTouchCount() > 0)
+            for (int i = 0; i < STICKY_COUNT; i++)
             {
-                return true;
+                if (atomStickies[i] != null)
+                {
+                    return true;
+                }
             }
         }
+        
+        foreach (AtomController atom in atomControllers)
+            {
+                if (atom.GetTouchCount() > 0)
+                {
+                    return true;
+                }
+            }
 
         return false;
     }
@@ -424,8 +520,25 @@ public class BlobController : MonoBehaviour
     }
 
     // Getters and setters
+    public void SetCreateBlob(CreateBlob createBlob)
+    {
+        this.createBlob = createBlob;
+    }
+
     public Vector3 GetPosition()
     {
         return centerAtom.transform.position;
+    }
+
+    private void SetStickyMode(bool enable)
+    {
+        stickyMode = enable;
+        if (!stickyMode)
+        {
+            for (int i = 0; i < STICKY_COUNT; i++)
+            {
+                Unstick(i);
+            }
+        }
     }
 }
