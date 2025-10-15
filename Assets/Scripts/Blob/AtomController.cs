@@ -37,7 +37,11 @@ public class AtomController : MonoBehaviour
     /// <summary>
     ///     Spring constant for when the atom sticks to an object.
     /// </summary>
-    private float stickyStrength = 1000;
+    private const float STICKY_STRENGTH = 1000;
+    /// <summary>
+    ///     Force needed to break the joint between a sticky atom and an object.
+    /// </summary>
+    private const float BREAK_FORCE = 500;
 
     /// <summary>
     ///     Initialize rigidbody and audio.
@@ -157,7 +161,8 @@ public class AtomController : MonoBehaviour
         stickyJoint.connectedBody = obj;
 
         stickyJoint.enableCollision = true;
-        stickyJoint.spring = stickyStrength;
+        stickyJoint.spring = STICKY_STRENGTH;
+        stickyJoint.breakForce = BREAK_FORCE;
 
         // manually set anchor positions
         stickyJoint.autoConfigureConnectedAnchor = false;
@@ -170,7 +175,15 @@ public class AtomController : MonoBehaviour
     /// </summary>
     public void Unstick()
     {
+        if (stickyJoint != null)
+    {
         Destroy(stickyJoint);
+        }
+    }
+
+    void OnJointBreak(float breakForce)
+    {
+        blobController.Unstick(gameObject);
     }
 
     // Getters and setters

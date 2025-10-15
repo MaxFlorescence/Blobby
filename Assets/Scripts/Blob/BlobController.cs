@@ -154,7 +154,7 @@ public class BlobController : MonoBehaviour
     /// <param name="i">
     ///     The index to remove.
     /// </param>
-    public void Unstick(int i)
+    private void Unstick(int i)
     {
         if (0 <= i && i < STICKY_COUNT)
         {
@@ -163,6 +163,21 @@ public class BlobController : MonoBehaviour
                 atomStickies[i].GetComponent<AtomController>().Unstick();
             }
             atomStickies[i] = null;
+        }
+    }
+
+    /// <summary>
+    ///     Unstick the given <tt>atom</tt>, if it's sticky.
+    /// </summary>
+    /// <param name="atom">
+    ///     The atom to remove.
+    /// </param>
+    public void Unstick(GameObject atom)
+    {
+        int index = StickyIndex(atom);
+        if (index != -1)
+        {
+            Unstick(index);
         }
     }
 
