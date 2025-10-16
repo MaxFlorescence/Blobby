@@ -96,12 +96,9 @@ public class AtomController : MonoBehaviour
         { // do nothing special when colliding with other atoms
             squisher.squish();
 
-            // Don't interact with boundaries or already-touched objects.
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.
-            if (NotBounds(obj))
-            {
-                if (!touching.Contains(obj))
+            if (NotBounds(obj) && !touching.Contains(obj))
                 {
                     Interactable interactableObj = obj.GetComponent<Interactable>();
                     if (interactableObj != null)
@@ -117,7 +114,6 @@ public class AtomController : MonoBehaviour
                     if (interactableObj == null || interactableObj.GetInteractionEnabled())
                     {
                         blobController.TrySticking(gameObject, obj);
-                    }
                 }
             }
         }
