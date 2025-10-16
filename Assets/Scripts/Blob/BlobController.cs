@@ -137,15 +137,19 @@ public class BlobController : MonoBehaviour
     /// </returns>
     public bool TrySticking(GameObject atom, GameObject obj)
     {
-        if (!stickyMode || StickyIndex(atom) != -1) return false;
-
+        if (stickyMode && StickyIndex(atom) == -1
+            && obj.TryGetComponent<Rigidbody>(out var objRigidbody))
+        {
         Unstick(stickyHead);
-        atom.GetComponent<AtomController>().StickTo(obj.GetComponent<Rigidbody>());
+            atom.GetComponent<AtomController>().StickTo(objRigidbody);
 
         atomStickies[stickyHead] = atom;
         stickyHead = (stickyHead + 1) % STICKY_COUNT;
 
         return true;
+        }
+
+        return false;
     }
 
     /// <summary>
