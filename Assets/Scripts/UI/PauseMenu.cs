@@ -35,12 +35,12 @@ public class PauseMenu : Menu
     {
         HideMenu();
         LevelStartupInfo.StartCutscene = false;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Level");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.DEMO_LEVEL);
     }
 
     public void QuitButton()
     {
         HideMenu();
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.MAIN_MENU);
     }
 }

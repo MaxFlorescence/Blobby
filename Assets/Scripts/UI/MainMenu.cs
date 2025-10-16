@@ -26,7 +26,7 @@ public class MainMenu : Menu
 
     public void PlayButton() {
         LevelStartupInfo.StartCutscene = true;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Level");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.DEMO_LEVEL);
     }
 
     public void QuitButton() {
