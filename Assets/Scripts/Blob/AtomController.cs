@@ -43,6 +43,16 @@ public class AtomController : MonoBehaviour
     /// </summary>
     private const float BREAK_FORCE = 500;
 
+    // Particles
+    private ParticleSystem drips;
+    private const string DROPLET_MATERIAL = "Materials/Droplet";
+    private Material dropletMaterial;
+    private ParticleSystem.EmissionModule dripsEmission;
+    /// <summary>
+    ///     <tt>true</tt> iff this atom is a center atom. This disables drip particles.
+    /// </summary>
+    private bool centerAtom = false;
+
     /// <summary>
     ///     Initialize rigidbody and audio.
     /// </summary>
@@ -50,6 +60,63 @@ public class AtomController : MonoBehaviour
     {
         rigidBody = GetComponent<Rigidbody>();
         squisher = blobController.GetComponent<Squisher>();
+
+        SetupDripParticles();
+    }
+
+    /// <summary>
+    ///     Add and configre the particle system component for dripping.
+    /// </summary>
+    private void SetupDripParticles()
+    {
+        if (centerAtom) return;
+
+        dropletMaterial = Resources.Load(DROPLET_MATERIAL, typeof(Material)) as Material;
+        drips = gameObject.AddComponent<ParticleSystem>();
+
+        dripsEmission = drips.emission;
+        dripsEmission.rateOverTime = 0.5f;
+
+        var main = drips.main;
+        main.loop = true;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.startSpeed = 0;
+        main.gravityModifier = 1;
+        main.startLifetime = 1;
+        main.startDelay = Random.Range(0f, 2f);
+
+        var collision = drips.collision;
+        collision.enabled = true;
+        collision.type = ParticleSystemCollisionType.World;
+        collision.collidesWith = LayerMask.GetMask("Default");
+        collision.bounce = 0;
+
+        var sizeOverLifetime = drips.sizeOverLifetime;
+        sizeOverLifetime.enabled = true;
+        AnimationCurve curve = new AnimationCurve();
+        curve.AddKey(0f, 1f);
+        curve.AddKey(0.5f, 1f);
+        curve.AddKey(1f, 0f);
+        sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1, curve);
+
+        if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
+        {
+            renderer.material = dropletMaterial;
+        }
+
+        drips.Play();
+    }
+
+    /// <summary>
+    ///     Enables/disables drip particle emission if this atom is/isn't on the underside of the
+    ///     blob.
+    /// </summary>
+    private void UpdateDripParticles()
+    {
+        if (centerAtom) return;
+
+        Vector3 direction = transform.position - blobController.transform.position;
+        dripsEmission.enabled = Vector3.Dot(direction, Vector3.down) > 0;
     }
 
     /// <summary>
@@ -60,6 +127,8 @@ public class AtomController : MonoBehaviour
         rigidBody.AddForce(force, ForceMode.Force);
         rigidBody.AddForce(impulse, ForceMode.Impulse);
         impulse = Vector3.zero;
+
+        UpdateDripParticles();
     }
 
     /// <summary>
@@ -99,21 +168,21 @@ public class AtomController : MonoBehaviour
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.
             if (NotBounds(obj) && !touching.Contains(obj))
+            {
+                Interactable interactableObj = obj.GetComponent<Interactable>();
+                if (interactableObj != null)
                 {
-                    Interactable interactableObj = obj.GetComponent<Interactable>();
-                    if (interactableObj != null)
-                    {
-                        interactableObj.Interact(blobController);
-                    }
+                    interactableObj.Interact(blobController);
+                }
 
-                    if (!blobController.IsHolding(obj))
-                    { // don't count grabbed objects as touching
-                        touching.Add(obj);
-                    }
-                    
-                    if (interactableObj == null || interactableObj.GetInteractionEnabled())
-                    {
-                        blobController.TrySticking(gameObject, obj);
+                if (!blobController.IsHolding(obj))
+                { // don't count grabbed objects as touching
+                    touching.Add(obj);
+                }
+
+                if (interactableObj == null || interactableObj.GetInteractionEnabled())
+                {
+                    blobController.TrySticking(gameObject, obj);
                 }
             }
         }
@@ -172,8 +241,8 @@ public class AtomController : MonoBehaviour
     public void Unstick()
     {
         if (stickyJoint != null)
-    {
-        Destroy(stickyJoint);
+        {
+            Destroy(stickyJoint);
         }
     }
 
@@ -198,5 +267,9 @@ public class AtomController : MonoBehaviour
     private void SetVisible(bool visible)
     {
         GetComponent<MeshRenderer>().enabled = visible;
+    }
+    public void SetCenterAtom(bool isCenterAtom)
+    {
+        centerAtom = isCenterAtom;
     }
 }

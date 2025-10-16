@@ -100,6 +100,7 @@ public class BlobController : MonoBehaviour
             atomControllers[i] = createBlob.GetAtoms()[i].AddComponent<AtomController>();
             atomControllers[i].blobController = this;
         }
+        atomControllers[0].GetComponent<AtomController>().SetCenterAtom(true);
 
         SetupSounds();
     }
@@ -140,13 +141,13 @@ public class BlobController : MonoBehaviour
         if (stickyMode && StickyIndex(atom) == -1
             && obj.TryGetComponent<Rigidbody>(out var objRigidbody))
         {
-        Unstick(stickyHead);
+            Unstick(stickyHead);
             atom.GetComponent<AtomController>().StickTo(objRigidbody);
 
-        atomStickies[stickyHead] = atom;
-        stickyHead = (stickyHead + 1) % STICKY_COUNT;
+            atomStickies[stickyHead] = atom;
+            stickyHead = (stickyHead + 1) % STICKY_COUNT;
 
-        return true;
+            return true;
         }
 
         return false;

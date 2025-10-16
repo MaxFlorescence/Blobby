@@ -22,5 +22,10 @@
 - Googly eye customization
 - Add rigidity?
 
+# Todo
+- Actual level design
+- Story
+    * Slime in a high fantasy dungeon becomes sentient
+
 # Code
 - Update input to Unity's new system
