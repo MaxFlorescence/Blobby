@@ -19,7 +19,7 @@ public abstract class Interactable : MonoBehaviour
     /// </summary>
     public void Update()
     {
-        if (!GameInfo.GameIsPaused)
+        if (GameInfo.GameStatus != GameState.PAUSED)
         {
             if (cooldownTime > 0)
             {

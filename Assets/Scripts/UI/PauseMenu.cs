@@ -40,7 +40,6 @@ public class PauseMenu : Menu
 
     public void QuitButton()
     {
-        HideMenu();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.MAIN_MENU);
+        QuitToMain();
     }
 }

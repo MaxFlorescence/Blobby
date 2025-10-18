@@ -20,7 +20,9 @@ public class FinishMenu : Menu
     protected override void OnShow() {
         if (hasWon) {
             winText.SetActive(true);
+            GameInfo.FinishStatus = FinishState.WON;
         } else {
+            GameInfo.FinishStatus = FinishState.LOST;
             failBackground.SetActive(true);
         }
     }
@@ -32,7 +34,6 @@ public class FinishMenu : Menu
     }
 
     public void QuitButton() {
-        HideMenu();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.MAIN_MENU);
+        QuitToMain();
     }
 }

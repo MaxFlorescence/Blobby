@@ -87,7 +87,7 @@ public class Grip : Interactable
     /// </summary>
     public void FixedUpdate()
     {
-        if (!GameInfo.GameIsPaused)
+        if (GameInfo.GameStatus != GameState.PAUSED)
         {
             if (state == GripState.Grabbing)
             {

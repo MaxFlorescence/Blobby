@@ -344,7 +344,7 @@ public class BlobController : Controllable
     /// </summary>
     void Update()
     {
-        if (!Controlled || GameInfo.StartCutscene || GameInfo.GameIsPaused)
+        if (!Controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
             return;
 
         if (Input.GetKeyDown(KeyCode.Q))

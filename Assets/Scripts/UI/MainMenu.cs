@@ -26,6 +26,8 @@ public class MainMenu : Menu
 
     public void PlayButton() {
         GameInfo.StartCutscene = true;
+        GameInfo.GameStatus = GameState.PLAYING;
+        GameInfo.FinishStatus = FinishState.UNFINISHED;
         UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.DEMO_LEVEL);
     }
 
