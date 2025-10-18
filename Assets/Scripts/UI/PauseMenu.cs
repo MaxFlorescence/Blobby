@@ -12,12 +12,12 @@ public class PauseMenu : Menu
     {
         key = "e";
         mouseTMP = mouseInfo.GetComponent<TextMeshProUGUI>();
-        mouseSlider.value = LevelStartupInfo.MouseSensitivity;
+        mouseSlider.value = GameInfo.MouseSensitivity;
     }
 
     public void MouseSensitivitySlider()
     {
-        LevelStartupInfo.MouseSensitivity = mouseSlider.value;
+        GameInfo.MouseSensitivity = mouseSlider.value;
         SetMouseTMPInfo();
     }
 
@@ -34,13 +34,13 @@ public class PauseMenu : Menu
     public void RestartButton()
     {
         HideMenu();
-        LevelStartupInfo.StartCutscene = false;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.DEMO_LEVEL);
+        GameInfo.StartCutscene = false;
+        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.DEMO_LEVEL);
     }
 
     public void QuitButton()
     {
         HideMenu();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.MAIN_MENU);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.MAIN_MENU);
     }
 }

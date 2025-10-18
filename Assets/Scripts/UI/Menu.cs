@@ -32,8 +32,8 @@ public class Menu : MonoBehaviour
 
     public void HideMenu() {
         menuActive = false;
-        LevelStartupInfo.GameIsPaused = false;
-        LevelStartupInfo.PauseAudio = false;
+        GameInfo.GameIsPaused = false;
+        GameInfo.PauseAudio = false;
 
         Time.timeScale = 1;
         graphics.SetActive(false);
@@ -47,11 +47,11 @@ public class Menu : MonoBehaviour
     virtual protected void OnHide() {}
 
     public void ShowMenu() {
-        if (!LevelStartupInfo.GameIsPaused)
+        if (!GameInfo.GameIsPaused)
         {
             menuActive = true;
-            LevelStartupInfo.GameIsPaused = true;
-            if (menuPausesAudio) LevelStartupInfo.PauseAudio = true;
+            GameInfo.GameIsPaused = true;
+            if (menuPausesAudio) GameInfo.PauseAudio = true;
             
 
             Time.timeScale = 0;

@@ -14,7 +14,7 @@ public class CameraSwitcher : MonoBehaviour
         cutsceneController = secondaryCamera.GetComponent<CutsceneCameraController>();
 
         // this flag is only true when starting the game from the main menu
-        if (LevelStartupInfo.StartCutscene)
+        if (GameInfo.StartCutscene)
         {
             SwitchCamera(false);
 
@@ -29,7 +29,7 @@ public class CameraSwitcher : MonoBehaviour
     void Update()
     {
         // press space to skip cutscene
-        if ((LevelStartupInfo.StartCutscene && Input.GetButtonUp("Jump"))
+        if ((GameInfo.StartCutscene && Input.GetButtonUp("Jump"))
             || cutsceneController.Finished())
         {
             EndCutscene();
@@ -40,7 +40,7 @@ public class CameraSwitcher : MonoBehaviour
     {
         cutsceneController.Reset();
         SwitchCamera(true);
-        LevelStartupInfo.StartCutscene = false;
+        GameInfo.StartCutscene = false;
     }
 
     private void SwitchCamera(bool main)

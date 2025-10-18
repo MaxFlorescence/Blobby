@@ -16,7 +16,7 @@ public class Squisher : MonoBehaviour
     }
 
     public void squish() {
-        if (!LevelStartupInfo.StartCutscene) {
+        if (!GameInfo.StartCutscene) {
             audioSource.pitch = Random.Range(0.5f, 1.5f);
 
             int i = Random.Range(0, 8);

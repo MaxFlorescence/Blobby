@@ -8,7 +8,7 @@ public class CheatMenu : Menu
     }
 
     private void Teleport(Vector3 to) {
-        LevelStartupInfo.ControlledBlob.Teleport(to);
+        GameInfo.ControlledBlob.Teleport(to);
         HideMenu();
     }
 

@@ -10,14 +10,14 @@ public class MainCameraController : Controllable
         float deltaX = 0;
         float deltaY = 0;
 
-        if (!LevelStartupInfo.StartCutscene) {
+        if (!GameInfo.StartCutscene) {
             deltaX = XSensitivity();
             deltaY = YSensitivity();
         }
 
         // rotate about axis perpendicular to mouse movement by angle proportional to mouse speed
         Vector3 axis = 10*(transform.up*deltaX - transform.right*deltaY);
-        float angle = axis.magnitude * LevelStartupInfo.MouseSensitivity * Time.deltaTime * Mathf.Rad2Deg;
+        float angle = axis.magnitude * GameInfo.MouseSensitivity * Time.deltaTime * Mathf.Rad2Deg;
 
         offset = Quaternion.AngleAxis(angle, axis) * offset;
 

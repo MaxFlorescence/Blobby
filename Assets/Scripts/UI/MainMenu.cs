@@ -10,13 +10,13 @@ public class MainMenu : Menu
 
     private void Start() {
         mouseTMP = mouseInfo.GetComponent<TextMeshProUGUI>();
-        mouseSlider.value = LevelStartupInfo.MouseSensitivity;
+        mouseSlider.value = GameInfo.MouseSensitivity;
 
         ShowMenu();
     }
 
     public void MouseSensitivitySlider() {
-        LevelStartupInfo.MouseSensitivity = mouseSlider.value;
+        GameInfo.MouseSensitivity = mouseSlider.value;
         SetMouseTMPInfo();
     }
 
@@ -25,8 +25,8 @@ public class MainMenu : Menu
     }
 
     public void PlayButton() {
-        LevelStartupInfo.StartCutscene = true;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.DEMO_LEVEL);
+        GameInfo.StartCutscene = true;
+        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.DEMO_LEVEL);
     }
 
     public void QuitButton() {

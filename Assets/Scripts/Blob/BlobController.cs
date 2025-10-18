@@ -67,7 +67,7 @@ public class BlobController : Controllable
     ///     The factor by which the blob can shrink from its original size.
     /// </summary>
     private float blobShrinkingFactor = 0.5f;
-    
+
     // Camera
     public GameObject mainCamera;
     /// <summary>
@@ -85,9 +85,9 @@ public class BlobController : Controllable
     {
         numAtoms = createBlob.GetAtoms().Length;
         centerAtom = createBlob.GetAtoms()[0];
-        if (LevelStartupInfo.ControlledBlob == null)
+        if (GameInfo.ControlledBlob == null)
         {
-            LevelStartupInfo.SetControlledBlob(this);
+            GameInfo.SetControlledBlob(this);
         }
         FindMainCamera();
 
@@ -366,7 +366,7 @@ public class BlobController : Controllable
     /// </summary>
     void Update()
     {
-        if (!Controlled || LevelStartupInfo.StartCutscene || LevelStartupInfo.GameIsPaused)
+        if (!Controlled || GameInfo.StartCutscene || GameInfo.GameIsPaused)
             return;
 
         if (Input.GetKeyDown(KeyCode.Q))
@@ -374,31 +374,31 @@ public class BlobController : Controllable
             Release();
         }
 
-            if (movementInputEnabled)
+        if (movementInputEnabled)
+        {
+            if (Input.GetButtonDown("Jump"))
             {
-                if (Input.GetButtonDown("Jump"))
-                {
-                    doJump = true;
-                }
-                if (Input.GetMouseButtonDown(0)) // left mouse shrinks
-                {
-                    createBlob.SetSpringLengthFactor(blobShrinkingFactor);
-                }
-                if (Input.GetMouseButtonDown(1)) // right mouse grows
-                {
-                    createBlob.SetSpringLengthFactor(blobGrowingFactor);
-                }
-                if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
-                {
-                    createBlob.SetSpringLengthFactor();
-                }
-                if (Input.GetKeyDown(KeyCode.LeftShift))
-                {
-                    SetStickyMode(true);
-                }
-                if (Input.GetKeyUp(KeyCode.LeftShift))
-                {
-                    SetStickyMode(false);
+                doJump = true;
+            }
+            if (Input.GetMouseButtonDown(0)) // left mouse shrinks
+            {
+                createBlob.SetSpringLengthFactor(blobShrinkingFactor);
+            }
+            if (Input.GetMouseButtonDown(1)) // right mouse grows
+            {
+                createBlob.SetSpringLengthFactor(blobGrowingFactor);
+            }
+            if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
+            {
+                createBlob.SetSpringLengthFactor();
+            }
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                SetStickyMode(true);
+            }
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                SetStickyMode(false);
             }
         }
     }

@@ -27,12 +27,12 @@ public class FinishMenu : Menu
 
     public void RestartButton() {
         HideMenu();
-        LevelStartupInfo.StartCutscene = false;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.DEMO_LEVEL);
+        GameInfo.StartCutscene = false;
+        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.DEMO_LEVEL);
     }
 
     public void QuitButton() {
         HideMenu();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(LevelStartupInfo.MAIN_MENU);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.MAIN_MENU);
     }
 }

@@ -18,13 +18,13 @@ public class RoundaboutPlayer : MonoBehaviour
 
     void Update()
     {
-        if (LevelStartupInfo.PauseAudio && !audioIsPaused)
+        if (GameInfo.PauseAudio && !audioIsPaused)
         {
             audioIsPaused = true;
             audioSource.Pause();
         }
 
-        if (!LevelStartupInfo.PauseAudio && audioIsPaused)
+        if (!GameInfo.PauseAudio && audioIsPaused)
         {
             audioIsPaused = false;
             audioSource.UnPause();

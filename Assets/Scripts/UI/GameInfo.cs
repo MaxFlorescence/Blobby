@@ -1,4 +1,4 @@
-public static class LevelStartupInfo
+public static class GameInfo
 {
     public static string MAIN_MENU = "Main Menu";
     public static string DEMO_LEVEL = "Demo Level";
@@ -19,7 +19,7 @@ public static class LevelStartupInfo
         camera.Controlled = true;
         ControlledCamera = camera;
     }
-    
+
     public static BlobController ControlledBlob { get; private set; } = null;
 
     public static void SetControlledBlob(BlobController blob)
