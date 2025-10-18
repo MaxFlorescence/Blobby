@@ -3,54 +3,74 @@ using UnityEngine;
 public class MainCameraController : Controllable
 {
     private Vector3 offset;
-    private Transform trackedObject;
+    private Transform trackedTransform = null;
+    public float trackingDistance = 10f;
+
+    void Start()
+    {
+        if (GameInfo.ControlledCamera == null)
+        {
+            GameInfo.SetControlledCamera(this);
+        }
+    }
 
     void LateUpdate()
     {
-        float deltaX = 0;
-        float deltaY = 0;
-
-        if (!GameInfo.StartCutscene) {
-            deltaX = XSensitivity();
-            deltaY = YSensitivity();
+        if (trackedTransform == null)
+        {
+            if (GameInfo.ControlledBlob != null)
+            {
+                TrackObject(GameInfo.ControlledBlob.gameObject, trackingDistance);
+            }
         }
+        else
+        {
+            float deltaX = 0;
+            float deltaY = 0;
 
-        // rotate about axis perpendicular to mouse movement by angle proportional to mouse speed
-        Vector3 axis = 10*(transform.up*deltaX - transform.right*deltaY);
-        float angle = axis.magnitude * GameInfo.MouseSensitivity * Time.deltaTime * Mathf.Rad2Deg;
+            if (!GameInfo.StartCutscene)
+            {
+                deltaX = XSensitivity();
+                deltaY = YSensitivity();
+            }
 
-        offset = Quaternion.AngleAxis(angle, axis) * offset;
+            // rotate about axis perpendicular to mouse movement by angle proportional to mouse speed
+            Vector3 axis = 10 * (transform.up * deltaX - transform.right * deltaY);
+            float angle = axis.magnitude * GameInfo.MouseSensitivity * Time.deltaTime * Mathf.Rad2Deg;
 
-        MoveCamera();
+            offset = Quaternion.AngleAxis(angle, axis) * offset;
+
+            MoveCamera();
+        }
     }
 
     public void TrackObject(GameObject obj, float distance)
     {
-        trackedObject = obj.transform;
+        trackedTransform = obj.transform;
         offset = distance * Vector3.left;
 
         MoveCamera();
     }
 
     private void MoveCamera() {
-        if (trackedObject == null)
+        if (trackedTransform == null)
             return;
 
         // Offset camera from the tracked object's position, then look at it.
 
-        transform.position = CollideCamera() + trackedObject.position;
-        transform.LookAt(trackedObject);
+        transform.position = CollideCamera() + trackedTransform.position;
+        transform.LookAt(trackedTransform);
     }
 
     private Vector3 CollideCamera() {
-        if (trackedObject == null)
+        if (trackedTransform == null)
             return offset;
 
         RaycastHit hitInfo;
         LayerMask layerMask = ~LayerMask.GetMask("Ignore Camera");
 
         bool hitSomething = Physics.Raycast(
-            trackedObject.position,
+            trackedTransform.position,
             offset.normalized,
             out hitInfo,
             offset.magnitude,

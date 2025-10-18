@@ -68,13 +68,6 @@ public class BlobController : Controllable
     /// </summary>
     private float blobShrinkingFactor = 0.5f;
 
-    // Camera
-    public GameObject mainCamera;
-    /// <summary>
-    ///    Distance from the camera to the blob character.
-    /// </summary>
-    private float cameraDistance = 10f;
-
     // Audio
     private AudioSource roundaboutAudio;
 
@@ -89,7 +82,6 @@ public class BlobController : Controllable
         {
             GameInfo.SetControlledBlob(this);
         }
-        FindMainCamera();
 
         atomControllers = new AtomController[numAtoms];
 
@@ -203,14 +195,14 @@ public class BlobController : Controllable
     /// </summary>
     void FixedUpdate()
     {
-        if (!movementInputEnabled || mainCamera == null || !Controlled)
+        if (!movementInputEnabled || !Controlled || GameInfo.ControlledCamera == null)
             return;
 
         // Ensure forward/rightward movement occurs in the horizontal plane.
-        Vector3 forwardForce = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
+        Vector3 forwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.forward, Vector3.up).normalized;
         forwardForce *= Input.GetAxis("Vertical");
 
-        Vector3 rightwardForce = Vector3.ProjectOnPlane(mainCamera.transform.right, Vector3.up).normalized;
+        Vector3 rightwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.right, Vector3.up).normalized;
         rightwardForce *= Input.GetAxis("Horizontal");
 
         // Constrain initial movementForce to the unit disk.
@@ -274,20 +266,6 @@ public class BlobController : Controllable
         {
             atom.SetGravity(gravity);
         }
-    }
-
-    /// <summary>
-    ///     Get a reference to the main camera and have it track this blob.
-    /// </summary>
-    public void FindMainCamera()
-    {
-        mainCamera = GameObject.FindGameObjectWithTag("CameraManager")
-            .GetComponent<CameraSwitcher>()
-            .GetMainCamera()
-            .gameObject;
-
-        // Allow the camera to track the blob.
-        mainCamera.GetComponent<MainCameraController>().TrackObject(centerAtom, cameraDistance);
     }
 
     /// <summary>
