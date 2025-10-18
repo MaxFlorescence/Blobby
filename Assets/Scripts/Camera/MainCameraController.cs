@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MainCameraController : MonoBehaviour
+public class MainCameraController : Controllable
 {
     private Vector3 offset;
     private Transform trackedObject;

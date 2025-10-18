@@ -5,14 +5,11 @@ using UnityEngine;
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
-public class BlobController : MonoBehaviour
+public class BlobController : Controllable
 {
     // PUBLIC MEMBERS
     public Squisher squisher;
     public RoundaboutPlayer roundabout;
-
-    // TODO: move functionality to menus
-    public CheatMenu cheatMenu;
 
     // PRIVATE MEMBERS
     // Input
@@ -88,10 +85,11 @@ public class BlobController : MonoBehaviour
     {
         numAtoms = createBlob.GetAtoms().Length;
         centerAtom = createBlob.GetAtoms()[0];
+        if (LevelStartupInfo.ControlledBlob == null)
+        {
+            LevelStartupInfo.SetControlledBlob(this);
+        }
         FindMainCamera();
-
-        // Allow the cheats menu to teleport the blob.
-        cheatMenu.blobController = this;
 
         atomControllers = new AtomController[numAtoms];
 
@@ -205,7 +203,7 @@ public class BlobController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        if (!movementInputEnabled || mainCamera == null)
+        if (!movementInputEnabled || mainCamera == null || !Controlled)
             return;
 
         // Ensure forward/rightward movement occurs in the horizontal plane.
@@ -368,8 +366,14 @@ public class BlobController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (!LevelStartupInfo.StartCutscene && !LevelStartupInfo.GameIsPaused)
+        if (!Controlled || LevelStartupInfo.StartCutscene || LevelStartupInfo.GameIsPaused)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Q))
         {
+            Release();
+        }
+
             if (movementInputEnabled)
             {
                 if (Input.GetButtonDown("Jump"))
@@ -395,12 +399,6 @@ public class BlobController : MonoBehaviour
                 if (Input.GetKeyUp(KeyCode.LeftShift))
                 {
                     SetStickyMode(false);
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                Release();
             }
         }
     }

@@ -33,13 +33,6 @@ public class CreateBlob : MonoBehaviour
     public GameObject leftEye;
     public GameObject rightEye;
 
-    // TODO: Find center atom automatically in experimenter script
-    public ExperimenterScript experimenter;
-
-    // TODO: move functionality to menus
-    public CheatMenu cheatMenu;
-    public PauseMenu pauseMenu;
-
     // PRIVATE MEMBERS
     // Spawning
     /// <summary>
@@ -106,7 +99,6 @@ public class CreateBlob : MonoBehaviour
         // Build the blob
         blobAtoms = MakeAtomsFromMesh(blobMesh, 0, NUM_ATOMS, out meshToAtomMap, spawnPoint);
         centerAtom = blobAtoms[0];
-        experimenter.blob = centerAtom.transform;
 
         atomRigidbodies = AddRigidBodies(blobAtoms);
 
@@ -404,9 +396,8 @@ public class CreateBlob : MonoBehaviour
     {
         BlobController controller = gameObject.AddComponent<BlobController>();
 
-        // Inherit some class members. Is there a better way to do this?
+        // Inherit class member. Is there a better way to do this?
         controller.SetCreateBlob(this);
-        controller.cheatMenu = cheatMenu;
 
         return controller;
     }

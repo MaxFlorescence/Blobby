@@ -2,15 +2,13 @@ using UnityEngine;
 
 public class CheatMenu : Menu
 {
-    public BlobController blobController;
-
     protected override void OnStart()
     {
         key = "t";
     }
 
     private void Teleport(Vector3 to) {
-        blobController.Teleport(to);
+        LevelStartupInfo.ControlledBlob.Teleport(to);
         HideMenu();
     }
 
