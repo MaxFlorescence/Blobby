@@ -1,66 +1,60 @@
+using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class CameraSwitcher : MonoBehaviour
 {
-    public Camera mainCamera;
-    public Camera secondaryCamera;
-    public GameObject mainOverlay = null;
-    public GameObject secondaryOverlay = null;
-    private bool mainActive = true;
-    private CutsceneCameraController cutsceneController;
+    private PriorityCamera[] cameras;
+    private int cameraCount;
+    private int activeCamera = -1;
 
     void Start()
     {
-        cutsceneController = secondaryCamera.GetComponent<CutsceneCameraController>();
-
-        // this flag is only true when starting the game from the main menu
-        if (GameInfo.StartCutscene)
-        {
-            SwitchCamera(false);
-
-            cutsceneController.BeginCutscene();
-        }
-        else
-        {
-            EndCutscene();
-        }
+        cameras = Array.ConvertAll(Camera.allCameras, camera => camera.GetComponent<PriorityCamera>());
+        cameraCount = cameras.Length;
+        DeactivateAll();
     }
 
     void Update()
     {
-        // press space to skip cutscene
-        if ((GameInfo.StartCutscene && Input.GetButtonUp("Jump"))
-            || cutsceneController.Finished())
+        ActivateHighesetPriorityCamera();
+    }
+
+    private void DeactivateAll()
+    {
+        foreach (PriorityCamera camera in cameras)
         {
-            EndCutscene();
+            camera.Deactivate();
         }
     }
 
-    void EndCutscene()
+    private void ActivateHighesetPriorityCamera()
     {
-        cutsceneController.Reset();
-        SwitchCamera(true);
-        GameInfo.StartCutscene = false;
-    }
+        int maxPriority = -1;
+        int newActiveCamera = -1;
 
-    private void SwitchCamera(bool main)
-    {
-        mainActive = main;
-        mainCamera.gameObject.SetActive(main);
-        secondaryCamera.gameObject.SetActive(!main);
-        if (mainOverlay != null)
-            mainOverlay.SetActive(main);
-        if (secondaryOverlay != null)
-            secondaryOverlay.SetActive(!main);
-    }
+        for (int i = 0; i < cameraCount; i++)
+        {
+            if (maxPriority < cameras[i].GetPriority())
+            {
+                maxPriority = cameras[i].GetPriority();
+                newActiveCamera = i;
+            }
+        }
+        
+        if (newActiveCamera == activeCamera) return;
 
-    public Camera GetMainCamera()
-    {
-        return mainCamera;
+        Assert.IsTrue(newActiveCamera >= 0);
+        if (activeCamera >= 0)
+        {
+            cameras[activeCamera].Deactivate();
+        }
+        cameras[newActiveCamera].Activate();
+        activeCamera = newActiveCamera;
     }
     
     public bool IsMainCameraActive()
     {
-        return mainActive;
+        return cameras[activeCamera].IsMain();
     }
 }

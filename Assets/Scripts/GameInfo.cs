@@ -13,37 +13,31 @@ public enum FinishState
 
 public static class GameInfo
 {
+    // "Constants"
     public static string MAIN_MENU = "Main Menu";
     public static string DEMO_LEVEL = "Demo Level";
-    public static bool StartCutscene { get; set; }
+
+    // Settings
     public static float MouseSensitivity { get; set; } = 1;
+
+    // Game State
+    public static bool StartCutscene { get; set; }
     public static GameState GameStatus { get; set; } = GameState.UNSTARTED;
     public static FinishState FinishStatus { get; set; } = FinishState.UNFINISHED;
     public static bool PauseAudio { get; set; } = false;
+    public static bool ControlledCameraIsMain { get; set; } = false;
 
-    public static MainCameraController ControlledCamera { get; private set; } = null;
-
-    public static void SetControlledCamera(MainCameraController camera)
-    {
-        if (ControlledCamera != null)
-        {
-            ControlledCamera.Controlled = false;
-        }
-
-        camera.Controlled = true;
-        ControlledCamera = camera;
-    }
-
+    // Global object references
+    public static PriorityCamera ControlledCamera { get; set; } = null;
     public static BlobController ControlledBlob { get; private set; } = null;
-
     public static void SetControlledBlob(BlobController blob)
     {
         if (ControlledBlob != null)
         {
-            ControlledBlob.Controlled = false;
+            ControlledBlob.controlled = false;
         }
 
-        blob.Controlled = true;
+        blob.controlled = true;
         ControlledBlob = blob;
     }
 }

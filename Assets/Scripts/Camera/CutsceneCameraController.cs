@@ -1,7 +1,9 @@
 using UnityEngine;
 
-public class CutsceneCameraController : MonoBehaviour
+public class CutsceneCameraController : PriorityCamera
 {
+    public GameObject skipOverlay;
+
     private float[] pauseTimes = {
         2f,
         1.5f,
@@ -30,23 +32,62 @@ public class CutsceneCameraController : MonoBehaviour
     private int points;
     private int currentPoint = -1;
     private float t = 0;
-    private bool cutsceneFinished = false;
 
     void Start()
     {
-        points = positions.Length;
+        SetMaxPriority(2);
 
+        points = positions.Length;
         foreach (Vector3 direction in directions)
         {
             direction.Normalize();
         }
+
+        // this flag is only true when starting the game from the main menu
+        if (GameInfo.StartCutscene)
+        {
+            BeginCutscene();
+        }
+        else
+        {
+            EndCutscene();
+        }
+    }
+
+    override protected void OnActivate()
+    {
+        skipOverlay.SetActive(true);
+    }
+
+    override protected void OnDeactivate()
+    {
+        skipOverlay.SetActive(false);
     }
 
     public void BeginCutscene()
     {
+        SetPriority(2);
+        
         currentPoint = 0;
         transform.position = positions[0];
         transform.LookAt(positions[0] + directions[0]);
+    }
+
+    void EndCutscene()
+    {
+        SetPriority(0);
+        
+        currentPoint = -1;
+        GameInfo.StartCutscene = false;
+    }
+
+    void Update()
+    {
+        // press space to skip cutscene
+        if (controlled && GameInfo.StartCutscene && Input.GetButtonUp("Jump"))
+        {
+            EndCutscene();
+        }
     }
 
     void LateUpdate()
@@ -74,18 +115,7 @@ public class CutsceneCameraController : MonoBehaviour
         }
         else if (currentPoint == points)
         {
-            cutsceneFinished = true;
+            EndCutscene();
         }
-    }
-
-    public void Reset()
-    {
-        cutsceneFinished = false;
-        currentPoint = -1;
-    }
-    
-    public bool Finished()
-    {
-        return cutsceneFinished;
     }
 }

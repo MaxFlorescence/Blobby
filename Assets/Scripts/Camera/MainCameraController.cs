@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MainCameraController : Controllable
+public class MainCameraController : PriorityCamera
 {
     private Vector3 offset;
     private Transform trackedTransform = null;
@@ -8,10 +8,9 @@ public class MainCameraController : Controllable
 
     void Start()
     {
-        if (GameInfo.ControlledCamera == null)
-        {
-            GameInfo.SetControlledCamera(this);
-        }
+        SetMaxPriority(1);
+        SetPriority(1);
+        isMain = true;
     }
 
     void LateUpdate()
@@ -28,7 +27,7 @@ public class MainCameraController : Controllable
             float deltaX = 0;
             float deltaY = 0;
 
-            if (!GameInfo.StartCutscene)
+            if (controlled)
             {
                 deltaX = XSensitivity();
                 deltaY = YSensitivity();

@@ -5269,7 +5269,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   graphics: {fileID: 1950416316}
-  blobController: {fileID: 0}
 --- !u!224 &619419954
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8350,6 +8349,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 498a061d989cfc24c8a35b2a8727cde7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controlled: 0
+  trackingDistance: 10
 --- !u!1 &977678002
 GameObject:
   m_ObjectHideFlags: 0
@@ -8663,10 +8664,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9927d49b3bfd8684d972242da74c6c55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainCamera: {fileID: 963194227}
-  secondaryCamera: {fileID: 1051775901}
-  mainOverlay: {fileID: 0}
-  secondaryOverlay: {fileID: 289988830}
 --- !u!4 &1006659781
 Transform:
   m_ObjectHideFlags: 0
@@ -8782,7 +8779,7 @@ GameObject:
   - component: {fileID: 1051775903}
   - component: {fileID: 1051775904}
   m_Layer: 0
-  m_Name: Secondary Camera
+  m_Name: Cutscene Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8874,6 +8871,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e58f5faedc9bec46b11b6c7db7e858d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controlled: 0
+  skipOverlay: {fileID: 289988830}
 --- !u!1 &1057705098
 GameObject:
   m_ObjectHideFlags: 0
