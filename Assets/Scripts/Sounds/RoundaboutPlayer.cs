@@ -2,22 +2,21 @@ using UnityEngine;
 
 public class RoundaboutPlayer : MonoBehaviour
 {
-    public AudioSource audioSource;
-    public Transform centerAtom;
+    private AudioSource audioSource = null;
     private bool playing = false;
-    private GameObject floorObject;
     private float dropTime = 3.6f;
     private float time = 0;
     private bool audioIsPaused = false;
 
-    void Start() {
+    private void SetupAudio() {
+        audioSource = GameInfo.ControlledBlob.GetCenterAtom().AddComponent<AudioSource>();
         audioSource.clip = Resources.Load("Sounds/roundabout", typeof(AudioClip)) as AudioClip;
-        
-        floorObject = GameObject.FindGameObjectsWithTag("Floor")[0];
     }
 
     void Update()
     {
+        if (audioSource == null) return;
+
         if (GameInfo.PauseAudio && !audioIsPaused)
         {
             audioIsPaused = true;
@@ -32,10 +31,19 @@ public class RoundaboutPlayer : MonoBehaviour
     }
 
     void FixedUpdate() {
-        if (!playing && centerAtom.position.y <= 15) {
+        if (GameInfo.ControlledBlob == null) return;
+
+        if (audioSource == null)
+        {
+            SetupAudio();
+        }
+
+        float height = GameInfo.ControlledBlob.GetPosition().y;
+
+        if (!playing && height <= 15) {
             playing = true;
             audioSource.Play();
-        } else if (playing && centerAtom.position.y > 15) {
+        } else if (playing && height > 15) {
             playing = false;
             audioSource.Stop();
             time = 0;
@@ -44,13 +52,13 @@ public class RoundaboutPlayer : MonoBehaviour
         if (playing) {
             float ratio = time / dropTime;
         
-            float newY = Mathf.Min(0, centerAtom.position.y - 15 + 11*ratio);
+            float newY = Mathf.Min(0, height - 15 + 11*ratio);
 
-            floorObject.transform.position = new Vector3(0, newY, 0);
+            gameObject.transform.position = new Vector3(0, newY, 0);
 
             time += Time.deltaTime;
         } else {
-            floorObject.transform.position = Vector3.zero;
+            gameObject.transform.position = Vector3.zero;
         }
     }
 }

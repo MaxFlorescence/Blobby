@@ -9,7 +9,6 @@ public class BlobController : Controllable
 {
     // PUBLIC MEMBERS
     public Squisher squisher;
-    public RoundaboutPlayer roundabout;
 
     // PRIVATE MEMBERS
     // Input
@@ -67,9 +66,6 @@ public class BlobController : Controllable
     ///     The factor by which the blob can shrink from its original size.
     /// </summary>
     private float blobShrinkingFactor = 0.5f;
-
-    // Audio
-    private AudioSource roundaboutAudio;
 
     /// <summary>
     ///     Create the atom controllers and set up the audio sources.
@@ -181,11 +177,6 @@ public class BlobController : Controllable
     /// </summary>
     private void SetupSounds()
     {
-        roundaboutAudio = centerAtom.AddComponent<AudioSource>();
-        roundabout = centerAtom.AddComponent<RoundaboutPlayer>();
-        roundabout.audioSource = roundaboutAudio;
-        roundabout.centerAtom = centerAtom.transform;
-
         squisher = centerAtom.AddComponent<Squisher>();
         squisher.audioSource = centerAtom.AddComponent<AudioSource>();
     }
@@ -536,5 +527,9 @@ public class BlobController : Controllable
                 Unstick(i);
             }
         }
+    }
+    public GameObject GetCenterAtom()
+    {
+        return centerAtom;
     }
 }
