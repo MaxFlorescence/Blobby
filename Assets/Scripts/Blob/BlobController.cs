@@ -195,7 +195,7 @@ public class BlobController : Controllable
     /// </summary>
     void FixedUpdate()
     {
-        if (!movementInputEnabled || !Controlled || GameInfo.ControlledCamera == null)
+        if (!movementInputEnabled || !controlled || GameInfo.ControlledCamera == null)
             return;
 
         // Ensure forward/rightward movement occurs in the horizontal plane.
@@ -344,7 +344,7 @@ public class BlobController : Controllable
     /// </summary>
     void Update()
     {
-        if (!Controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
+        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
             return;
 
         if (Input.GetKeyDown(KeyCode.Q))

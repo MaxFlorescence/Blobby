@@ -8,5 +8,5 @@ public abstract class Controllable : MonoBehaviour
     /// <summary>
     ///     Is this game object controlled?
     /// </summary>
-    public bool Controlled = false;
+    public bool controlled = false;
 }
