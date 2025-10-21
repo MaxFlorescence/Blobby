@@ -3,7 +3,6 @@
     * Each liquid has different properties
         - Slime
         - Magma
-        - Lava
         - Soda
         - Honey
         - Acid
