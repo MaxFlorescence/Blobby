@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5106808934950989114}
   m_Layer: 0
-  m_Name: Dungeon Junction
+  m_Name: DungeonJunction
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
