@@ -1,0 +1,17 @@
+4, 1, 4 # dimensions; x (left/right), y (up/down), z (forward/back)
+dead_end, forward # row 1
+corner, back
+corner, right
+dead_end, back
+dead_end, forward # row 2
+junction, back
+junction, forward
+dead_end, back
+dead_end, forward # row 3
+crossing, forward
+crossing, forward
+dead_end, back
+dead_end, forward # row 4
+corner, left
+corner, forward
+dead_end, back
