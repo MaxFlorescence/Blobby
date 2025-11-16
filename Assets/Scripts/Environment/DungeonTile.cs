@@ -22,7 +22,7 @@ public class DungeonTile : MonoBehaviour
         {DungeonTileType.CROSSING,    LoadPrefab("DungeonCrossing")},   // :: (no walls)
         {DungeonTileType.STAIRS_UP,   LoadPrefab("DungeonStairsUp")},   // |^| (stairs go forward)
         {DungeonTileType.STAIRS_DOWN, LoadPrefab("DungeonStairsDown")}, // |v| (stairs go back)
-        {DungeonTileType.ENTRANCE,    null}
+        {DungeonTileType.ENTRANCE,    LoadPrefab("DungeonDeadEnd")} // TODO
     };
     public static Dictionary<Vector3, Quaternion> RotationMap = new()
     {

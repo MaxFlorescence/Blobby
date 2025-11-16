@@ -1,59 +1,49 @@
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Dungeon : MonoBehaviour
 {
-    public TextAsset layoutFile = null;
-    public string layoutFileName = null;
+    public TextAsset layoutFile;
+    public string layoutFileName;
     public int randomSeed = 0;
     public Vector3Int randomDimMin = new(5, 5, 5);
     public Vector3Int randomDimMax = new(20, 20, 20);
 
     private bool generated = false;
-    private int dimX, dimY, dimZ;
+    private Vector3Int dim;
     private DungeonTile[,,] layout;
     private const string LAYOUT_PATH = "DungeonLayouts/";
-    private static readonly Regex removeWhitespace = new(@"\s");
-    private static readonly Dictionary<string, Vector3> directionMap = new()
-    {
-        {"forward", Vector3.forward},
-        {"back", Vector3.back},
-        {"right", Vector3.right},
-        {"left", Vector3.left}
-    };
 
     void Start()
     {
         // Generate layout at start if a method is provided
-        if (layoutFile != null)
-        {
-            GenerateLayoutFromFile(layoutFile);
-        } else if (layoutFileName != null)
-        {
-            GenerateLayoutFromFile(layoutFileName);
-        } else if (randomSeed != 0)
+        if (randomSeed != 0)
         {
             GenerateRandomLayout(randomSeed);
+        }
+        else if (!layoutFile)
+        {
+            GenerateLayoutFromFile(layoutFileName);
+        }
+        else
+        {
+            GenerateLayoutFromFile(layoutFile);
         }
     }
 
     private void GenerateRandomLayout(int seed)
-    { // TODO
+    {
         if (generated) return;
         generated = true;
 
-        dimX = UnityEngine.Random.Range(randomDimMin.x, randomDimMax.x + 1);
-        dimY = UnityEngine.Random.Range(randomDimMin.y, randomDimMax.y + 1);
-        dimZ = UnityEngine.Random.Range(randomDimMin.z, randomDimMax.z + 1);
+        Random.InitState(seed);
+        dim.x = Random.Range(randomDimMin.x, randomDimMax.x + 1);
+        dim.y = Random.Range(randomDimMin.y, randomDimMax.y + 1);
+        dim.z = Random.Range(randomDimMin.z, randomDimMax.z + 1);
+        Vector3Int entrance = new(Random.Range(0, dim.x), dim.y-1, Random.Range(0, dim.z));
 
-        // Place entrance tile
-        layout = new DungeonTile[dimX, dimY, dimZ];
-        Vector3Int index = new(dimX / 2, 0, 0);
-        layout[index.x, index.y, index.z] = DungeonTile.MakeTile(
-            DungeonTileType.ENTRANCE, PositionOf(index), Vector3.forward, gameObject
-        );
+        DungeonLayoutGenerator tree = new(dim, entrance);
+        PopulateLayout(tree);
     }
     
     public void GenerateLayoutFromFile(string layoutFileName)
@@ -71,35 +61,36 @@ public class Dungeon : MonoBehaviour
         generated = true;
 
         string[] layoutFromFile = layoutFile.text.Split("\n");
+        DungeonLayoutGenerator loaded = new(layoutFromFile);
+        dim = loaded.dims;
 
-        string[] dims = SplitLine(layoutFromFile[0]);
-        dimX = int.Parse(dims[0]);
-        dimY = int.Parse(dims[1]);
-        dimZ = int.Parse(dims[2]);
-        layout = new DungeonTile[dimX, dimY, dimZ];
+        PopulateLayout(loaded);
+    }
 
-        int line = 1;
-        for (int x = 0; x < dimX; x++)
+    private void PopulateLayout(DungeonLayoutGenerator generator)
+    {
+        layout = new DungeonTile[dim.x, dim.y, dim.z];
+
+        int flatIndex = 0;
+        for (int x = 0; x < dim.x; x++)
         {
-            for (int y = 0; y < dimY; y++)
+            for (int y = 0; y < dim.y; y++)
             {
-                for (int z = 0; z < dimZ; z++)
+                for (int z = 0; z < dim.z; z++)
                 {
-                    string[] tileInfo = SplitLine(layoutFromFile[line]);
-                    if (tileInfo[0].ToLower().Equals("none"))
+                    Vector3Int index = new(x, y, z);
+
+                    if (generator.IsNone(flatIndex, index))
                     {
                         continue;
                     }
 
-                    Vector3Int index = new(x, y, z);
                     Vector3 tilePosition = PositionOf(index);
 
-                    string tileName = string.Format("{0}-{1}-{2}_{3}_{4}", name, tileInfo[0], x, y, z);
-                    Enum.TryParse(tileInfo[0], true, out DungeonTileType tileType);
-                    Vector3 tileRotation = directionMap[tileInfo[1]];
+                    (string tileName, DungeonTileType tileType, Vector3 tileRotation) = generator.GetTile(flatIndex, index);
 
                     layout[x, y, z] = DungeonTile.MakeTile(tileType, tilePosition, tileRotation, gameObject);
-                    layout[x, y, z].name = tileName;
+                    layout[x, y, z].name = name + "-" + tileName;
                     foreach (Vector3 dir in DungeonTile.directions)
                     {
                         Vector3Int pos = Vector3Int.FloorToInt(dir) + index;
@@ -111,21 +102,14 @@ public class Dungeon : MonoBehaviour
                         catch { /* do nothing */ }
                     }
 
-                    line++;
-                    if (line >= layoutFromFile.Length)
+                    flatIndex++;
+                    if (flatIndex >= generator.Length)
                     {
                         return;
                     }
                 }
             }
         }
-    }
-
-    private string[] SplitLine(string line, char delimiter = ',', char comment = '#')
-    {
-        line = removeWhitespace.Replace(line, "");
-        line = line.Split(comment)[0];
-        return line.Split(delimiter);
     }
 
     private Vector3 PositionOf(Vector3Int index)
