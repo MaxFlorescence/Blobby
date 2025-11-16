@@ -55,6 +55,7 @@ public class BlobController : Controllable
     ///     Indicates if atoms can become sticky. If <tt>false</tt>, no atoms are sticky.
     /// </summary>
     private bool stickyMode = false;
+    private float stickyModifier = 1.2f;
 
     // Misc behavior
     private GameObject grabbedObject;
@@ -202,7 +203,7 @@ public class BlobController : Controllable
         {
             movementForce = movementForce.normalized;
         }
-        movementForce *= movementIntensity;
+        movementForce *= movementIntensity * (stickyMode ? stickyModifier : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
         // so detect the keypress in Update() and perform the action in FixedUpdate().
