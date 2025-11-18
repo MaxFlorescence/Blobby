@@ -846,7 +846,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layoutFile: {fileID: 4900000, guid: 594e3cbef2b411245a9618c4bcb6e6d3, type: 3}
   layoutFileName: test_layout
-  randomSeed: 3
+  randomSeed: 5
   randomDimMin: {x: 8, y: 1, z: 8}
   randomDimMax: {x: 8, y: 1, z: 8}
 --- !u!114 &1287475399

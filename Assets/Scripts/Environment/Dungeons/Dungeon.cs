@@ -9,7 +9,6 @@ public class Dungeon : MonoBehaviour
     public Vector3Int randomDimMin = new(5, 5, 5);
     public Vector3Int randomDimMax = new(20, 20, 20);
 
-    private bool generated = false;
     private Vector3Int dim;
     private DungeonTile[,,] layout;
     private const string LAYOUT_PATH = "DungeonLayouts/";
@@ -33,9 +32,6 @@ public class Dungeon : MonoBehaviour
 
     private void GenerateRandomLayout(int seed)
     {
-        if (generated) return;
-        generated = true;
-
         Random.InitState(seed);
         dim.x = Random.Range(randomDimMin.x, randomDimMax.x + 1);
         dim.y = Random.Range(randomDimMin.y, randomDimMax.y + 1);
@@ -48,8 +44,6 @@ public class Dungeon : MonoBehaviour
     
     public void GenerateLayoutFromFile(string layoutFileName)
     {
-        if (generated) return;
-
         GenerateLayoutFromFile(
             Resources.Load(LAYOUT_PATH + layoutFileName, typeof(TextAsset)) as TextAsset
         );
@@ -57,9 +51,6 @@ public class Dungeon : MonoBehaviour
 
     private void GenerateLayoutFromFile(TextAsset layoutFile)
     {
-        if (generated) return;
-        generated = true;
-
         string[] layoutFromFile = layoutFile.text.Split("\n");
         DungeonLayoutGenerator loaded = new(layoutFromFile);
         dim = loaded.dims;
@@ -85,15 +76,11 @@ public class Dungeon : MonoBehaviour
                         continue;
                     }
 
-                    Vector3 tilePosition = PositionOf(index);
+                    layout[x, y, z] = generator.GetTile(flatIndex, index, this);
 
-                    (string tileName, DungeonTileType tileType, Vector3 tileRotation) = generator.GetTile(flatIndex, index);
-
-                    layout[x, y, z] = DungeonTile.MakeTile(tileType, tilePosition, tileRotation, gameObject);
-                    layout[x, y, z].name = name + "-" + tileName;
-                    foreach (Vector3 dir in DungeonTile.directions)
+                    foreach (Vector3Int dir in Utilities.cardinalDirections)
                     {
-                        Vector3Int pos = Vector3Int.FloorToInt(dir) + index;
+                        Vector3Int pos = dir + index;
 
                         try
                         {
@@ -112,7 +99,7 @@ public class Dungeon : MonoBehaviour
         }
     }
 
-    private Vector3 PositionOf(Vector3Int index)
+    public Vector3 PositionOf(Vector3Int index)
     {
         return 10 * index;
     }
