@@ -13,9 +13,9 @@ public enum FinishState
 
 public static class GameInfo
 {
-    // "Constants"
-    public static string MAIN_MENU = "Main Menu";
-    public static string DEMO_LEVEL = "Demo Level";
+    // Constants
+    public static readonly string MAIN_MENU = "Main Menu";
+    public static readonly string DEMO_LEVEL = "Demo Level";
 
     // Settings
     public static float MouseSensitivity { get; set; } = 1;

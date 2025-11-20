@@ -52,6 +52,7 @@ public class DungeonTile : MonoBehaviour
 
         DungeonTile tile = tileObject.AddComponent<DungeonTile>();
         tile.Type = tileType;
+        tileObject.SetActive(false);
 
         return tile;
     }
@@ -101,5 +102,12 @@ public class DungeonTile : MonoBehaviour
         }
 
         Assert.IsTrue(Utilities.cardinalDirections.Contains(direction));
-    } 
+    }
+
+    public void SetActive(bool active)
+    {
+        if (Type == DungeonTileType.NONE) return;
+        
+        gameObject.SetActive(active);
+    }
 }
