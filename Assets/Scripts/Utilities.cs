@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using Random = UnityEngine.Random;
-
-public enum BracketType
-{
-    NONE, SQUARE, PARENTHESES, CURLY, ANGLE
-}
 
 public static class Rotation
 {
@@ -77,19 +73,16 @@ public static class Extensions
         }
         return false;
     }
+
+    private static readonly Regex removeWhitespace = new(@"\s");
+    public static string RemoveWhitespace(this string s)
+    {
+        return removeWhitespace.Replace(s, "");
+    }
 }
 
 class Utilities
 {
-    private static Dictionary<BracketType, string> bracketMap = new()
-    {
-        { BracketType.NONE, "" },
-        { BracketType.SQUARE, "[]" },
-        { BracketType.PARENTHESES, "()" },
-        { BracketType.CURLY, "{}" },
-        { BracketType.ANGLE, "<>" },
-    };
-
     public static int[] ArgShuffle<T>(T[] array)
     {
         int n = array.Length;
@@ -105,7 +98,9 @@ class Utilities
 
             indices[k] = i+1;
         }
-        indices[zeroIndex] = 0;
+        if (n > 0) {
+            indices[zeroIndex] = 0;
+        }
 
         return indices;
     }
@@ -132,6 +127,16 @@ class Utilities
         Vector3Int.left
     };
 
+    public static readonly Vector3Int[] cardinalAxes = new Vector3Int[]
+    {
+        Vector3Int.right, Vector3Int.up, Vector3Int.forward
+    };
+
+    public static readonly Vector3Int[] planarAxes = new Vector3Int[]
+    {
+        Vector3Int.right, Vector3Int.forward
+    };
+
     public static IEnumerable<Vector3Int> RandomDirections(bool planar)
     {
         Vector3Int[] dirs = planar ? planarDirections : cardinalDirections;
@@ -144,46 +149,30 @@ class Utilities
         yield break;
     }
 
-    public static string Array3DToString<T>(T[,,] array, char delimeter = ',', BracketType bracketType = BracketType.SQUARE)
+    public static IEnumerable<(int, int, int)> Indices3D(Vector3Int dims)
     {
-        string brackets = bracketMap[bracketType];
-        string ret = string.Format(
-            "Array of dimension ({0}, {1}, {2}): {3}",
-            array.GetLength(0), array.GetLength(1), array.GetLength(2), brackets[0]
-        );
-
-        for (int i = 0; i < array.GetLength(0); i++)
+        for (int x = 0; x < dims.x; x++)
         {
-            if (i > 0) ret += delimeter;
-            string layer = brackets[..1];
-            for (int j = 0; j < array.GetLength(1); j++)
+            for (int y = 0; y < dims.y; y++)
             {
-                if (j > 0) layer += delimeter;
-                string column = brackets[..1];
-                for (int k = 0; k < array.GetLength(2); k++)
+                for (int z = 0; z < dims.z; z++)
                 {
-                    if (k > 0) column += delimeter;
-                    column += array[i, j, k].ToString();
+                    yield return (x, y, z);
                 }
-                layer += column + brackets[1];
             }
-            ret += layer + brackets[1];
         }
-
-        return ret + brackets[1];
+        yield break;
     }
-    public static string Join2D(char[,] array, string delimeter = "")
+
+    public static IEnumerable<(int, int)> Indices2D(Vector3Int dims)
     {
-        string ret = "";
-        for (int i = 0; i < array.GetLength(0); i++)
+        for (int x = 0; x < dims.x; x++)
         {
-            if (i > 0) ret += '\n';
-            for (int j = array.GetLength(1)-1; j >= 0; j--)
+            for (int z = 0; z < dims.z; z++)
             {
-                if (j > 0) ret += delimeter;
-                ret += array[i, j];
+                yield return (x, z);
             }
         }
-        return ret;
+        yield break;
     }
 }

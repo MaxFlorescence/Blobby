@@ -10,6 +10,7 @@ public class Dungeon : MonoBehaviour
     public Vector3Int randomDimMax = new(20, 20, 20);
 
     private Vector3Int dim;
+    private Vector3Int entrance;
     private DungeonTile[,,] layout;
     private const string LAYOUT_PATH = "DungeonLayouts/";
 
@@ -36,7 +37,7 @@ public class Dungeon : MonoBehaviour
         dim.x = Random.Range(randomDimMin.x, randomDimMax.x + 1);
         dim.y = Random.Range(randomDimMin.y, randomDimMax.y + 1);
         dim.z = Random.Range(randomDimMin.z, randomDimMax.z + 1);
-        Vector3Int entrance = new(Random.Range(0, dim.x), dim.y-1, Random.Range(0, dim.z));
+        entrance = new(Random.Range(0, dim.x), dim.y-1, Random.Range(0, dim.z));
 
         DungeonLayoutGenerator tree = new(dim, entrance);
         PopulateLayout(tree);
@@ -53,6 +54,7 @@ public class Dungeon : MonoBehaviour
     {
         string[] layoutFromFile = layoutFile.text.Split("\n");
         DungeonLayoutGenerator loaded = new(layoutFromFile);
+        entrance = loaded.root;
         dim = loaded.dims;
 
         PopulateLayout(loaded);
@@ -63,44 +65,38 @@ public class Dungeon : MonoBehaviour
         layout = new DungeonTile[dim.x, dim.y, dim.z];
 
         int flatIndex = 0;
-        for (int x = 0; x < dim.x; x++)
+        foreach ((int x, int y, int z) in Utilities.Indices3D(dim))
         {
-            for (int y = 0; y < dim.y; y++)
+            Vector3Int index = new(x, y, z);
+
+            if (generator.IsNone(flatIndex, index))
             {
-                for (int z = 0; z < dim.z; z++)
+                continue;
+            }
+
+            layout[x, y, z] = generator.GetTile(flatIndex, index, this);
+
+            foreach (Vector3Int dir in Utilities.cardinalDirections)
+            {
+                Vector3Int pos = dir + index;
+
+                try
                 {
-                    Vector3Int index = new(x, y, z);
-
-                    if (generator.IsNone(flatIndex, index))
-                    {
-                        continue;
-                    }
-
-                    layout[x, y, z] = generator.GetTile(flatIndex, index, this);
-
-                    foreach (Vector3Int dir in Utilities.cardinalDirections)
-                    {
-                        Vector3Int pos = dir + index;
-
-                        try
-                        {
-                            layout[x, y, z].AddNeighbor(layout[pos.x, pos.y, pos.z], dir);
-                        }
-                        catch { /* do nothing */ }
-                    }
-
-                    flatIndex++;
-                    if (flatIndex >= generator.Length)
-                    {
-                        return;
-                    }
+                    layout[x, y, z].AddNeighbor(layout[pos.x, pos.y, pos.z], dir);
                 }
+                catch { /* do nothing */ }
+            }
+
+            flatIndex++;
+            if (flatIndex >= generator.Length)
+            {
+                return;
             }
         }
     }
 
     public Vector3 PositionOf(Vector3Int index)
     {
-        return 10 * index;
+        return new Vector3Int(10, 20, 10) * (index - entrance);
     }
 }

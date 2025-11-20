@@ -1,20 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 class DungeonLayoutGenerator
 {
     public readonly int Length;
-    private static readonly Regex removeWhitespace = new(@"\s");
 
     public readonly Vector3Int dims;
-    private readonly Vector3Int root;
+    public readonly Vector3Int root;
     private readonly string[] layoutFileLines;
     private readonly bool fromFile;
-    private readonly float reconnectChance = 0.1f;
-    LatticeGraph lattice;
+    private readonly LatticeGraph lattice;
 
     public DungeonLayoutGenerator(Vector3Int dims, Vector3Int root)
     {
@@ -22,17 +17,20 @@ class DungeonLayoutGenerator
         this.root = root;
         Length = dims.x * dims.y * dims.z;
         fromFile = false;
-        lattice = new(dims);
-
-        GenerateRandomLayout();
+        lattice = new(dims, root);
     }
 
     public DungeonLayoutGenerator(string[] layoutFileLines)
     {
-        string[] strDims = PrepareString(layoutFileLines[0]);
-        dims.x = int.Parse(strDims[0]);
-        dims.y = int.Parse(strDims[1]);
-        dims.z = int.Parse(strDims[2]);
+        string[] preppedStr = PrepareString(layoutFileLines[0]);
+        dims.x = int.Parse(preppedStr[0]);
+        dims.y = int.Parse(preppedStr[1]);
+        dims.z = int.Parse(preppedStr[2]);
+
+        preppedStr = PrepareString(layoutFileLines[1]);
+        root.x = int.Parse(preppedStr[0]);
+        root.y = int.Parse(preppedStr[1]);
+        root.z = int.Parse(preppedStr[2]);
 
         this.layoutFileLines = layoutFileLines;
         Length = layoutFileLines.Length;
@@ -47,7 +45,8 @@ class DungeonLayoutGenerator
 
         if (fromFile)
         {
-            (tileName, tileType, tileRotation) = GetTileFromLines(index + 1);
+            // +2 because first line is dims, second line is root
+            (tileName, tileType, tileRotation) = GetTileFromLines(index + 2);
         }
         else
         {
@@ -56,7 +55,7 @@ class DungeonLayoutGenerator
         Vector3 tilePosition = parent.PositionOf(position);
         
         DungeonTile tile = DungeonTile.MakeTile(tileType, tilePosition, tileRotation, parent.gameObject);
-        tile.name = parent.name + "-" + tileName + "-" + string.Join("_", position);
+        tile.SetName(parent.name + "-" + tileName + "-" + string.Join("_", position));
 
         return tile;
     }
@@ -72,18 +71,18 @@ class DungeonLayoutGenerator
     private (string, DungeonTileType, Quaternion) GetTileInternal(Vector3Int position)
     {
         (DungeonTileType tileType, Quaternion tileRotation) = lattice[position].TileInfo();
-        string tileName;
 
-        if (root == position)
-        {
-            tileName = "entrance";
-            tileType = DungeonTileType.ENTRANCE;
-        } else
-        {
-            tileName = tileType.GetName();
-        }
+        // string tileName;
+        // if (root == position)
+        // {
+        //     tileName = "entrance";
+        //     tileType = DungeonTileType.ENTRANCE;
+        // } else
+        // {
+        //     tileName = tileType.GetName();
+        // }
 
-        return (tileName, tileType, tileRotation);
+        return (tileType.GetName(), tileType, tileRotation);
     }
 
     public bool IsNone(int flatIndex, Vector3Int index)
@@ -99,42 +98,9 @@ class DungeonLayoutGenerator
         }
     }
 
-    private void GenerateRandomLayout()
-    {
-        HashSet<Vector3Int> heads = new();
-        foreach (Vector3Int dir in Utilities.RandomDirections(true))
-        {
-            try
-            {
-                lattice.Connect(root, dir);
-                heads.Add(root + dir);
-                break;
-            } catch { /* continue */ }
-        }
-
-        HashSet<Vector3Int> newHeads;
-        while (heads.Count > 0)
-        {
-            newHeads = new();
-            foreach (Vector3Int head in heads)
-            {
-                lattice.ConnectRandom(head,
-                    (_, remaining, _) => { return 1f / remaining; },
-                reconnectChance, newHeads);
-            }
-            heads = newHeads;
-
-            if (heads.Count() == 0 && lattice.UnsetWalls > 0)
-            {
-                heads.Add(lattice.GetBridgePoint());
-            }
-        }
-    }
-
     private string[] PrepareString(string s, char delimiter = ',', char comment = '#')
     {
-        s = removeWhitespace.Replace(s, "");
-        s = s.Split(comment)[0].ToLower();
+        s = s.RemoveWhitespace().Split(comment)[0].ToLower();
 
         return s.Split(delimiter);
     }

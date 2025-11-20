@@ -1,8 +1,9 @@
 4, 1, 4 # dimensions; x (left/right), y (up/down), z (forward/back)
+0, 0, 3 # root
 dead_endF # row 1
 cornerB
 cornerR
-dead_endB
+stairs_downB
 dead_endF # row 2
 junctionB
 junctionF

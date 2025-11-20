@@ -38,43 +38,66 @@ public static class TileExtensions
 
 public class DungeonTile : MonoBehaviour
 {
-
+    public static DungeonTile NoneTile = new();
     public static DungeonTile MakeTile(DungeonTileType tileType, Vector3 position, Quaternion rotation, GameObject dungeon)
     {
-        GameObject tile = Instantiate(tileType.GetPrefab());
-        tile.transform.SetPositionAndRotation(position, rotation);
-        tile.transform.parent = dungeon.transform;
-        return tile.AddComponent<DungeonTile>();
+        if (tileType == DungeonTileType.NONE)
+        {
+            return NoneTile;
+        }
+
+        GameObject tileObject = Instantiate(tileType.GetPrefab());
+        tileObject.transform.SetPositionAndRotation(position, rotation);
+        tileObject.transform.parent = dungeon.transform;
+
+        DungeonTile tile = tileObject.AddComponent<DungeonTile>();
+        tile.Type = tileType;
+
+        return tile;
     }
     
     public DungeonTile forward, back, right, left, up, down;
+    public DungeonTileType Type { get; private set; }
+
+    private DungeonTile()
+    {
+        Type = DungeonTileType.NONE;
+    }
+
+    public void SetName(string name)
+    {
+        if (Type == DungeonTileType.NONE) return;
+
+        this.name = name;
+    }
 
     public void AddNeighbor(DungeonTile neighbor, Vector3Int direction)
-    {        
+    {
+        GoAddNeighbor(neighbor, direction);
+        neighbor.GoAddNeighbor(this, -direction);
+    }
+
+    private void GoAddNeighbor(DungeonTile neighbor, Vector3Int direction) {
+        if (Type == DungeonTileType.NONE) return;
+
         if (direction == Vector3Int.forward)
         {
             forward = neighbor;
-            neighbor.back = this;
         } else if (direction == Vector3Int.back)
         {
             back = neighbor;
-            neighbor.forward = this;
         } else if (direction == Vector3Int.right)
         {
             right = neighbor;
-            neighbor.left = this;
         } else if (direction == Vector3Int.left)
         {
             left = neighbor;
-            neighbor.right = this;
         } else if (direction == Vector3Int.up)
         {
             up = neighbor;
-            neighbor.down = this;
         } else if (direction == Vector3Int.down)
         {
             down = neighbor;
-            neighbor.up = this;
         }
 
         Assert.IsTrue(Utilities.cardinalDirections.Contains(direction));
