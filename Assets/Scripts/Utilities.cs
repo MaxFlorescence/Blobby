@@ -112,11 +112,11 @@ class Utilities
 
     public static readonly Vector3Int[] cardinalDirections = new Vector3Int[]
     {
-        Vector3Int.up,
         Vector3Int.forward,
         Vector3Int.right,
         Vector3Int.back,
         Vector3Int.left,
+        Vector3Int.up,
         Vector3Int.down
     };
     public static readonly Vector3Int[] planarDirections = new Vector3Int[]

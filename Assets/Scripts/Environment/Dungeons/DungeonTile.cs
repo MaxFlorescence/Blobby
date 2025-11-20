@@ -23,7 +23,7 @@ public static class TileExtensions
         {DungeonTileType.STAIRS_DOWN, LoadCorridorPrefab("DungeonStairsDown")}, // |v| (stairs go back)
         {DungeonTileType.ENTRANCE,    LoadCorridorPrefab("DungeonDeadEnd")} // TODO
     };
-    private static GameObject LoadCorridorPrefab(string name)
+    public static GameObject LoadCorridorPrefab(string name)
     {
         return Resources.Load("DungeonPrefabs/Corridors/" + name, typeof(GameObject)) as GameObject;
     }
@@ -57,7 +57,7 @@ public class DungeonTile : MonoBehaviour
         return tile;
     }
     
-    public DungeonTile forward, back, right, left, up, down;
+    private DungeonTile[] neighbors = new DungeonTile[6] { null, null, null, null, null, null };
     public DungeonTileType Type { get; private set; }
 
     private DungeonTile()
@@ -83,22 +83,22 @@ public class DungeonTile : MonoBehaviour
 
         if (direction == Vector3Int.forward)
         {
-            forward = neighbor;
-        } else if (direction == Vector3Int.back)
-        {
-            back = neighbor;
+            neighbors[0] = neighbor;
         } else if (direction == Vector3Int.right)
         {
-            right = neighbor;
+            neighbors[1] = neighbor;
+        } else if (direction == Vector3Int.back)
+        {
+            neighbors[2] = neighbor;
         } else if (direction == Vector3Int.left)
         {
-            left = neighbor;
+            neighbors[3] = neighbor;
         } else if (direction == Vector3Int.up)
         {
-            up = neighbor;
+            neighbors[4] = neighbor;
         } else if (direction == Vector3Int.down)
         {
-            down = neighbor;
+            neighbors[5] = neighbor;
         }
 
         Assert.IsTrue(Utilities.cardinalDirections.Contains(direction));
