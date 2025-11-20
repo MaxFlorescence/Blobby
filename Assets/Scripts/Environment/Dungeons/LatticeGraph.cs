@@ -146,12 +146,7 @@ class LatticeGraph
     {
         this.dims = dims;
         walls = new Walls[dims.x, dims.y, dims.z];
-        try {
-            GenerateRandomLayout(root);
-        } finally
-        {
-            PrintLayout();
-        }
+        GenerateRandomLayout(root);
     }
 
     private void ResetUnsetWalls()
