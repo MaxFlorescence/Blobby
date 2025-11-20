@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,10 +14,21 @@ public class Dungeon : MonoBehaviour
     private Vector3Int entrance;
     private DungeonTile[,,] layout;
     private Vector3Int[,] stairs;
+    private static GameObject blockerPrefab;
+    private GameObject upperBlocker;
+    private GameObject lowerBlocker;
     private const string LAYOUT_PATH = "DungeonLayouts/";
 
     void Start()
     {
+        blockerPrefab = TileExtensions.LoadCorridorPrefab("Blocker");
+        
+        upperBlocker = Instantiate(blockerPrefab);
+        upperBlocker.transform.parent = transform;
+
+        lowerBlocker = Instantiate(blockerPrefab);
+        lowerBlocker.transform.parent = transform;
+
         // Generate layout at start if a method is provided
         if (randomSeed != 0)
         {
@@ -127,31 +137,54 @@ public class Dungeon : MonoBehaviour
         return dims.y - 1 - Mathf.CeilToInt((transform.position.y - coordinateY) / 20);
     }
 
-    private IEnumerable<(int, int, int)> IndicesNearStairs(int level)
+    private void SetActiveNearStairs(int level, bool active)
     {
-        Vector3Int centerPos;
+        Vector3Int centerPos, stairsDir;
 
+        // Upper level
         if (level < dims.y-1)
         {
-            centerPos = 2*stairs[level+1, 1] - stairs[level, 0] + Vector3Int.down;
+            stairsDir = stairs[level+1, 1] - stairs[level, 0] + Vector3Int.down;
+            Vector3Int flip = 180*stairsDir;
+            centerPos = stairs[level+1, 1] + stairsDir;
 
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
-                yield return (centerPos.x + x-1, level+1 , centerPos.z + z-1);
+                try {
+                    layout[centerPos.x + x-1, level+1 , centerPos.z + z-1].SetActive(active);
+                } catch { /* continue */ }
             }
+            upperBlocker.SetActive(true);
+            upperBlocker.transform.SetPositionAndRotation(
+                PositionOf(centerPos) + 10*Vector3Int.up,
+                Quaternion.Euler(flip) * Rotation.Parse(stairsDir)
+            );
+        } else
+        {
+            upperBlocker.SetActive(false);
         }
 
+        // Lower level
         if (level > 0)
         {
-            centerPos = 2*stairs[level-1, 0] - stairs[level, 1] + Vector3Int.up;
+            stairsDir = stairs[level-1, 0] - stairs[level, 1] + Vector3Int.up;
+            centerPos = stairs[level-1, 0] + stairsDir;
 
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
-                yield return (centerPos.x + x-1, level-1, centerPos.z + z-1);
+                try {
+                    layout[centerPos.x + x-1, level-1, centerPos.z + z-1].SetActive(active);
+                } catch { /* continue */ }
             }
+            lowerBlocker.SetActive(true);
+            lowerBlocker.transform.SetPositionAndRotation(
+                PositionOf(centerPos),
+                Rotation.Parse(stairsDir)
+            );
+        } else
+        {
+            lowerBlocker.SetActive(false);
         }
-
-        yield break;
     }
 
     public void UpdateActiveLevel(int level)
@@ -163,12 +196,7 @@ public class Dungeon : MonoBehaviour
             {
                 layout[x, activeLevel, z].SetActive(false);
             }
-            foreach ((int x, int y, int z) in IndicesNearStairs(activeLevel))
-            {
-                try {
-                    layout[x, y, z].SetActive(false);
-                } catch { /* continue */ }
-            }
+            SetActiveNearStairs(activeLevel, false);
         }
 
         activeLevel = level;
@@ -176,11 +204,6 @@ public class Dungeon : MonoBehaviour
         {
             layout[x, activeLevel, z].SetActive(true);
         }
-        foreach ((int x, int y, int z) in IndicesNearStairs(activeLevel))
-        {
-            try {
-                layout[x, y, z].SetActive(true);
-            } catch { /* continue */ }
-        }
+        SetActiveNearStairs(activeLevel, true);
     }
 }
