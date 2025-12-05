@@ -4,6 +4,8 @@ public class MainCameraController : PriorityCamera
 {
     private Vector3 offset;
     private Transform trackedTransform = null;
+    private Vector3 lastPosition;
+    private const float EPSILON = 1E-2f;
     public float trackingDistance = 10f;
 
     void Start()
@@ -47,6 +49,7 @@ public class MainCameraController : PriorityCamera
     {
         trackedTransform = obj.transform;
         offset = distance * Vector3.left;
+        lastPosition = CollideCamera() + trackedTransform.position;
 
         MoveCamera();
     }
@@ -58,6 +61,13 @@ public class MainCameraController : PriorityCamera
         // Offset camera from the tracked object's position, then look at it.
 
         transform.position = CollideCamera() + trackedTransform.position;
+        if ((transform.position - lastPosition).magnitude < EPSILON)
+        {
+            // reduce shaking if the camera is not moving much
+            transform.position = (transform.position + lastPosition) /  2;
+        }
+        lastPosition = transform.position;
+
         transform.LookAt(trackedTransform);
     }
 

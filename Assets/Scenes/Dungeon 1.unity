@@ -971,7 +971,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1287475397}
   - component: {fileID: 1287475398}
-  - component: {fileID: 1287475399}
   m_Layer: 0
   m_Name: TestDungeonFile
   m_TagString: Untagged
@@ -1011,18 +1010,6 @@ MonoBehaviour:
   randomSeed: 24
   randomDimMin: {x: 8, y: 8, z: 8}
   randomDimMax: {x: 8, y: 8, z: 8}
---- !u!114 &1287475399
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1287475395}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5dc292e07f1f5e4894fe2de7cf3b56f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1298357497 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1387827871966359042, guid: 51d5864b65910e04bbbd5d370377e8f4, type: 3}
