@@ -4,6 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(MeshRenderer))]
+[RequireComponent(typeof(MeshFilter))]
 /// <summary>
 ///    This class defines the behavior of each individual atom in the blob.
 /// </summary>
@@ -45,7 +46,7 @@ public class AtomController : MonoBehaviour
 
     // Particles
     private ParticleSystem drips;
-    private const string DROPLET_MATERIAL = "Materials/Droplet";
+    private const string DROPLET_MATERIAL = "Materials/Blob Materials/JellyTexture";
     private Material dropletMaterial;
     private ParticleSystem.EmissionModule dripsEmission;
     /// <summary>
@@ -94,13 +95,15 @@ public class AtomController : MonoBehaviour
         var sizeOverLifetime = drips.sizeOverLifetime;
         sizeOverLifetime.enabled = true;
         AnimationCurve curve = new AnimationCurve();
-        curve.AddKey(0f, 1f);
-        curve.AddKey(0.5f, 1f);
+        curve.AddKey(0f, .5f);
+        curve.AddKey(0.5f, .5f);
         curve.AddKey(1f, 0f);
         sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1, curve);
 
         if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
         {
+            renderer.renderMode = ParticleSystemRenderMode.Mesh;
+            renderer.mesh = GetComponent<MeshFilter>().mesh;
             renderer.material = dropletMaterial;
         }
 

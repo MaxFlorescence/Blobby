@@ -50,7 +50,7 @@ public class CreateBlob : MonoBehaviour
     ///     Custom epsilon for floating point comparisons. Used to determine if two atoms are adjacent.
     /// </summary>
     private const float EPSILON = 1E-3f;
-    private const string JELLY_PHYSIC_MATERIAL = "Materials/JellyPhysic";
+    private const string JELLY_PHYSIC_MATERIAL = "Materials/Blob Materials/JellyPhysic";
     private const string IGNORE_CAMERA_LAYER = "Ignore Camera";
     private GameObject[] blobAtoms;
     private Rigidbody[] atomRigidbodies;
