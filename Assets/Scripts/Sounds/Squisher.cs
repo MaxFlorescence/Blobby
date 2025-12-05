@@ -12,7 +12,7 @@ public class Squisher : MonoBehaviour
             clips[i] = Resources.Load("Sounds/squish_" + i.ToString(), typeof(AudioClip)) as AudioClip;
         }
 
-        audioSource.volume = 0.2f;
+        audioSource.volume = 0.05f;
     }
 
     public void squish() {
