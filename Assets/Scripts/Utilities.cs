@@ -110,6 +110,19 @@ class Utilities
         return array[Random.Range(0, array.Length)];
     }
 
+    public static T Clamp<T>(T n, T min, T max) where T : IComparable
+    {
+        if (n.CompareTo(min) < 0)
+        {
+            return min;
+        } else if (n.CompareTo(max) > 0)
+        {
+            return max;
+        }
+
+        return n;
+    }
+
     public static readonly Vector3Int[] cardinalDirections = new Vector3Int[]
     {
         Vector3Int.forward,

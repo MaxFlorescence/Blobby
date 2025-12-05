@@ -143,7 +143,7 @@ public class Dungeon : MonoBehaviour
 
         // Upper level
         if (level < dims.y-1)
-        {
+        { // TODO: block entrance
             stairsDir = stairs[level+1, 1] - stairs[level, 0] + Vector3Int.down;
             Vector3Int flip = 180*stairsDir;
             centerPos = stairs[level+1, 1] + stairsDir;
@@ -151,7 +151,7 @@ public class Dungeon : MonoBehaviour
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
                 try {
-                    layout[centerPos.x + x-1, level+1 , centerPos.z + z-1].SetActive(active);
+                    layout[centerPos.x + x-1, level+1 , centerPos.z + z-1].SetVisible(active);
                 } catch { /* continue */ }
             }
             upperBlocker.SetActive(true);
@@ -173,7 +173,7 @@ public class Dungeon : MonoBehaviour
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
                 try {
-                    layout[centerPos.x + x-1, level-1, centerPos.z + z-1].SetActive(active);
+                    layout[centerPos.x + x-1, level-1, centerPos.z + z-1].SetVisible(active);
                 } catch { /* continue */ }
             }
             lowerBlocker.SetActive(true);
@@ -190,11 +190,12 @@ public class Dungeon : MonoBehaviour
     public void UpdateActiveLevel(int level)
     {
         if (activeLevel == level) return;
+        level = Utilities.Clamp(level, 0, dims.y - 1);
 
         if (activeLevel >= 0) {
             foreach ((int x, int z) in Utilities.Indices2D(dims))
             {
-                layout[x, activeLevel, z].SetActive(false);
+                layout[x, activeLevel, z].SetVisible(false);
             }
             SetActiveNearStairs(activeLevel, false);
         }
@@ -202,7 +203,7 @@ public class Dungeon : MonoBehaviour
         activeLevel = level;
         foreach ((int x, int z) in Utilities.Indices2D(dims))
         {
-            layout[x, activeLevel, z].SetActive(true);
+            layout[x, activeLevel, z].SetVisible(true);
         }
         SetActiveNearStairs(activeLevel, true);
     }

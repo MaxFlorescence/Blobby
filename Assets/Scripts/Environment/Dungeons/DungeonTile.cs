@@ -46,13 +46,10 @@ public class DungeonTile : MonoBehaviour
             return NoneTile;
         }
 
-        GameObject tileObject = Instantiate(tileType.GetPrefab());
-        tileObject.transform.SetPositionAndRotation(position, rotation);
-        tileObject.transform.parent = dungeon.transform;
-
+        GameObject tileObject = Instantiate(tileType.GetPrefab(), position, rotation, dungeon.transform);
         DungeonTile tile = tileObject.AddComponent<DungeonTile>();
         tile.Type = tileType;
-        tileObject.SetActive(false);
+        tile.SetVisible(false);
 
         return tile;
     }
@@ -104,10 +101,15 @@ public class DungeonTile : MonoBehaviour
         Assert.IsTrue(Utilities.cardinalDirections.Contains(direction));
     }
 
-    public void SetActive(bool active)
+    public void SetVisible(bool visible)
     {
         if (Type == DungeonTileType.NONE) return;
-        
-        gameObject.SetActive(active);
+        int newLayer = visible ? GameInfo.DEFAULT_LAYER : GameInfo.INVISIBLE_LAYER;
+
+        gameObject.layer = newLayer;
+        foreach (Transform child in GetComponentsInChildren<Transform>())
+        {
+            child.gameObject.layer = newLayer;
+        }
     }
 }
