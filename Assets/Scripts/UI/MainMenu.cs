@@ -3,7 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMenu : Menu
-{    
+{
+    public string playScene = GameInfo.DEMO_LEVEL;
+    public bool startCutsceneOnPlay = true;
+
     public Slider mouseSlider;
     public GameObject mouseInfo;
     private TextMeshProUGUI mouseTMP;
@@ -25,10 +28,10 @@ public class MainMenu : Menu
     }
 
     public void PlayButton() {
-        GameInfo.StartCutscene = true;
+        GameInfo.StartCutscene = startCutsceneOnPlay;
         GameInfo.GameStatus = GameState.PLAYING;
         GameInfo.FinishStatus = FinishState.UNFINISHED;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.DEMO_LEVEL);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(playScene);
     }
 
     public void QuitButton() {

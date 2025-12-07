@@ -38,12 +38,11 @@ public static class TileExtensions
 
 public class DungeonTile : MonoBehaviour
 {
-    public static DungeonTile NoneTile = new();
     public static DungeonTile MakeTile(DungeonTileType tileType, Vector3 position, Quaternion rotation, GameObject dungeon)
     {
         if (tileType == DungeonTileType.NONE)
         {
-            return NoneTile;
+            return dungeon.GetComponent<Dungeon>().NoneTile;
         }
 
         GameObject tileObject = Instantiate(tileType.GetPrefab(), position, rotation, dungeon.transform);
@@ -55,12 +54,7 @@ public class DungeonTile : MonoBehaviour
     }
     
     private DungeonTile[] neighbors = new DungeonTile[6] { null, null, null, null, null, null };
-    public DungeonTileType Type { get; private set; }
-
-    private DungeonTile()
-    {
-        Type = DungeonTileType.NONE;
-    }
+    public DungeonTileType Type { get; private set; } = DungeonTileType.NONE;
 
     public void SetName(string name)
     {
@@ -104,7 +98,7 @@ public class DungeonTile : MonoBehaviour
     public void SetVisible(bool visible)
     {
         if (Type == DungeonTileType.NONE) return;
-        int newLayer = visible ? GameInfo.DEFAULT_LAYER : GameInfo.INVISIBLE_LAYER;
+        int newLayer = visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER;
 
         gameObject.layer = newLayer;
         foreach (Transform child in GetComponentsInChildren<Transform>())

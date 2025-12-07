@@ -81,8 +81,43 @@ public static class Extensions
     }
 }
 
-class Utilities
+class Utilities : MonoBehaviour
 {
+    public static int DEFAULT_LAYER { get; private set; }
+    public static int INVISIBLE_LAYER { get; private set; }
+    public static readonly Vector3Int[] cardinalDirections = new Vector3Int[]
+    {
+        Vector3Int.forward,
+        Vector3Int.right,
+        Vector3Int.back,
+        Vector3Int.left,
+        Vector3Int.up,
+        Vector3Int.down
+    };
+    public static readonly Vector3Int[] planarDirections = new Vector3Int[]
+    {
+        Vector3Int.forward,
+        Vector3Int.right,
+        Vector3Int.back,
+        Vector3Int.left
+    };
+
+    public static readonly Vector3Int[] cardinalAxes = new Vector3Int[]
+    {
+        Vector3Int.right, Vector3Int.up, Vector3Int.forward
+    };
+
+    public static readonly Vector3Int[] planarAxes = new Vector3Int[]
+    {
+        Vector3Int.right, Vector3Int.forward
+    };
+
+    void Awake()
+    {
+        DEFAULT_LAYER = LayerMask.NameToLayer("Default");
+        INVISIBLE_LAYER = LayerMask.NameToLayer("Invisible");
+    }
+    
     public static int[] ArgShuffle<T>(T[] array)
     {
         int n = array.Length;
@@ -122,33 +157,6 @@ class Utilities
 
         return n;
     }
-
-    public static readonly Vector3Int[] cardinalDirections = new Vector3Int[]
-    {
-        Vector3Int.forward,
-        Vector3Int.right,
-        Vector3Int.back,
-        Vector3Int.left,
-        Vector3Int.up,
-        Vector3Int.down
-    };
-    public static readonly Vector3Int[] planarDirections = new Vector3Int[]
-    {
-        Vector3Int.forward,
-        Vector3Int.right,
-        Vector3Int.back,
-        Vector3Int.left
-    };
-
-    public static readonly Vector3Int[] cardinalAxes = new Vector3Int[]
-    {
-        Vector3Int.right, Vector3Int.up, Vector3Int.forward
-    };
-
-    public static readonly Vector3Int[] planarAxes = new Vector3Int[]
-    {
-        Vector3Int.right, Vector3Int.forward
-    };
 
     public static IEnumerable<Vector3Int> RandomDirections(bool planar)
     {

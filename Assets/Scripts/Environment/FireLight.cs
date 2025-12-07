@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(Light))]
 class FireLight : MonoBehaviour
 {
-    public Vector2 intervalRange = new(0f, 1f);
+    public Vector2 intervalRange = new(0.1f, 1f);
     public Vector2 intensityRange = new(0.5f, 1f);
     public float maxDisplacement = 0.25f;
 
@@ -12,8 +12,8 @@ class FireLight : MonoBehaviour
     private Light fireLight;
     float targetIntensity;
     float lastIntensity;
-    float interval;
-    float timer;
+    float interval = 1;
+    float timer = 1;
 
     Vector3 targetPosition;
     Vector3 lastPosition;

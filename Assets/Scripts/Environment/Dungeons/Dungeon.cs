@@ -19,9 +19,12 @@ public class Dungeon : MonoBehaviour
     private GameObject lowerBlocker;
     private const string LAYOUT_PATH = "DungeonLayouts/";
 
+    public DungeonTile NoneTile;
+
     void Start()
     {
         blockerPrefab = TileExtensions.LoadCorridorPrefab("Blocker");
+        NoneTile = gameObject.AddComponent<DungeonTile>();
         
         upperBlocker = Instantiate(blockerPrefab);
         upperBlocker.transform.parent = transform;
@@ -48,8 +51,10 @@ public class Dungeon : MonoBehaviour
 
     void Update()
     {
-        float blobPositionY = GameInfo.ControlledBlob.GetPosition().y;
-        UpdateActiveLevel(LayerOf(blobPositionY));
+        if (GameInfo.ControlledBlob != null) {
+            float blobPositionY = GameInfo.ControlledBlob.GetPosition().y;
+            UpdateActiveLevel(LayerOf(blobPositionY));
+        }
     }
 
     private void GenerateRandomLayout(int seed)

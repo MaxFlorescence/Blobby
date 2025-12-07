@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class PauseMenu : Menu
 {
+    public string playScene = GameInfo.DEMO_LEVEL;
     public Slider mouseSlider;
     public GameObject mouseInfo;
     private TextMeshProUGUI mouseTMP;
@@ -35,7 +36,7 @@ public class PauseMenu : Menu
     {
         HideMenu();
         GameInfo.StartCutscene = false;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.DEMO_LEVEL);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(playScene);
     }
 
     public void QuitButton()

@@ -18,8 +18,6 @@ public static class GameInfo
     // Constants
     public static readonly string MAIN_MENU = "Main Menu";
     public static readonly string DEMO_LEVEL = "Demo Level";
-    public static readonly int DEFAULT_LAYER = LayerMask.NameToLayer("Default");
-    public static readonly int INVISIBLE_LAYER = LayerMask.NameToLayer("Invisible");
 
     // Settings
     public static float MouseSensitivity { get; set; } = 1;
