@@ -79,6 +79,18 @@ public static class Extensions
     {
         return removeWhitespace.Replace(s, "");
     }
+
+    public static float Min(this Vector3 vector, bool nonzero = false)
+    {
+        float min = float.PositiveInfinity;
+
+        if (!nonzero || vector.x > 0) min = Mathf.Min(min, vector.x);
+        if (!nonzero || vector.y > 0) min = Mathf.Min(min, vector.y);
+        if (!nonzero || vector.z > 0) min = Mathf.Min(min, vector.z);
+        if (min == float.PositiveInfinity) min = 0;
+
+        return min;
+    }
 }
 
 class Utilities : MonoBehaviour

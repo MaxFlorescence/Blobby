@@ -21,9 +21,14 @@ public class Dungeon : MonoBehaviour
 
     public DungeonTile NoneTile;
 
+    void Awake()
+    {
+        GameInfo.CurrentDungeon = this;
+    }
+
     void Start()
     {
-        blockerPrefab = TileExtensions.LoadCorridorPrefab("Blocker");
+        blockerPrefab = TileTypeExtensions.LoadCorridorAssets("Blocker").Item1;
         NoneTile = gameObject.AddComponent<DungeonTile>();
         
         upperBlocker = Instantiate(blockerPrefab);
@@ -137,6 +142,35 @@ public class Dungeon : MonoBehaviour
         return new Vector3Int(10, 20, 10) * (index - entrance);
     }
 
+    public Vector3 TransformPosition(Vector3 dungeonPosition, bool relativeToCenter, bool normalize, bool correctForTiles)
+    {
+        if (correctForTiles)
+        {
+            dungeonPosition += 0.5f * Vector3.one;
+        }
+        if (relativeToCenter)
+        {
+            dungeonPosition -= dims/2;
+        }
+        if (normalize)
+        {
+            dungeonPosition.x /= dims.x;
+            dungeonPosition.y /= dims.y;
+            dungeonPosition.z /= dims.z;
+        }
+
+        return dungeonPosition;
+    }
+
+    public Vector3 CoordinatesOf(Vector3 worldPosition, bool dungeonCentered = false, bool normalized = false, bool tileCentered = false)
+    {
+        Vector3 relativePosition = worldPosition - PositionOf(Vector3Int.zero);
+        relativePosition /= 10;
+        relativePosition.y /= 2;
+
+        return relativePosition;
+    }
+
     private int LayerOf(float coordinateY)
     {
         return dims.y - 1 - Mathf.CeilToInt((transform.position.y - coordinateY) / 20);
@@ -156,7 +190,7 @@ public class Dungeon : MonoBehaviour
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
                 try {
-                    layout[centerPos.x + x-1, level+1 , centerPos.z + z-1].SetVisible(active);
+                    layout[centerPos.x + x-1, level+1 , centerPos.z + z-1].SetVisible(active, false);
                 } catch { /* continue */ }
             }
             upperBlocker.SetActive(true);
@@ -178,7 +212,7 @@ public class Dungeon : MonoBehaviour
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
                 try {
-                    layout[centerPos.x + x-1, level-1, centerPos.z + z-1].SetVisible(active);
+                    layout[centerPos.x + x-1, level-1, centerPos.z + z-1].SetVisible(active, false);
                 } catch { /* continue */ }
             }
             lowerBlocker.SetActive(true);

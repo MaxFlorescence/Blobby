@@ -31,6 +31,8 @@ public static class GameInfo
 
     // Global object references
     public static PriorityCamera ControlledCamera { get; set; } = null;
+    public static MiniMap ActiveMiniMap { get; set; } = null;
+    public static Dungeon CurrentDungeon { get; set; } = null;
     public static BlobController ControlledBlob { get; private set; } = null;
     public static void SetControlledBlob(BlobController blob)
     {

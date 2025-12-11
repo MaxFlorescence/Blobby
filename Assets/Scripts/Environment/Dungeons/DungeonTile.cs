@@ -10,25 +10,32 @@ public enum DungeonTileType
     ENTRANCE
 }
 
-public static class TileExtensions
+public static class TileTypeExtensions
 {
-    private static Dictionary<DungeonTileType, GameObject> map = new()
+    private static Dictionary<DungeonTileType, (GameObject, Sprite)> map = new()
     {
-        {DungeonTileType.DEAD_END,    LoadCorridorPrefab("DungeonDeadEnd")},    // |_| (no wall forward)
-        {DungeonTileType.CORNER,      LoadCorridorPrefab("DungeonCorner")},     // '_| (no wall left/forward)
-        {DungeonTileType.HALLWAY,     LoadCorridorPrefab("DungeonHallway")},    // | | (no wall back/foward)
-        {DungeonTileType.JUNCTION,    LoadCorridorPrefab("DungeonJunction")},   // '_' (wall back)
-        {DungeonTileType.CROSSING,    LoadCorridorPrefab("DungeonCrossing")},   // :: (no walls)
-        {DungeonTileType.STAIRS_UP,   LoadCorridorPrefab("DungeonStairsUp")},   // |^| (stairs go forward)
-        {DungeonTileType.STAIRS_DOWN, LoadCorridorPrefab("DungeonStairsDown")}, // |v| (stairs go back)
-        {DungeonTileType.ENTRANCE,    LoadCorridorPrefab("DungeonDeadEnd")} // TODO
+        {DungeonTileType.DEAD_END,    LoadCorridorAssets("DungeonDeadEnd")},    // |_| (no wall forward)
+        {DungeonTileType.CORNER,      LoadCorridorAssets("DungeonCorner")},     // '_| (no wall left/forward)
+        {DungeonTileType.HALLWAY,     LoadCorridorAssets("DungeonHallway")},    // | | (no wall back/foward)
+        {DungeonTileType.JUNCTION,    LoadCorridorAssets("DungeonJunction")},   // '_' (wall back)
+        {DungeonTileType.CROSSING,    LoadCorridorAssets("DungeonCrossing")},   // :: (no walls)
+        {DungeonTileType.STAIRS_UP,   LoadCorridorAssets("DungeonStairsUp")},   // |^| (stairs go forward)
+        {DungeonTileType.STAIRS_DOWN, LoadCorridorAssets("DungeonStairsDown")}, // |v| (stairs go back)
+        {DungeonTileType.ENTRANCE,    LoadCorridorAssets("DungeonDeadEnd")} // TODO
     };
-    public static GameObject LoadCorridorPrefab(string name)
+    public static (GameObject, Sprite) LoadCorridorAssets(string name)
     {
-        return Resources.Load("DungeonPrefabs/Corridors/" + name, typeof(GameObject)) as GameObject;
+        GameObject prefab = Resources.Load("DungeonPrefabs/Corridors/" + name, typeof(GameObject)) as GameObject;
+        Sprite sprite = Resources.Load("Images/Minimap Icons/" + name, typeof(Sprite)) as Sprite;
+
+        return (prefab, sprite);
     }
     public static GameObject GetPrefab(this DungeonTileType tile) {
-        return map[tile];
+        return map[tile].Item1;
+    }
+    public static Sprite GetMapSprite(this DungeonTileType tile)
+    {
+        return map[tile].Item2;
     }
     public static string GetName(this DungeonTileType tile)
     {
@@ -38,15 +45,26 @@ public static class TileExtensions
 
 public class DungeonTile : MonoBehaviour
 {
-    public static DungeonTile MakeTile(DungeonTileType tileType, Vector3 position, Quaternion rotation, GameObject dungeon)
+    public static DungeonTile MakeTile(string name, DungeonTileType tileType, Vector3Int position, Quaternion tileRotation, Dungeon dungeon)
     {
         if (tileType == DungeonTileType.NONE)
         {
             return dungeon.GetComponent<Dungeon>().NoneTile;
         }
 
-        GameObject tileObject = Instantiate(tileType.GetPrefab(), position, rotation, dungeon.transform);
+        Vector3 tilePosition = dungeon.PositionOf(position);
+
+        GameObject tileObject = Instantiate(tileType.GetPrefab(), tilePosition, tileRotation, dungeon.transform);
         DungeonTile tile = tileObject.AddComponent<DungeonTile>();
+
+        tile.mapIcon = GameInfo.ActiveMiniMap.AddIcon(
+            name + "-Minimap_Icon",
+            tileType.GetMapSprite(),
+            dungeon.TransformPosition(position, true, true, true),
+            -tileRotation.eulerAngles.y,
+            0.333f // why?
+        );
+
         tile.Type = tileType;
         tile.SetVisible(false);
 
@@ -55,6 +73,7 @@ public class DungeonTile : MonoBehaviour
     
     private DungeonTile[] neighbors = new DungeonTile[6] { null, null, null, null, null, null };
     public DungeonTileType Type { get; private set; } = DungeonTileType.NONE;
+    private GameObject mapIcon;
 
     public void SetName(string name)
     {
@@ -95,9 +114,11 @@ public class DungeonTile : MonoBehaviour
         Assert.IsTrue(Utilities.cardinalDirections.Contains(direction));
     }
 
-    public void SetVisible(bool visible)
+    public void SetVisible(bool visible, bool? visibleOnMap = null)
     {
         if (Type == DungeonTileType.NONE) return;
+        visibleOnMap ??= visible;
+        
         int newLayer = visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER;
 
         gameObject.layer = newLayer;
@@ -105,5 +126,7 @@ public class DungeonTile : MonoBehaviour
         {
             child.gameObject.layer = newLayer;
         }
+
+        mapIcon.SetActive((bool)visibleOnMap);
     }
 }

@@ -52,10 +52,11 @@ class DungeonLayoutGenerator
         {
             (tileName, tileType, tileRotation) = GetTileInternal(position);
         }
-        Vector3 tilePosition = parent.PositionOf(position);
         
-        DungeonTile tile = DungeonTile.MakeTile(tileType, tilePosition, tileRotation, parent.gameObject);
-        tile.SetName(parent.name + "-" + tileName + "-" + string.Join("_", position));
+        DungeonTile tile = DungeonTile.MakeTile(
+            parent.name + "-" + tileName + "-" + string.Join("_", position),
+            tileType, position, tileRotation, parent
+        );
 
         return tile;
     }
