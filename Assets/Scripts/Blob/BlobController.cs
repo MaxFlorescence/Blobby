@@ -66,6 +66,8 @@ public class BlobController : Controllable
     ///     The factor by which the blob can shrink from its original size.
     /// </summary>
     private float blobShrinkingFactor = 0.5f;
+    private bool ghostMode = false;
+    private float ghostSpeed = 0.5f;
 
     void Awake()
     {
@@ -187,15 +189,12 @@ public class BlobController : Controllable
     /// </summary>
     void FixedUpdate()
     {
+        if (ghostMode) ApplyGhostMovement();
+
         if (!movementInputEnabled || !controlled)
             return;
 
-        // Ensure forward/rightward movement occurs in the horizontal plane.
-        Vector3 forwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.forward, Vector3.up).normalized;
-        forwardForce *= Input.GetAxis("Vertical");
-
-        Vector3 rightwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.right, Vector3.up).normalized;
-        rightwardForce *= Input.GetAxis("Horizontal");
+        (Vector3 forwardForce, Vector3 rightwardForce) = GetInputAxisForces();
 
         // Constrain initial movementForce to the unit disk.
         Vector3 movementForce = forwardForce + rightwardForce;
@@ -211,6 +210,17 @@ public class BlobController : Controllable
         doJump = false;
 
         ApplyForces(movementForce, jumpForce, true);
+    }
+
+    private (Vector3, Vector3) GetInputAxisForces() {
+        // Ensure forward/rightward movement occurs in the horizontal plane.
+        Vector3 forwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.forward, Vector3.up).normalized;
+        forwardForce *= Input.GetAxis("Vertical");
+
+        Vector3 rightwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.right, Vector3.up).normalized;
+        rightwardForce *= Input.GetAxis("Horizontal");
+
+        return (forwardForce, rightwardForce);
     }
 
     /// <summary>
@@ -342,6 +352,11 @@ public class BlobController : Controllable
         if (Input.GetKeyDown(KeyCode.Q))
         {
             Release();
+        }
+
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            GhostMode(!ghostMode);
         }
 
         if (movementInputEnabled)
@@ -532,5 +547,55 @@ public class BlobController : Controllable
     public GameObject GetCenterAtom()
     {
         return centerAtom;
+    }
+
+    public void SetColliders(bool enabled)
+    {
+        foreach (GameObject atom in createBlob.GetAtoms())
+        {
+            atom.GetComponent<Collider>().enabled = enabled;
+        }
+    }
+
+    public void GhostMode(bool active)
+    {
+        ghostMode = active;
+
+        if (active) {
+            SetColliders(false);
+            SetMovementInputEnabled(false);
+            SetStickyMode(false);
+            SetGravity(false);
+            OverrideSpringLengths(1f);
+            ApplyForces(Vector3.zero, Vector3.zero, false);
+            StopMovement();
+        } else {
+            SetColliders(true);
+            SetGravity(true);
+            SetMovementInputEnabled(true, 0.5f);
+            RestoreSpringLengths();
+        }
+    }
+
+    private void ApplyGhostMovement()
+    {
+        (Vector3 forwardForce, Vector3 rightwardForce) = GetInputAxisForces();
+
+        Vector3 translation = forwardForce + rightwardForce;
+        
+        if (Input.GetButton("Jump"))
+        {
+            translation.y += 1;
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            translation.y -= 1;
+        }
+
+        foreach (GameObject atom in createBlob.GetAtoms())
+        {
+            atom.transform.position += ghostSpeed * translation;
+        }
     }
 }
