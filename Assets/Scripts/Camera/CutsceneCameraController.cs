@@ -33,10 +33,13 @@ public class CutsceneCameraController : PriorityCamera
     private int currentPoint = -1;
     private float t = 0;
 
-    void Start()
+    void Awake()
     {
         SetMaxPriority(2);
+    }
 
+    void Start()
+    {
         points = positions.Length;
         foreach (Vector3 direction in directions)
         {

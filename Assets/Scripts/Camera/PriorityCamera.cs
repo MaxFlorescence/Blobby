@@ -18,7 +18,14 @@ public abstract class PriorityCamera : Controllable
     ///     The camera's current priority.
     /// </summary>
     private int priority = 0;
+    private Camera cameraComponent;
+
     protected bool isMain = false;
+
+    void Awake()
+    {
+        cameraComponent = gameObject.GetComponent<Camera>();
+    }
 
     /// <summary>
     ///     Set the camera's priority without exceeding the maximum priority.
@@ -48,6 +55,11 @@ public abstract class PriorityCamera : Controllable
     public bool IsMain()
     {
         return isMain;
+    }
+
+    public Camera GetCamera()
+    {
+        return cameraComponent;
     }
 
     private void EnableCamera(bool enable)

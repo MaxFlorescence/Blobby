@@ -56,10 +56,8 @@ public class Dungeon : MonoBehaviour
 
     void Update()
     {
-        if (GameInfo.ControlledBlob != null) {
-            float blobPositionY = GameInfo.ControlledBlob.GetPosition().y;
-            UpdateActiveLevel(LayerOf(blobPositionY));
-        }
+        float blobPositionY = GameInfo.ControlledBlob.GetPosition().y;
+        UpdateActiveLevel(LayerOf(blobPositionY));
     }
 
     private void GenerateRandomLayout(int seed)

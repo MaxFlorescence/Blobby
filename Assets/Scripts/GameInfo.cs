@@ -34,6 +34,7 @@ public static class GameInfo
     public static MiniMap ActiveMiniMap { get; set; } = null;
     public static Dungeon CurrentDungeon { get; set; } = null;
     public static BlobController ControlledBlob { get; private set; } = null;
+    
     public static void SetControlledBlob(BlobController blob)
     {
         if (ControlledBlob != null)

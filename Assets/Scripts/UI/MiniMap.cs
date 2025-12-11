@@ -32,23 +32,21 @@ public class MiniMap : MonoBehaviour
 
     void Update()
     {
-        if (GameInfo.CurrentDungeon != null && GameInfo.ControlledBlob != null && GameInfo.ControlledCamera != null) {
-            Vector3 dungeonPosition = GameInfo.CurrentDungeon.CoordinatesOf(
-                GameInfo.ControlledBlob.GetPosition()
-            );
-            dungeonPosition = GameInfo.CurrentDungeon.TransformPosition(
-                dungeonPosition, false, true, true
-            );
+        Vector3 dungeonPosition = GameInfo.CurrentDungeon.CoordinatesOf(
+            GameInfo.ControlledBlob.GetPosition()
+        );
+        dungeonPosition = GameInfo.CurrentDungeon.TransformPosition(
+            dungeonPosition, false, true, true
+        );
 
-            Quaternion viewRotation = Quaternion.Euler(0, 0,
-                GameInfo.ControlledCamera.transform.rotation.eulerAngles.y
-            );
+        Quaternion viewRotation = Quaternion.Euler(0, 0,
+            GameInfo.ControlledCamera.transform.rotation.eulerAngles.y
+        );
 
-            RectTransform tileRect = tileCanvas.GetComponent<RectTransform>();
-            tileRect.pivot = new(dungeonPosition.x, dungeonPosition.z);
-            tileRect.rotation = viewRotation;
-            mapBorder.GetComponent<RectTransform>().rotation = viewRotation;
-        }
+        RectTransform tileRect = tileCanvas.GetComponent<RectTransform>();
+        tileRect.pivot = new(dungeonPosition.x, dungeonPosition.z);
+        tileRect.rotation = viewRotation;
+        mapBorder.GetComponent<RectTransform>().rotation = viewRotation;
     }
 
     public GameObject AddIcon(string name, Sprite sprite, Vector3 position, float rotation, float scale)

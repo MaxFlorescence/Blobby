@@ -91,7 +91,7 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     Create the blob. This assumes the script is a component of an icosahedron mesh, which may change later.
     /// </summary>
-    void Start()
+    void Awake()
     {
         spawnPoint = transform.position;
         blobMesh = GetComponent<MeshFilter>().mesh;

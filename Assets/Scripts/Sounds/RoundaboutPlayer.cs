@@ -31,8 +31,6 @@ public class RoundaboutPlayer : MonoBehaviour
     }
 
     void FixedUpdate() {
-        if (GameInfo.ControlledBlob == null) return;
-
         if (audioSource == null)
         {
             SetupAudio();

@@ -8,11 +8,16 @@ public class CameraSwitcher : MonoBehaviour
     private int cameraCount;
     private int activeCamera = -1;
 
-    void Start()
+    void Awake()
     {
         cameras = Array.ConvertAll(Camera.allCameras, camera => camera.GetComponent<PriorityCamera>());
         cameraCount = cameras.Length;
         DeactivateAll();
+    }
+
+    void Start()
+    {
+        ActivateHighesetPriorityCamera();
     }
 
     void Update()

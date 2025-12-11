@@ -8,10 +8,7 @@ public class ExperimenterScript : MonoBehaviour
     {
         if (blob == null)
         {
-            if (GameInfo.ControlledBlob != null)
-            {
-                blob = GameInfo.ControlledBlob.transform;
-            }
+            blob = GameInfo.ControlledBlob.transform;
         }
         else
         {

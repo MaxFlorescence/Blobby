@@ -8,21 +8,21 @@ public class MainCameraController : PriorityCamera
     private const float EPSILON = 1E-2f;
     public float trackingDistance = 10f;
 
-    void Start()
+    void Awake()
     {
         SetMaxPriority(1);
         SetPriority(1);
         isMain = true;
+        
+        GameInfo.ControlledCamera = this;
+        GameInfo.ControlledCameraIsMain = isMain;
     }
 
     void LateUpdate()
     {
         if (trackedTransform == null)
         {
-            if (GameInfo.ControlledBlob != null)
-            {
-                TrackObject(GameInfo.ControlledBlob.gameObject, trackingDistance);
-            }
+            TrackObject(GameInfo.ControlledBlob.gameObject, trackingDistance);
         }
         else
         {

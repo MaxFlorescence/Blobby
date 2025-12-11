@@ -67,6 +67,11 @@ public class BlobController : Controllable
     /// </summary>
     private float blobShrinkingFactor = 0.5f;
 
+    void Awake()
+    {
+        GameInfo.SetControlledBlob(this);
+    }
+
     /// <summary>
     ///     Create the atom controllers and set up the audio sources.
     /// </summary>
@@ -74,10 +79,6 @@ public class BlobController : Controllable
     {
         numAtoms = createBlob.GetAtoms().Length;
         centerAtom = createBlob.GetAtoms()[0];
-        if (GameInfo.ControlledBlob == null)
-        {
-            GameInfo.SetControlledBlob(this);
-        }
 
         atomControllers = new AtomController[numAtoms];
 
@@ -186,7 +187,7 @@ public class BlobController : Controllable
     /// </summary>
     void FixedUpdate()
     {
-        if (!movementInputEnabled || !controlled || GameInfo.ControlledCamera == null)
+        if (!movementInputEnabled || !controlled)
             return;
 
         // Ensure forward/rightward movement occurs in the horizontal plane.
