@@ -47,7 +47,6 @@ public class AtomController : MonoBehaviour
     // Particles
     private ParticleSystem drips;
     private const string DROPLET_MATERIAL = "Materials/Blob Materials/JellyTexture";
-    private Material dropletMaterial;
     private ParticleSystem.EmissionModule dripsEmission;
     /// <summary>
     ///     <tt>true</tt> iff this atom is a center atom. This disables drip particles.
@@ -72,42 +71,58 @@ public class AtomController : MonoBehaviour
     {
         if (centerAtom) return;
 
-        dropletMaterial = Resources.Load(DROPLET_MATERIAL, typeof(Material)) as Material;
         drips = gameObject.AddComponent<ParticleSystem>();
+        drips.Stop();
 
         dripsEmission = drips.emission;
-        dripsEmission.rateOverTime = 0.5f;
+        dripsEmission.rateOverTime = 0.25f;
+        dripsEmission.enabled = true;
 
         var main = drips.main;
+        main.startLifetime = 2;
         main.loop = true;
+        main.duration = 4;
         main.simulationSpace = ParticleSystemSimulationSpace.World;
         main.startSpeed = 0;
         main.gravityModifier = 1;
-        main.startLifetime = 1;
-        main.startDelay = Random.Range(0f, 2f);
+        main.startDelay = Random.Range(0f, 4f);
 
         var collision = drips.collision;
         collision.enabled = true;
         collision.type = ParticleSystemCollisionType.World;
         collision.collidesWith = LayerMask.GetMask("Default");
+        collision.dampen = 1;
         collision.bounce = 0;
 
         var sizeOverLifetime = drips.sizeOverLifetime;
         sizeOverLifetime.enabled = true;
-        AnimationCurve curve = new AnimationCurve();
-        curve.AddKey(0f, .5f);
-        curve.AddKey(0.5f, .5f);
-        curve.AddKey(1f, 0f);
+        AnimationCurve curve = new();
+        curve.AddKey(0.00f, 1.00f);
+        curve.AddKey(1.00f, 0.00f);
         sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1, curve);
 
         if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
         {
             renderer.renderMode = ParticleSystemRenderMode.Mesh;
             renderer.mesh = GetComponent<MeshFilter>().mesh;
-            renderer.material = dropletMaterial;
+            renderer.alignment = ParticleSystemRenderSpace.Velocity;
+            renderer.material = blobController.GetMaterial();
         }
 
+        var inheritVelocity = drips.inheritVelocity;
+        inheritVelocity.enabled = true;
+        inheritVelocity.mode = ParticleSystemInheritVelocityMode.Initial;
+        inheritVelocity.curveMultiplier = 1.5f;
+
         drips.Play();
+    }
+
+    public void SetDropletMaterial(Material material)
+    {
+        if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
+        {
+            renderer.material = material;
+        }
     }
 
     /// <summary>
@@ -131,7 +146,7 @@ public class AtomController : MonoBehaviour
         rigidBody.AddForce(impulse, ForceMode.Impulse);
         impulse = Vector3.zero;
 
-        UpdateDripParticles();
+        // UpdateDripParticles();
     }
 
     /// <summary>

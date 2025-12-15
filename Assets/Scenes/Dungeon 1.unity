@@ -4067,6 +4067,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: 5403373899688315117, guid: 942565cc9b739fc4e8a4417f1f87b666, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 34eba0aaca433d443a1435a11fd87388, type: 2}
     - target: {fileID: 5907701946653190456, guid: 942565cc9b739fc4e8a4417f1f87b666, type: 3}
       propertyPath: m_Layer
       value: 9
@@ -4447,6 +4451,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 921496884}
     m_Modifications:
+    - target: {fileID: 230778239333614258, guid: a18d21be11bea924db6ea8eb10886cb4, type: 3}
+      propertyPath: InheritVelocityModule.enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8554833170801048670, guid: a18d21be11bea924db6ea8eb10886cb4, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

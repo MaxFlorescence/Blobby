@@ -56,7 +56,10 @@ public class BlobController : Controllable
     private bool stickyMode = false;
     private float stickyModifier = 1.2f;
 
-    // Misc behavior
+    // Visuals
+    private MeshRenderer blobMesh;
+
+    // Misc
     private GameObject grabbedObject;
     /// <summary>
     ///     The factor by which the blob can grow from its original size.
@@ -66,6 +69,7 @@ public class BlobController : Controllable
     ///     The factor by which the blob can shrink from its original size.
     /// </summary>
     private float blobShrinkingFactor = 0.5f;
+    // Ghost mode
     private bool ghostMode = false;
     private float ghostSpeed = 0.5f;
 
@@ -79,6 +83,8 @@ public class BlobController : Controllable
     /// </summary>
     void Start()
     {
+        blobMesh = createBlob.gameObject.GetComponent<MeshRenderer>();
+
         numAtoms = createBlob.GetAtoms().Length;
         centerAtom = createBlob.GetAtoms()[0];
 
@@ -554,6 +560,21 @@ public class BlobController : Controllable
         foreach (GameObject atom in createBlob.GetAtoms())
         {
             atom.GetComponent<Collider>().enabled = enabled;
+        }
+    }
+
+    public Material GetMaterial()
+    {
+        return blobMesh.material;
+    }
+
+    public void SetMaterial(Material material)
+    {
+        blobMesh.material = material;
+
+        foreach (GameObject atom in createBlob.GetAtoms())
+        {
+            atom.GetComponent<AtomController>().SetDropletMaterial(material);
         }
     }
 
