@@ -97,56 +97,44 @@ public class CreateBlob : MonoBehaviour
         blobMesh = GetComponent<MeshFilter>().mesh;
 
         // Build the blob
-        blobAtoms = MakeAtomsFromMesh(blobMesh, 0, NUM_ATOMS, out meshToAtomMap, spawnPoint);
+        blobAtoms = MakeAtomsFromMesh(out meshToAtomMap);
         centerAtom = blobAtoms[0];
 
-        atomRigidbodies = AddRigidBodies(blobAtoms);
+        atomRigidbodies = AddRigidBodies();
 
-        PhysicMaterial jellyPhysic = Resources.Load(JELLY_PHYSIC_MATERIAL, typeof(PhysicMaterial)) as PhysicMaterial;
-        AddPhysicMaterials(blobAtoms, jellyPhysic);
+        AddPhysicMaterials();
 
-        springJoints = ConnectAtoms(blobAtoms, springForce, NUM_SPRINGS, SIDE_LENGTH, false);
+        springJoints = ConnectAtoms(false);
 
-        blobController = AttachController(centerAtom);
+        blobController = centerAtom.AddComponent<BlobController>();
     }
 
     /// <summary>
     ///     Spawns one atom (sphere) at the given center, and one at each vertex of the given mesh.
     /// </summary>
-    /// <param name="mesh">
-    ///     The mesh to build from.
-    /// </param>
     /// <param name="ID">
     ///     The ID of this mesh.
-    /// </param>
-    /// <param name="expectedCount">
-    ///     How many atoms the caller expects there to be when this method returns.
     /// </param>
     /// <param name="vertexToAtomMap">
     ///     A list mapping which mesh verices correspond to which atoms.
     ///     vertexToAtomMap[i] = j iff mesh.vertices[i] corresponds to the returned array's j-th element. 
     /// </param>
-    /// <param name="center">
-    ///     The center of the mesh.
-    ///     If not given, defaults to the average position of the mesh's vertices.
-    /// </param>
     /// <returns>
     ///     An array of GameObjects containing the spawned atoms.
     ///     The first atom (index 0) is the atom spawned at the center.
     /// </returns>
-    private GameObject[] MakeAtomsFromMesh(Mesh mesh, int ID, int expectedCount, out int[] vertexToAtomMap, Vector3? center = null)
+    private GameObject[] MakeAtomsFromMesh(out int[] vertexToAtomMap)
     {
-
-        GameObject[] atoms = new GameObject[expectedCount];
-        vertexToAtomMap = new int[mesh.vertexCount];
+        GameObject[] atoms = new GameObject[NUM_ATOMS];
+        vertexToAtomMap = new int[blobMesh.vertexCount];
         int newIndex = 1; // reserve index 0 for the center atom
         Vector3 positionSum = Vector3.zero; // used to calculate the center, if needed
 
         // Add enough atoms to account for every mesh vertex.
-        for (int i = 0; i < mesh.vertexCount; i++)
+        for (int i = 0; i < blobMesh.vertexCount; i++)
         {
 
-            Vector3 newPosition = transform.TransformPoint(mesh.vertices[i]); // working in world coordinates is easier
+            Vector3 newPosition = transform.TransformPoint(blobMesh.vertices[i]); // working in world coordinates is easier
             positionSum += newPosition;
 
             // Search for an existing atom that was spawned at this new atom's position.
@@ -164,31 +152,20 @@ public class CreateBlob : MonoBehaviour
             if (vertexToAtomMap[i] == -1)
             {
                 Assert.IsTrue(
-                    newIndex < expectedCount,
-                    string.Format("Number of necessary atoms is greater than expected. ({0} >= {1})", newIndex, expectedCount)
+                    newIndex < NUM_ATOMS,
+                    string.Format("Number of necessary atoms is greater than expected. ({0} >= {1})", newIndex, NUM_ATOMS)
                 );
                 vertexToAtomMap[i] = newIndex;
-                atoms[newIndex] = SpawnAtom(
-                    newPosition,
-                    atomScale,
-                    newIndex, ID,
-                    transform.parent.transform // ew
-                );
+                atoms[newIndex] = SpawnAtom(newPosition, newIndex);
                 newIndex++;
             }
         }
         Assert.IsTrue(
-            newIndex == expectedCount,
-            string.Format("Number of atoms created is less than expected. ({0} < {1})", newIndex, expectedCount)
+            newIndex == NUM_ATOMS,
+            string.Format("Number of atoms created is less than expected. ({0} < {1})", newIndex, NUM_ATOMS)
         );
 
-        Vector3 centerPosition = (center == null) ? positionSum / (expectedCount - 1) : (Vector3)center;
-        atoms[0] = SpawnAtom(
-            centerPosition,
-            atomScale,
-            0, ID,
-            transform.parent.transform // ew x2
-        );
+        atoms[0] = SpawnAtom(spawnPoint, 0);
 
         return atoms;
     }
@@ -199,33 +176,24 @@ public class CreateBlob : MonoBehaviour
     /// <param name="position">
     ///     The position at which to spawn this atom.
     /// </param>
-    /// <param name="scale">
-    ///     The scale to give this atom.
-    /// </param>
     /// <param name="ID">
     ///     The ID of this atom.
-    /// </param>
-    /// <param name="parentID">
-    ///     The ID of this atom's parent.
-    /// </param>
-    /// <param name="parentTransform">
-    ///     The transform of this atom's parent.
     /// </param>
     /// <returns>
     ///     The atom GameObject.
     /// </returns>
-    private GameObject SpawnAtom(Vector3 position, float scale, int ID, int parentID, Transform parentTransform)
+    private GameObject SpawnAtom(Vector3 position, int ID)
     {
         GameObject atom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         atom.GetComponent<MeshRenderer>().enabled = false; // make it invisible
 
-        atom.name = string.Format("Mesh {0} Atom {1}", parentID, ID);
+        atom.name = string.Format("Mesh {0} Atom {1}", BLOB_ID, ID);
         atom.layer = LayerMask.NameToLayer(IGNORE_CAMERA_LAYER);
         atom.tag = "Atom";
 
-        atom.transform.localScale = scale * Vector3.one;
+        atom.transform.localScale = atomScale * Vector3.one;
         atom.transform.position = position;
-        atom.transform.SetParent(parentTransform);
+        atom.transform.SetParent(transform.parent);
 
         return atom;
     }
@@ -233,19 +201,16 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     Adds a Rigidbody component to every object in an array.
     /// </summary>
-    /// <param name="objects">
-    ///     The array of objects.
-    /// </param>
     /// <returns>
     ///     The array of Rigidbodies added.
     ///     objects[i] has the Rigidbody at index i.
     /// </returns>
-    private Rigidbody[] AddRigidBodies(GameObject[] objects)
+    private Rigidbody[] AddRigidBodies()
     {
-        Rigidbody[] rigidBodies = new Rigidbody[objects.Length];
-        for (int i = 0; i < objects.Length; i++)
+        Rigidbody[] rigidBodies = new Rigidbody[blobAtoms.Length];
+        for (int i = 0; i < blobAtoms.Length; i++)
         {
-            rigidBodies[i] = objects[i].AddComponent<Rigidbody>();
+            rigidBodies[i] = blobAtoms[i].AddComponent<Rigidbody>();
         }
 
         return rigidBodies;
@@ -254,17 +219,13 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     Adds a physic material to the collider of every object in an array.
     /// </summary>
-    /// <param name="objects">
-    ///     The array of objects.
-    /// </param>
-    /// <param name="material">
-    ///     The material to apply.
-    /// </param>
-    private void AddPhysicMaterials(GameObject[] objects, PhysicMaterial physicMaterial)
+    private void AddPhysicMaterials()
     {
-        for (int i = 0; i < objects.Length; i++)
+        PhysicMaterial jellyPhysic = Resources.Load(JELLY_PHYSIC_MATERIAL, typeof(PhysicMaterial)) as PhysicMaterial;
+
+        for (int i = 0; i < blobAtoms.Length; i++)
         {
-            objects[i].GetComponent<Collider>().material = physicMaterial;
+            blobAtoms[i].GetComponent<Collider>().material = jellyPhysic;
         }
     }
 
@@ -276,19 +237,6 @@ public class CreateBlob : MonoBehaviour
     ///     e.g. anchor=(0,0,0), connectedAnchor=(0,1,0) => A's origin "wants" to rest one unit
     ///     above B's origin.
     /// </summary>
-    /// <param name="objects">
-    ///     The array of objects to connect.
-    /// </param>
-    /// <param name="springForce">
-    ///     The spring constant to apply to each spring joint.
-    /// </param>
-    /// <param name="expectedCount">
-    ///     How many spring joints are expected to be created
-    /// </param>
-    /// <param name="distance">
-    ///     The threshold that determines which pairs of objects will be connected.
-    ///     The center object (index 0) will always be connected to all other objects.
-    /// </param>
     /// <param name="ballAdjacency">
     ///     Option for deciding how to interpret the `distance` threshold.
     ///     `true` indicates that objects are connected iff they are at most `distance` apart.
@@ -297,29 +245,29 @@ public class CreateBlob : MonoBehaviour
     /// <returns>
     ///     The array of SpringJoints added, in no particular order.
     /// </returns>
-    private SpringJoint[] ConnectAtoms(GameObject[] objects, float springForce, int expectedCount, float distance, bool ballAdjacency)
+    private SpringJoint[] ConnectAtoms(bool ballAdjacency)
     {
-        SpringJoint[] springJoints = new SpringJoint[expectedCount];
-        connectedAnchors = new Vector3[expectedCount];
+        SpringJoint[] springJoints = new SpringJoint[NUM_SPRINGS];
+        connectedAnchors = new Vector3[NUM_SPRINGS];
         int newIndex = 0;
 
         // For each unique pair of objects, try to connect them.
-        for (int i = 1; i < objects.Length; i++)
+        for (int i = 1; i < blobAtoms.Length; i++)
         {
             for (int j = 0; j < i; j++)
             {
                 bool isCenterObject = (j == 0);
-                if (isCenterObject || AreAdjacent(objects, i, j, distance, ballAdjacency))
+                if (isCenterObject || AtomsAreAdjacent(i, j, SIDE_LENGTH, ballAdjacency))
                 {
                     Assert.IsTrue(
-                        newIndex < expectedCount,
-                        string.Format("Number of necessary springs is greater than expected. ({0} >= {1})", newIndex, expectedCount)
+                        newIndex < NUM_SPRINGS,
+                        string.Format("Number of necessary springs is greater than expected. ({0} >= {1})", newIndex, NUM_SPRINGS)
                     );
 
-                    Rigidbody from = objects[i].GetComponent<Rigidbody>();
-                    Rigidbody to = objects[j].GetComponent<Rigidbody>();
+                    Rigidbody from = blobAtoms[i].GetComponent<Rigidbody>();
+                    Rigidbody to = blobAtoms[j].GetComponent<Rigidbody>();
 
-                    springJoints[newIndex] = objects[i].AddComponent<SpringJoint>();
+                    springJoints[newIndex] = blobAtoms[i].AddComponent<SpringJoint>();
                     springJoints[newIndex].connectedBody = to;
 
                     springJoints[newIndex].enableCollision = true;
@@ -337,18 +285,16 @@ public class CreateBlob : MonoBehaviour
         }
 
         Assert.IsTrue(
-            newIndex == expectedCount,
-            string.Format("Number of springs created is less than expected. ({0} < {1})", newIndex, expectedCount)
+            newIndex == NUM_SPRINGS,
+            string.Format("Number of springs created is less than expected. ({0} < {1})", newIndex, NUM_SPRINGS)
         );
 
         return springJoints;
     }
 
     /// <summary>
-    ///     Tests if objects i and j are adjacent by the given parameters.
+    ///     Tests if atoms i and j are adjacent by the given parameters.
     /// </summary>
-    /// <param name="objects">
-    ///     The array of objects
     /// </param>
     /// <param name="i">
     ///     The index of the first object.
@@ -367,9 +313,9 @@ public class CreateBlob : MonoBehaviour
     /// <returns>
     ///     A boolean indicating if i and j are adjacent.
     /// </returns>
-    private bool AreAdjacent(GameObject[] objects, int i, int j, float distance, bool ballAdjacency)
+    private bool AtomsAreAdjacent(int i, int j, float distance, bool ballAdjacency)
     {
-        float separation = (objects[i].transform.position - objects[j].transform.position).magnitude;
+        float separation = (blobAtoms[i].transform.position - blobAtoms[j].transform.position).magnitude;
 
         if (ballAdjacency)
         {
@@ -383,33 +329,13 @@ public class CreateBlob : MonoBehaviour
     }
 
     /// <summary>
-    ///     Attaches a blob controller component to the given gameObject.
-    ///     This controller handles player input, motion, and world interaction.
-    /// </summary>
-    /// <param name="gameObject">
-    ///     The object to attach the blob controller to.
-    /// </param>
-    /// <returns>
-    ///     The attached BlobController.
-    /// </returns>
-    private BlobController AttachController(GameObject gameObject)
-    {
-        BlobController controller = gameObject.AddComponent<BlobController>();
-
-        // Inherit class member. Is there a better way to do this?
-        controller.SetCreateBlob(this);
-
-        return controller;
-    }
-
-    /// <summary>
     ///     Maintains the blob's appearance by keeping the eyes and mesh in place and looking as they should.
     /// </summary>
     void Update()
     {
         // Move the blob mesh and snap its vertices to the atoms.
         transform.position = centerAtom.transform.position;
-        SnapMeshToAtoms(blobMesh, blobAtoms, meshToAtomMap, meshScale);
+        SnapMeshToAtoms();
 
         // Maintain accurate reflections and colors.
         blobMesh.RecalculateNormals();
@@ -423,8 +349,8 @@ public class CreateBlob : MonoBehaviour
     ///</summary>
     private void SnapEyes()
     {
-        SnapToTriangle(leftEye, blobAtoms, 1, 2, 3, meshScale);
-        SnapToTriangle(rightEye, blobAtoms, 1, 3, 4, meshScale);
+        SnapToTriangle(leftEye, 1, 2, 3);
+        SnapToTriangle(rightEye, 1, 3, 4);
     }
 
     /// <summary>
@@ -449,14 +375,14 @@ public class CreateBlob : MonoBehaviour
     /// <param name="scale">
     ///     The scale between the given objects and the center object.
     /// </param>
-    private void SnapToTriangle(GameObject objectToSnap, GameObject[] objects, int i, int j, int k, float scale)
+    private void SnapToTriangle(GameObject objectToSnap, int i, int j, int k)
     {
-        Vector3 center = objects[0].transform.position;
-        Vector3 pos1 = objects[i].transform.position;
-        Vector3 pos2 = objects[j].transform.position;
-        Vector3 pos3 = objects[k].transform.position;
+        Vector3 center = blobAtoms[0].transform.position;
+        Vector3 pos1 = blobAtoms[i].transform.position;
+        Vector3 pos2 = blobAtoms[j].transform.position;
+        Vector3 pos3 = blobAtoms[k].transform.position;
 
-        Vector3 position = ScaledBarycenter(center, pos1, pos2, pos3, scale);
+        Vector3 position = ScaledBarycenter(center, pos1, pos2, pos3, meshScale);
         Vector3 direction = NormalVector(center, pos1, pos2, pos3, position);
 
         objectToSnap.transform.position = position;
@@ -532,32 +458,19 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     Sets the vertex positions for the mesh to equal the given object positions, mapped and scaled accordingly.
     /// </summary>
-    /// <param name="mesh">
-    ///     The mesh whose vertices will be snapped.
-    /// </param>
-    /// <param name="objects">
-    ///     The objects to snap the mesh to.
-    /// </param>
-    /// <param name="vertexToObjectMap">
-    ///     The mapping between mesh vertices and object indices.
-    ///     vertexToObjectMap[i] = j indicates that vertex i corresponds to object j.
-    /// </param>
-    /// <param name="scale">
-    ///     The scaling to apply to the mesh.
-    /// </param>
-    private void SnapMeshToAtoms(Mesh mesh, GameObject[] objects, int[] vertexToObjectMap, float scale)
+    private void SnapMeshToAtoms()
     {
-        Vector3[] newVertices = mesh.vertices;
+        Vector3[] newVertices = blobMesh.vertices;
 
         for (int i = 0; i < newVertices.Length; i++)
         {
-            Vector3 worldPosition = objects[vertexToObjectMap[i]].transform.position;
+            Vector3 worldPosition = blobAtoms[meshToAtomMap[i]].transform.position;
 
             // Calculate local position of mesh vertices.
-            newVertices[i] = transform.InverseTransformPoint(worldPosition) * scale;
+            newVertices[i] = transform.InverseTransformPoint(worldPosition) * meshScale;
         }
 
-        mesh.vertices = newVertices;
+        blobMesh.vertices = newVertices;
     }
 
     // Getters and setters
