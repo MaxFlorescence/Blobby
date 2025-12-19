@@ -58,6 +58,7 @@ public class BlobController : Controllable
 
     // Visuals
     private MeshRenderer blobMesh;
+    private BlobMaterials blobMaterials;
 
     // Misc
     private GameObject grabbedObject;
@@ -76,6 +77,9 @@ public class BlobController : Controllable
     void Awake()
     {
         GameInfo.SetControlledBlob(this);
+
+        createBlob = transform.parent.GetComponentInChildren<CreateBlob>();
+        blobMesh = createBlob.gameObject.GetComponent<MeshRenderer>();
     }
 
     /// <summary>
@@ -83,8 +87,6 @@ public class BlobController : Controllable
     /// </summary>
     void Start()
     {
-        blobMesh = createBlob.gameObject.GetComponent<MeshRenderer>();
-
         numAtoms = createBlob.GetAtoms().Length;
         centerAtom = createBlob.GetAtoms()[0];
 
@@ -96,6 +98,8 @@ public class BlobController : Controllable
             atomControllers[i].blobController = this;
         }
         atomControllers[0].GetComponent<AtomController>().SetCenterAtom(true);
+
+        SetBlobMaterials(BlobMaterials.LAVA);
 
         SetupSounds();
     }
@@ -528,12 +532,6 @@ public class BlobController : Controllable
         return createBlob.GetAtoms().Contains(obj);
     }
 
-    // Getters and setters
-    public void SetCreateBlob(CreateBlob createBlob)
-    {
-        this.createBlob = createBlob;
-    }
-
     public Vector3 GetPosition()
     {
         return centerAtom.transform.position;
@@ -563,18 +561,21 @@ public class BlobController : Controllable
         }
     }
 
-    public Material GetMaterial()
+    public BlobMaterials GetBlobMaterials()
     {
-        return blobMesh.material;
+        return blobMaterials;
     }
 
-    public void SetMaterial(Material material)
+    public void SetBlobMaterials(BlobMaterials newBlobMaterials)
     {
-        blobMesh.material = material;
+        blobMaterials = newBlobMaterials;
 
+        blobMesh.materials = new Material[] {newBlobMaterials.Body()};
+
+        Material dropMaterial = newBlobMaterials.Drops();
         foreach (GameObject atom in createBlob.GetAtoms())
         {
-            atom.GetComponent<AtomController>().SetDropletMaterial(material);
+            atom.GetComponent<AtomController>().SetDropletMaterial(dropMaterial);
         }
     }
 
