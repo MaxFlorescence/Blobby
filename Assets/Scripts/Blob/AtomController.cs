@@ -46,12 +46,15 @@ public class AtomController : MonoBehaviour
 
     // Particles
     private ParticleSystem drips;
-    private const string DROPLET_MATERIAL = "Materials/Blob Materials/JellyTexture";
     private ParticleSystem.EmissionModule dripsEmission;
     /// <summary>
     ///     <tt>true</tt> iff this atom is a center atom. This disables drip particles.
     /// </summary>
     private bool centerAtom = false;
+
+    void Awake() {
+        SetupDripParticles();
+    }
 
     /// <summary>
     ///     Initialize rigidbody and audio.
@@ -61,7 +64,7 @@ public class AtomController : MonoBehaviour
         rigidBody = GetComponent<Rigidbody>();
         squisher = blobController.GetComponent<Squisher>();
 
-        SetupDripParticles();
+        drips.Play();
     }
 
     /// <summary>
@@ -106,15 +109,12 @@ public class AtomController : MonoBehaviour
             renderer.renderMode = ParticleSystemRenderMode.Mesh;
             renderer.mesh = GetComponent<MeshFilter>().mesh;
             renderer.alignment = ParticleSystemRenderSpace.Velocity;
-            renderer.material = blobController.GetMaterial();
         }
 
         var inheritVelocity = drips.inheritVelocity;
         inheritVelocity.enabled = true;
         inheritVelocity.mode = ParticleSystemInheritVelocityMode.Initial;
         inheritVelocity.curveMultiplier = 1.5f;
-
-        drips.Play();
     }
 
     public void SetDropletMaterial(Material material)
