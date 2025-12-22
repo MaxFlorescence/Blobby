@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,14 +8,21 @@ public enum BlobMaterials
     LAVA
 }
 
+[Flags]
+public enum MaterialProperties
+{
+    CAN_IGNITE     = 0b_0000_0001,
+    CAN_EXTINGUISH = 0b_0000_0010,
+}
+
 public static class BlobMaterialExtensions
 {
-    private static readonly Dictionary<BlobMaterials, (Material, Material)> map = new()
+    private static readonly Dictionary<BlobMaterials, (Material, Material, MaterialProperties)> map = new()
     {
-        {BlobMaterials.WATER, LoadMaterials("Blob Materials/WaterJelly")},
-        {BlobMaterials.LAVA,  LoadMaterials("Blob Materials/LavaJelly", "Basic Materials/Flame")},
+        {BlobMaterials.WATER, LoadMaterials(MaterialProperties.CAN_EXTINGUISH, "Blob Materials/WaterJelly")},
+        {BlobMaterials.LAVA,  LoadMaterials(MaterialProperties.CAN_IGNITE, "Blob Materials/LavaJelly", "Basic Materials/Flame")},
     };
-    public static (Material, Material) LoadMaterials(string name, string dropName = null)
+    public static (Material, Material, MaterialProperties) LoadMaterials(MaterialProperties properties, string name, string dropName = null)
     {
         Material body =  Resources.Load("Materials/" + name, typeof(Material)) as Material;
         Material drop = body;
@@ -24,7 +32,7 @@ public static class BlobMaterialExtensions
             drop =  Resources.Load("Materials/" + dropName, typeof(Material)) as Material;
         }
 
-        return (body, drop);
+        return (body, drop, properties);
     }
     public static Material Body(this BlobMaterials blobMaterial)
     {
@@ -33,5 +41,9 @@ public static class BlobMaterialExtensions
     public static Material Drops(this BlobMaterials blobMaterial)
     {
         return map[blobMaterial].Item2;
+    }
+    public static bool HasProperty(this BlobMaterials blobMaterial, MaterialProperties property)
+    {
+        return (map[blobMaterial].Item3 & property) > 0;
     }
 }

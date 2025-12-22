@@ -53,7 +53,8 @@ public class AtomController : MonoBehaviour
     private bool centerAtom = false;
 
     void Awake() {
-        SetupDripParticles();
+        drips = gameObject.AddComponent<ParticleSystem>();
+        drips.Stop();
     }
 
     /// <summary>
@@ -64,7 +65,7 @@ public class AtomController : MonoBehaviour
         rigidBody = GetComponent<Rigidbody>();
         squisher = blobController.GetComponent<Squisher>();
 
-        drips.Play();
+        SetupDripParticles();
     }
 
     /// <summary>
@@ -73,9 +74,6 @@ public class AtomController : MonoBehaviour
     private void SetupDripParticles()
     {
         if (centerAtom) return;
-
-        drips = gameObject.AddComponent<ParticleSystem>();
-        drips.Stop();
 
         dripsEmission = drips.emission;
         dripsEmission.rateOverTime = 0.25f;
@@ -107,7 +105,7 @@ public class AtomController : MonoBehaviour
         if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
         {
             renderer.renderMode = ParticleSystemRenderMode.Mesh;
-            renderer.mesh = GetComponent<MeshFilter>().mesh;
+            renderer.mesh = blobController.dropletMesh;
             renderer.alignment = ParticleSystemRenderSpace.Velocity;
         }
 
@@ -115,10 +113,14 @@ public class AtomController : MonoBehaviour
         inheritVelocity.enabled = true;
         inheritVelocity.mode = ParticleSystemInheritVelocityMode.Initial;
         inheritVelocity.curveMultiplier = 1.5f;
+
+        drips.Play();
     }
 
     public void SetDropletMaterial(Material material)
     {
+        if (centerAtom) return;
+
         if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
         {
             renderer.material = material;

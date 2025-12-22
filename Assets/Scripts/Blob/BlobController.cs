@@ -56,9 +56,14 @@ public class BlobController : Controllable
     private bool stickyMode = false;
     private float stickyModifier = 1.2f;
 
+    // Fire
+    public bool canIgnite { get; private set; } = false;
+    public bool canExtinguish { get; private set; }= false;
+
     // Visuals
     private MeshRenderer blobMesh;
     private BlobMaterials blobMaterials;
+    public Mesh dropletMesh { get; private set; }
 
     // Misc
     private GameObject grabbedObject;
@@ -80,6 +85,10 @@ public class BlobController : Controllable
 
         createBlob = transform.parent.GetComponentInChildren<CreateBlob>();
         blobMesh = createBlob.gameObject.GetComponent<MeshRenderer>();
+        
+        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        dropletMesh = Instantiate(sphere.GetComponent<MeshFilter>().mesh);
+        Destroy(sphere);
     }
 
     /// <summary>
@@ -99,7 +108,7 @@ public class BlobController : Controllable
         }
         atomControllers[0].GetComponent<AtomController>().SetCenterAtom(true);
 
-        SetBlobMaterials(BlobMaterials.LAVA);
+        SetBlobMaterials(BlobMaterials.WATER);
 
         SetupSounds();
     }
@@ -369,6 +378,14 @@ public class BlobController : Controllable
             GhostMode(!ghostMode);
         }
 
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            if (blobMaterials == BlobMaterials.WATER)
+                SetBlobMaterials(BlobMaterials.LAVA);
+            else
+                SetBlobMaterials(BlobMaterials.WATER);
+        }
+
         if (movementInputEnabled)
         {
             if (Input.GetButtonDown("Jump"))
@@ -569,6 +586,9 @@ public class BlobController : Controllable
     public void SetBlobMaterials(BlobMaterials newBlobMaterials)
     {
         blobMaterials = newBlobMaterials;
+
+        canIgnite = newBlobMaterials.HasProperty(MaterialProperties.CAN_IGNITE);
+        canExtinguish = newBlobMaterials.HasProperty(MaterialProperties.CAN_EXTINGUISH);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 

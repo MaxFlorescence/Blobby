@@ -61,13 +61,22 @@ public class Fire : Interactable
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        Extinguish();
-        StartInteractionCooldown(10);
-    }
+        bool interacted = false;
 
-    protected override void OnInteractionCooldownEnd()
-    {
-        Ignite();
+        if (blob.canIgnite) {
+            Ignite();
+            interacted = true;
+        }
+        else if (blob.canExtinguish) 
+        {
+            Extinguish();
+            interacted = true;
+        }
+
+        if (interacted)
+        {
+            StartInteractionCooldown(10);   
+        }
     }
 
     private void Ignite()
