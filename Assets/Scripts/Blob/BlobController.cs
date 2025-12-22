@@ -373,19 +373,6 @@ public class BlobController : Controllable
             Release();
         }
 
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            GhostMode(!ghostMode);
-        }
-
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            if (blobMaterials == BlobMaterials.WATER)
-                SetBlobMaterials(BlobMaterials.LAVA);
-            else
-                SetBlobMaterials(BlobMaterials.WATER);
-        }
-
         if (movementInputEnabled)
         {
             if (Input.GetButtonDown("Jump"))
@@ -599,11 +586,11 @@ public class BlobController : Controllable
         }
     }
 
-    public void GhostMode(bool active)
+    public void ToggleGhostMode()
     {
-        ghostMode = active;
+        ghostMode = !ghostMode;
 
-        if (active) {
+        if (ghostMode) {
             SetColliders(false);
             SetMovementInputEnabled(false);
             SetStickyMode(false);

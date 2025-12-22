@@ -23,7 +23,8 @@ public static class GameInfo
     public static float MouseSensitivity { get; set; } = 1;
 
     // Game State
-    public static bool StartCutscene { get; set; }
+    public static bool DebugMode { get; set; } = false;
+    public static bool StartCutscene { get; set; } = false;
     public static GameState GameStatus { get; set; } = GameState.UNSTARTED;
     public static FinishState FinishStatus { get; set; } = FinishState.UNFINISHED;
     public static bool PauseAudio { get; set; } = false;
