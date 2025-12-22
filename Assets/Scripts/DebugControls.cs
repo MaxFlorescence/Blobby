@@ -4,8 +4,10 @@ class DebugControls : MonoBehaviour
 {
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Slash))
+        if (Input.GetKeyDown(KeyCode.Slash)) {
             GameInfo.DebugMode = !GameInfo.DebugMode;
+            GameInfo.SendAlert("Debug mode is " + (GameInfo.DebugMode ? "on" : "off"), 3);
+        }
 
         if (!GameInfo.DebugMode) return;
         

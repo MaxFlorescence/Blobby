@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 /// <summary>
 ///     States for controlling the gripped object.
@@ -34,8 +35,8 @@ public static class GameInfo
     public static PriorityCamera ControlledCamera { get; set; } = null;
     public static MiniMap ActiveMiniMap { get; set; } = null;
     public static Dungeon CurrentDungeon { get; set; } = null;
+
     public static BlobController ControlledBlob { get; private set; } = null;
-    
     public static void SetControlledBlob(BlobController blob)
     {
         if (ControlledBlob != null)
@@ -45,5 +46,12 @@ public static class GameInfo
 
         blob.controlled = true;
         ControlledBlob = blob;
+    }
+
+    public static AlertSystem AlertSystem { get; set; } = null;
+    public static void SendAlert(string content, float duration)
+    {
+        if (AlertSystem != null)
+            AlertSystem.Send(content, duration);
     }
 }
