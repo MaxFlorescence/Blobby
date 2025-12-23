@@ -6,27 +6,28 @@ using UnityEngine;
 [RequireComponent(typeof(TMP_Text))]
 public class AlertSystem : MonoBehaviour
 {
+    private static readonly Color DEFAULT_COLOR = Color.white.WithAlpha(0);
+
     public float fadeInTime = 0.25f;
     public float fadeOutTime = 1f;
 
     private TMP_Text alertBox;
     private Queue<(string, float, Color)> alertQueue = new();
-    private Color textColor = Color.white;
-    private string textContent = "";
-    private float displayTime = 0;
+    private Color textColor = DEFAULT_COLOR;
+    private float displayTime = 0f;
     private float timer = 0f;
 
     void Awake()
     {
         alertBox = GetComponent<TMP_Text>();
         alertBox.color = textColor;
-        alertBox.text = textContent;
+        alertBox.text = "";
         GameInfo.AlertSystem = this;
     }
 
     public void Send(string content, float duration = 3f, Color? color = null)
     {
-        alertQueue.Enqueue((content, duration, color == null ? Color.white : (Color)color));
+        alertQueue.Enqueue((content, duration, color == null ? DEFAULT_COLOR : (Color)color));
     }
 
     private float AlphaFromTime()
@@ -41,7 +42,7 @@ public class AlertSystem : MonoBehaviour
         }
         else
         {
-            return 1 - (timer - fadeOutTime - displayTime) / fadeInTime;
+            return 1f - (timer - fadeOutTime - displayTime) / fadeInTime;
         }
     }
 
@@ -55,6 +56,7 @@ public class AlertSystem : MonoBehaviour
             {
                 timer = 0f;
                 alertBox.text = "";
+                alertBox.color = textColor = DEFAULT_COLOR;
             }
         }
         
