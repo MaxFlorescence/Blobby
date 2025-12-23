@@ -49,9 +49,4 @@ public static class GameInfo
     }
 
     public static AlertSystem AlertSystem { get; set; } = null;
-    public static void SendAlert(string content, float duration)
-    {
-        if (AlertSystem != null)
-            AlertSystem.Send(content, duration);
-    }
 }

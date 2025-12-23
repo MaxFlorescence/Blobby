@@ -6,7 +6,7 @@ class DebugControls : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Slash)) {
             GameInfo.DebugMode = !GameInfo.DebugMode;
-            GameInfo.SendAlert("Debug mode is " + (GameInfo.DebugMode ? "on" : "off"), 3);
+            GameInfo.AlertSystem.Send("Debug mode is " + (GameInfo.DebugMode ? "on" : "off"));
         }
 
         if (!GameInfo.DebugMode) return;

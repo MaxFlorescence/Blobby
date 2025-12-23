@@ -24,14 +24,9 @@ public class AlertSystem : MonoBehaviour
         GameInfo.AlertSystem = this;
     }
 
-    public void Send(string content, float duration)
+    public void Send(string content, float duration = 3f, Color? color = null)
     {
-        alertQueue.Enqueue((content, duration, Color.white));
-    }
-
-    public void SendColored(string content, float duration, Color color)
-    {
-        alertQueue.Enqueue((content, duration, color));
+        alertQueue.Enqueue((content, duration, color == null ? Color.white : (Color)color));
     }
 
     private float AlphaFromTime()
