@@ -576,6 +576,7 @@ public class BlobController : Controllable
 
         canIgnite = newBlobMaterials.HasProperty(MaterialProperties.CAN_IGNITE);
         canExtinguish = newBlobMaterials.HasProperty(MaterialProperties.CAN_EXTINGUISH);
+        createBlob.SetLightEnabled(newBlobMaterials.HasProperty(MaterialProperties.GLOWS));
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 

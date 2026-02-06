@@ -13,14 +13,21 @@ public enum MaterialProperties
 {
     CAN_IGNITE     = 0b_0000_0001,
     CAN_EXTINGUISH = 0b_0000_0010,
+    GLOWS          = 0b_0000_0100
 }
 
 public static class BlobMaterialExtensions
 {
     private static readonly Dictionary<BlobMaterials, (Material, Material, MaterialProperties)> map = new()
     {
-        {BlobMaterials.WATER, LoadMaterials(MaterialProperties.CAN_EXTINGUISH, "Blob Materials/WaterJelly")},
-        {BlobMaterials.LAVA,  LoadMaterials(MaterialProperties.CAN_IGNITE, "Blob Materials/LavaJelly", "Basic Materials/Flame")},
+        {BlobMaterials.WATER, LoadMaterials(
+            MaterialProperties.CAN_EXTINGUISH,
+            "Blob Materials/WaterJelly"
+        )},
+        {BlobMaterials.LAVA,  LoadMaterials(
+            MaterialProperties.CAN_IGNITE | MaterialProperties.GLOWS,
+            "Blob Materials/LavaJelly", "Basic Materials/Flame"
+        )},
     };
     public static (Material, Material, MaterialProperties) LoadMaterials(MaterialProperties properties, string name, string dropName = null)
     {

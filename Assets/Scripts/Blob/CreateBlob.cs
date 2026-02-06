@@ -32,6 +32,7 @@ public class CreateBlob : MonoBehaviour
     // TODO: can/should these be found automatically?
     public GameObject leftEye;
     public GameObject rightEye;
+    public Light blobLight;
 
     // PRIVATE MEMBERS
     // Spawning
@@ -95,6 +96,7 @@ public class CreateBlob : MonoBehaviour
     {
         spawnPoint = transform.position;
         blobMesh = GetComponent<MeshFilter>().mesh;
+        blobLight = GetComponentInChildren<Light>();
 
         // Build the blob
         blobAtoms = MakeAtomsFromMesh(out meshToAtomMap);
@@ -500,5 +502,16 @@ public class CreateBlob : MonoBehaviour
         }
 
         meshScale = 1f + atomScale/factor;
+    }
+
+    /// <summary>
+    ///     Turn the light attached to this blob on or off.
+    /// </summary>
+    /// <param name="enabled">
+    ///     Indicates whether or not the light is on.
+    /// </param>
+    public void SetLightEnabled(bool enabled)
+    {
+        blobLight.enabled = enabled;
     }
 }

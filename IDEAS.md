@@ -25,6 +25,8 @@
 - Actual level design
 - Story
     * Slime in a high fantasy dungeon becomes sentient
+    * Loot economy
+    * Dungeon builder w/ tower defense feeling
 
 # Code
 - Update input to Unity's new system
