@@ -147,7 +147,8 @@ public class BlobController : Controllable
     public bool TrySticking(GameObject atom, GameObject obj)
     {
         if (stickyMode && StickyIndex(atom) == -1
-            && obj.TryGetComponent<Rigidbody>(out var objRigidbody))
+            && obj.TryGetComponent<Rigidbody>(out var objRigidbody)
+            && !obj.CompareTag("No Sticky"))
         {
             Unstick(stickyHead);
             atom.GetComponent<AtomController>().StickTo(objRigidbody);

@@ -13,6 +13,7 @@ TagManager:
   - Floor
   - FinishMenu
   - CameraManager
+  - No Sticky
   layers:
   - Default
   - TransparentFX
