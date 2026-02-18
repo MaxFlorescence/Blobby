@@ -130,7 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd212e68eee26b345b120fa827580fd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  finalScaleFactor: 0.5
+  finalScaleFactor: 0.33
   gripSound: {fileID: 0}
 --- !u!1 &4291656006547718127 stripped
 GameObject:

@@ -311,7 +311,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bd9e78a546433e42889e471b7a6f57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  state: 1
+  finalScaleFactor: 0.33
+  gripSound: {fileID: 0}
+  chestState: 1
   contents: {fileID: 5098124715001449125}
 --- !u!82 &2409640578900595915
 AudioSource:
