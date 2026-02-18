@@ -2,10 +2,7 @@ using UnityEngine;
 
 public enum ChestState
 {
-    LOCKED,
-    CLOSED,
-    OPEN_FULL,
-    OPEN_EMPTY
+    Locked, Closed, OpenFull, OpenEmpty
 }
 
 [RequireComponent(typeof(AudioSource))]
@@ -14,21 +11,20 @@ public enum ChestState
 /// <summary>
 ///     Controls effects of chest interactions.
 /// </summary>
-public class Chest : Interactable
+public class Chest : Grip
 {
-    public ChestState state = ChestState.CLOSED;
+    public ChestState chestState = ChestState.Closed;
     public GameObject contents;
 
     private Animator animator;
-    private AudioSource audioSource;
     private AudioClip chestOpen, chestClose, chestLoot;
     private bool opened = false;
     private bool empty = false;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         animator = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
         chestOpen = Resources.Load("Sounds/creak_open", typeof(AudioClip)) as AudioClip;
         chestClose = Resources.Load("Sounds/creak_close", typeof(AudioClip)) as AudioClip;
         chestLoot = Resources.Load("Sounds/coins", typeof(AudioClip)) as AudioClip;
@@ -39,29 +35,36 @@ public class Chest : Interactable
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        switch(state)
+        if (blob.IsSticky())
         {
-            case ChestState.LOCKED:
-                if (true /*blob has the key*/ )
-                {
-                    state = ChestState.CLOSED;
-                }
-                break;
-            case ChestState.CLOSED:
-                OpenCloseToggle();
-                state = empty? ChestState.OPEN_EMPTY : ChestState.OPEN_FULL;
-                break;
-            case ChestState.OPEN_EMPTY:
-                OpenCloseToggle();
-                state = ChestState.CLOSED;
-                break;
-            case ChestState.OPEN_FULL:
-                Loot(blob);
-                state = ChestState.OPEN_EMPTY;
-                break;
+            base.OnInteract(blob);
         }
-        animator.SetBool("chestOpened", opened);
-        StartInteractionCooldown(1);
+        else
+        {
+            switch(chestState)
+            {
+                case ChestState.Locked:
+                    if (true /*blob has the key*/ )
+                    {
+                        chestState = ChestState.Closed;
+                    }
+                    break;
+                case ChestState.Closed:
+                    OpenCloseToggle();
+                    chestState = empty? ChestState.OpenEmpty : ChestState.OpenFull;
+                    break;
+                case ChestState.OpenEmpty:
+                    OpenCloseToggle();
+                    chestState = ChestState.Closed;
+                    break;
+                case ChestState.OpenFull:
+                    Loot(blob);
+                    chestState = ChestState.OpenEmpty;
+                    break;
+            }
+            animator.SetBool("chestOpened", opened);
+            StartInteractionCooldown(1, false);
+        }
     }
 
     /// <summary>

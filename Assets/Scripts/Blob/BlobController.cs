@@ -471,6 +471,25 @@ public class BlobController : Controllable
     }
 
     /// <summary>
+    ///     Returns a bool indicating if the blob character is touching the game object.
+    /// </summary>
+    /// <returns>
+    ///     <tt>true</tt> if touching something, <tt>false</tt> if not.
+    /// </returns>
+    public bool IsTouching(GameObject obj)
+    {        
+        foreach (AtomController atom in atomControllers)
+            {
+                if (atom.IsTouching(obj))
+                {
+                    return true;
+                }
+            }
+
+        return false;
+    }
+
+    /// <summary>
     ///     Attempt to grab the game object and keep it held by the blob character.
     ///     This can fail if another object is being held, if the object refuses to be grabbed,
     ///     or if the object does not have a Grip component.
@@ -553,6 +572,11 @@ public class BlobController : Controllable
             }
         }
     }
+    public bool IsSticky()
+    {
+        return stickyMode;
+    }
+
     public GameObject GetCenterAtom()
     {
         return centerAtom;

@@ -217,6 +217,10 @@ public class AtomController : MonoBehaviour
         {
             touching.Remove(obj);
         }
+        if (!blobController.IsTouching(obj) && obj.TryGetComponent<Interactable>(out var interactableObj))
+        {
+            interactableObj.InteractionEnd(blobController);
+        }
     }
 
     /// <summary>
@@ -271,6 +275,10 @@ public class AtomController : MonoBehaviour
     }
 
     // Getters and setters
+    public BlobController GetBlobController()
+    {
+        return blobController;
+    }
     public void SetForce(Vector3 force)
     {
         this.force = force;
@@ -282,6 +290,10 @@ public class AtomController : MonoBehaviour
     public int GetTouchCount()
     {
         return touching.Count;
+    }
+    public bool IsTouching(GameObject obj)
+    {
+        return touching.Contains(obj);
     }
     private void SetVisible(bool visible)
     {

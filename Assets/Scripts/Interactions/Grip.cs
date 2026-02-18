@@ -5,10 +5,9 @@ using UnityEngine;
 /// </summary>
 public enum GripState
 {
-    Idle, Grabbing, Releasing, Held
+    Idle, Grabbing, Held, Releasing
 }
 
-[RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 /// <summary>
 ///     GameObjects with a Grip component can be grabbed by blob characters.
@@ -23,7 +22,7 @@ public class Grip : Interactable
     /// <summary>
     ///    The sound played when the object is grabbed.
     /// </summary>
-    public AudioSource gripSound;
+    public AudioClip gripSound;
 
     // PRIVATE MEMBERS
     // Movement
@@ -65,21 +64,30 @@ public class Grip : Interactable
     /// <summary>
     ///     The current state of the gripped object.
     /// </summary>
-    private GripState state = GripState.Idle;
+    private GripState gripState = GripState.Idle;
     /// <summary>
     ///    The blob character currently grabbing this object, or null if none.
     /// </summary>
     private BlobController grabbedBy;
+    private bool isIgnoringAtomCollisions = false;
 
     // Components
-    private Collider gripCollider;
+    private Collider[] gripColliders;
     private Rigidbody gripRigidbody;
+    protected AudioSource audioSource;
 
-    void Start()
+    protected virtual void Start()
     {
-        gripCollider = GetComponent<Collider>();
+        gripColliders = GetComponentsInChildren<Collider>();
         gripRigidbody = GetComponent<Rigidbody>();
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.volume = 0.8f;
         initialScale = transform.localScale;
+
+        if (gripSound == null)
+        {
+            gripSound = Resources.Load("Sounds/bubbles", typeof(AudioClip)) as AudioClip;
+        }
     }
 
     /// <summary>
@@ -89,7 +97,7 @@ public class Grip : Interactable
     {
         if (GameInfo.GameStatus != GameState.PAUSED)
         {
-            if (state == GripState.Grabbing)
+            if (gripState == GripState.Grabbing)
             {
                 Vector3 translation = grabbedBy.transform.position - transform.position;
                 float distance = translation.magnitude;
@@ -105,7 +113,7 @@ public class Grip : Interactable
                 {
                     if (grabbedBy.TryToGrab(gameObject))
                     {
-                        state = GripState.Held;
+                        gripState = GripState.Held;
                     }
                     else
                     {
@@ -113,7 +121,7 @@ public class Grip : Interactable
                     }
                 }
             }
-            else if (state == GripState.Held)
+            else if (gripState == GripState.Held)
             {
                 transform.position = grabbedBy.transform.position;
             }
@@ -125,7 +133,7 @@ public class Grip : Interactable
     /// </summary>
     protected override void OnUpdate()
     {
-        if (state == GripState.Releasing) // && CoolingDown() // iff GripState.Releasing
+        if (gripState == GripState.Releasing) // && CoolingDown() // iff GripState.Releasing
         {
             GrowByCooldown();
         }
@@ -139,19 +147,27 @@ public class Grip : Interactable
     /// </param>
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.IsHolding(null))
+        if (blob.IsHolding(null) && blob.IsSticky())
         {
-            initialDistance = (blob.transform.position - transform.position).magnitude;
-            grabbedBy = blob;
-
-            gripCollider.isTrigger = true;
-            gripRigidbody.useGravity = false;
-
-            state = GripState.Grabbing;
-
-            gripSound.Play();
-            SetInteractionEnabled(false);
+            GrabBy(blob);
         }
+    }
+
+    protected void GrabBy(BlobController blob)
+    {
+        initialDistance = (blob.transform.position - transform.position).magnitude;
+        grabbedBy = blob;
+
+        foreach (Collider collider in gripColliders) {
+            collider.isTrigger = true;
+        }
+        gripRigidbody.useGravity = false;
+
+        gripState = GripState.Grabbing;
+
+        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.PlayOneShot(gripSound);
+        SetInteractionEnabled(false);
     }
 
     /// <summary>
@@ -170,9 +186,12 @@ public class Grip : Interactable
         grabbedBy = null;
         IgnoreAtomCollisions(true);
         initialDistance = -1;
-        gripCollider.isTrigger = false;
+        
+        foreach (Collider collider in gripColliders) {
+            collider.isTrigger = false;
+        }
         gripRigidbody.useGravity = true;
-        state = GripState.Releasing;
+        gripState = GripState.Releasing;
     }
 
     /// <summary>
@@ -180,8 +199,20 @@ public class Grip : Interactable
     /// </summary>
     protected override void OnInteractionCooldownEnd()
     {
+        GameObject[] atoms = GameObject.FindGameObjectsWithTag("Atom");
+        foreach (GameObject atom in atoms)
+        {
+            foreach (Collider collider in gripColliders) {
+                if (collider.bounds.Intersects(atom.GetComponent<Collider>().bounds))
+                {
+                    GrabBy(atom.GetComponent<AtomController>().GetBlobController());
+                    return;
+                }
+            }
+        }
+
+        gripState = GripState.Idle;
         IgnoreAtomCollisions(false);
-        state = GripState.Idle;
     }
 
     /// <summary>
@@ -192,11 +223,17 @@ public class Grip : Interactable
     /// </param>
     private void IgnoreAtomCollisions(bool ignore)
     {
+        if (isIgnoringAtomCollisions == ignore)
+            return;
+        
         GameObject[] atoms = GameObject.FindGameObjectsWithTag("Atom");
         foreach (GameObject atom in atoms)
         {
-            Physics.IgnoreCollision(gripCollider, atom.GetComponent<Collider>(), ignore);
+            foreach (Collider collider in gripColliders) {
+                Physics.IgnoreCollision(collider, atom.GetComponent<Collider>(), ignore);
+            }
         }
+        isIgnoringAtomCollisions = ignore;
     }
 
     /// <summary>

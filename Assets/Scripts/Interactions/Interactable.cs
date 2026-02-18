@@ -13,6 +13,7 @@ public abstract class Interactable : MonoBehaviour
     ///    Interaction is disabled during the cooldown.
     /// </summary>
     private bool interactionEnabled = true;
+    private bool usingCooldownCallbacks = true;
 
     /// <summary>
     ///     If needed, wait for cooldown and then re-enable interaction.
@@ -28,7 +29,9 @@ public abstract class Interactable : MonoBehaviour
                 {
                     interactionEnabled = true;
                     cooldownTime = 0f;
-                    OnInteractionCooldownEnd();
+                    if (usingCooldownCallbacks) {
+                        OnInteractionCooldownEnd();
+                    }
                 }
             }
 
@@ -57,16 +60,42 @@ public abstract class Interactable : MonoBehaviour
     }
 
     /// <summary>
+    ///     Called by a blob character when it stops interacting with this object.
+    /// </summary>
+    /// <param name="blob">
+    ///     The blob character that has stopped interacting with this object.
+    /// </param>
+    /// <returns>
+    ///     <tt>true</tt> if the interaction stopped, <tt>false</tt> otherwise.
+    /// </returns>
+    public bool InteractionEnd(BlobController blob)
+    {
+        if (interactionEnabled)
+        {
+            OnInteractionEnd(blob);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
     ///    Disable interaction and start a cooldown timer. Re-enable interaction when it ends.
     /// </summary>
     /// <param name="duration">
     ///     The duration of the cooldown period.
     /// </param>
-    protected void StartInteractionCooldown(float duration)
+    /// <param name="useCallbacks">
+    ///     Determines if callbacks related to the interaction cooldown should be used.
+    /// </param>
+    protected void StartInteractionCooldown(float duration, bool useCallbacks = true)
     {
         interactionEnabled = false;
         cooldownTime = duration;
-        OnInteractionCooldownStart();
+        usingCooldownCallbacks = useCallbacks;
+
+        if (usingCooldownCallbacks) {
+            OnInteractionCooldownStart();
+        }
     }
 
     /// <summary>
@@ -92,6 +121,14 @@ public abstract class Interactable : MonoBehaviour
     ///     The blob character interacting with this object.
     /// </param>
     protected virtual void OnInteract(BlobController blob) {}
+
+    /// <summary>
+    ///    Code to run when <tt>InteractEnd()</tt> is called. Can be overridden by the extending class.
+    /// </summary>
+    /// <param name="blob">
+    ///     The blob character ending interaction with this object.
+    /// </param>
+    protected virtual void OnInteractionEnd(BlobController blob) {}
 
     /// <summary>
     ///    Code to run when the cooldown timer begins. Can be overridden by the extending class.
