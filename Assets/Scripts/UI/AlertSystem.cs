@@ -3,70 +3,104 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
-[RequireComponent(typeof(TMP_Text))]
 public class AlertSystem : MonoBehaviour
 {
     private static readonly Color DEFAULT_COLOR = Color.white.WithAlpha(0);
 
     public float fadeInTime = 0.25f;
+    public float displayTime = 3f;
     public float fadeOutTime = 1f;
 
-    private TMP_Text alertBox;
-    private Queue<(string, float, Color)> alertQueue = new();
-    private Color textColor = DEFAULT_COLOR;
-    private float displayTime = 0f;
-    private float timer = 0f;
+    private int alertBoxCount;
+    private float totalTime;
+    private Queue<(string, Color)> alertQueue = new();
+    private TMP_Text[] alertBoxes;
+    private float[] timers;
+    private int headIndex = 0;
+    private Vector3 screenPosition;
+    private Vector3 alertBoxHeightOffset;
 
     void Awake()
     {
-        alertBox = GetComponent<TMP_Text>();
-        alertBox.color = textColor;
-        alertBox.text = "";
         GameInfo.AlertSystem = this;
-    }
+        totalTime = displayTime + fadeInTime + fadeOutTime;
 
-    public void Send(string content, float duration = 3f, Color? color = null)
-    {
-        alertQueue.Enqueue((content, duration, color == null ? DEFAULT_COLOR : (Color)color));
-    }
+        alertBoxes = GetComponentsInChildren<TMP_Text>();
+        alertBoxCount = alertBoxes.Length;
+        timers = new float[alertBoxCount];
 
-    private float AlphaFromTime()
-    {
-        if (timer <= fadeOutTime)
-        {
-            return timer / fadeOutTime;
+        for (int i = 0; i < alertBoxCount; i++) {
+            alertBoxes[i].color = DEFAULT_COLOR;
+            alertBoxes[i].text = "";
+            timers[i] = 0f;
         }
-        else if (timer <= fadeOutTime + displayTime)
+
+        alertBoxHeightOffset = new(0 ,alertBoxes[0].rectTransform.rect.height, 0);
+        screenPosition = alertBoxes[0].transform.position - alertBoxHeightOffset * (alertBoxCount - 1);
+        ShiftAlertBoxes();
+    }
+
+    public void Send(string content, Color? color = null)
+    {
+        alertQueue.Enqueue((content, color == null ? DEFAULT_COLOR : (Color)color));
+    }
+
+    public void TryPostNext()
+    {
+        if (timers[headIndex] == 0 && alertQueue.Count > 0) {
+            (string content, Color color) = alertQueue.Dequeue();
+
+            timers[headIndex] = totalTime;
+            alertBoxes[headIndex].text = content;
+            alertBoxes[headIndex].color = color;
+            headIndex = (headIndex + 1) % alertBoxCount;
+
+            ShiftAlertBoxes();
+        }
+    }
+
+    private void ShiftAlertBoxes()
+    {
+        int shift = alertBoxCount - headIndex;
+        for (int i = 0; i < alertBoxCount; i++)
+        {
+            Vector3 offset = alertBoxHeightOffset * ((i + shift) % alertBoxCount);
+            alertBoxes[i].transform.position = screenPosition + offset;
+        }
+    }
+
+    private float AlphaFromTime(int i)
+    {
+        if (timers[i] <= fadeOutTime)
+        {
+            return timers[i] / fadeOutTime;
+        }
+        else if (timers[i] <= fadeOutTime + displayTime)
         {
             return 1f;
         }
         else
         {
-            return 1f - (timer - fadeOutTime - displayTime) / fadeInTime;
+            return 1f - (timers[i] - fadeOutTime - displayTime) / fadeInTime;
         }
     }
 
     void Update()
     {
-        if (timer > 0)
-        {
-            alertBox.color = textColor.WithAlpha(AlphaFromTime());
-            timer -= Time.deltaTime;
-            if (timer <= 0)
+        TryPostNext();
+
+        for (int i = 0; i < alertBoxCount; i++) {
+            if (timers[i] > 0)
             {
-                timer = 0f;
-                alertBox.text = "";
-                alertBox.color = textColor = DEFAULT_COLOR;
+                alertBoxes[i].color = alertBoxes[i].color.WithAlpha(AlphaFromTime(i));
+                timers[i] -= Time.deltaTime;
+                if (timers[i] <= 0)
+                {
+                    timers[i] = 0f;
+                    alertBoxes[i].text = "";
+                    alertBoxes[i].color = DEFAULT_COLOR;
+                }
             }
-        }
-        
-        if (alertQueue.Count > 0)
-        {
-            (string content, float duration, Color color) = alertQueue.Dequeue();
-            alertBox.text = content;
-            displayTime = duration;
-            textColor = color;
-            timer = displayTime + fadeInTime + fadeOutTime;
         }
     }
 }
