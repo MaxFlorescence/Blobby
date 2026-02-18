@@ -20,6 +20,7 @@ public class Chest : Grip
     private AudioClip chestOpen, chestClose, chestLoot;
     private bool opened = false;
     private bool empty = false;
+    private Light treasureLight;
 
     protected override void Start()
     {
@@ -28,6 +29,8 @@ public class Chest : Grip
         chestOpen = Resources.Load("Sounds/creak_open", typeof(AudioClip)) as AudioClip;
         chestClose = Resources.Load("Sounds/creak_close", typeof(AudioClip)) as AudioClip;
         chestLoot = Resources.Load("Sounds/coins", typeof(AudioClip)) as AudioClip;
+
+        treasureLight = contents.GetComponentInChildren<Light>();
     }
 
     /// <summary>
@@ -35,7 +38,7 @@ public class Chest : Grip
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.IsSticky())
+        if (blob.IsSticky() && chestState != ChestState.OpenFull)
         {
             base.OnInteract(blob);
         }
@@ -53,13 +56,16 @@ public class Chest : Grip
                     OpenCloseToggle();
                     chestState = empty? ChestState.OpenEmpty : ChestState.OpenFull;
                     break;
+                case ChestState.OpenFull:
+                    if (blob.IsSticky()) {
+                        Loot(blob);
+                        chestState = ChestState.OpenEmpty;
+                        break;
+                    }
+                    goto case ChestState.OpenEmpty;
                 case ChestState.OpenEmpty:
                     OpenCloseToggle();
                     chestState = ChestState.Closed;
-                    break;
-                case ChestState.OpenFull:
-                    Loot(blob);
-                    chestState = ChestState.OpenEmpty;
                     break;
             }
             animator.SetBool("chestOpened", opened);
@@ -80,6 +86,11 @@ public class Chest : Grip
         // TODO: incorporate with actual inventory system.
         int goldAmount = Random.Range(1, 100);
         GameInfo.AlertSystem.Send(string.Format("Obtained {0} gold", goldAmount));
+    }
+
+    public void SetShine(bool shine)
+    {
+        treasureLight.enabled = shine;
     }
 
     /// <summary>
