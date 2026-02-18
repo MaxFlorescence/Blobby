@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 public enum ChestState
@@ -13,7 +12,7 @@ public enum ChestState
 [RequireComponent(typeof(Animator))]
 
 /// <summary>
-///     Controls effects of chests being opened and closed.
+///     Controls effects of chest interactions.
 /// </summary>
 public class Chest : Interactable
 {
@@ -35,33 +34,8 @@ public class Chest : Interactable
         chestLoot = Resources.Load("Sounds/coins", typeof(AudioClip)) as AudioClip;
     }
 
-    // protected override void OnUpdate()
-    // {
-    //     if (timer > 0)
-    //     {
-    //         timer -= Time.deltaTime;
-    //         SetFlameStrength(Mathf.Lerp(targetStrength, lastStrength, timer / fadeTime));
-    //     }
-    //     else if (lastStrength != targetStrength)
-    //     {
-    //         SetFlameStrength(targetStrength);
-    //         timer = fadeTime;
-    //     }
-
-    // }
-
-    // private void SetFlameStrength(float newStrength)
-    // {
-    //     foreach (Renderer renderer in fireRenderers)
-    //     {
-    //         renderer.material.SetFloat("_Strength", newStrength);
-    //     }
-
-    //     lastStrength = newStrength;
-    // }
-
     /// <summary>
-    ///     Put out the fire on interaction
+    ///     Change chest state on interaction.
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
@@ -82,7 +56,7 @@ public class Chest : Interactable
                 state = ChestState.CLOSED;
                 break;
             case ChestState.OPEN_FULL:
-                Loot();
+                Loot(blob);
                 state = ChestState.OPEN_EMPTY;
                 break;
         }
@@ -90,14 +64,24 @@ public class Chest : Interactable
         StartInteractionCooldown(1);
     }
 
-    private void Loot()
+    /// <summary>
+    ///     Add chest loot to blob's inventory.
+    /// </summary>
+    private void Loot(BlobController blob)
     {
         audioSource.pitch = 1;
         audioSource.PlayOneShot(chestLoot, 0.5f);
         empty = true;
         contents.SetActive(false);
+
+        // TODO: incorporate with actual inventory system.
+        int goldAmount = Random.Range(1, 100);
+        GameInfo.AlertSystem.Send(string.Format("Obtained {0} gold", goldAmount));
     }
 
+    /// <summary>
+    ///     Toggle chest state between open and closed.
+    /// </summary>
     private void OpenCloseToggle()
     {
         audioSource.pitch = Random.Range(0.8f, 1.2f);
