@@ -23,6 +23,7 @@ public class Grip : Interactable
     ///    The sound played when the object is grabbed.
     /// </summary>
     public AudioClip gripSound;
+    public Vector2 randomPitchBounds = new(0.8f, 1.2f);
 
     // PRIVATE MEMBERS
     // Movement
@@ -114,6 +115,7 @@ public class Grip : Interactable
                     if (grabbedBy.TryToGrab(gameObject))
                     {
                         gripState = GripState.Held;
+                        SetScale(finalScaleFactor);
                     }
                     else
                     {
@@ -165,7 +167,7 @@ public class Grip : Interactable
 
         gripState = GripState.Grabbing;
 
-        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.pitch = Random.Range(randomPitchBounds.x, randomPitchBounds.y);
         audioSource.PlayOneShot(gripSound);
         SetInteractionEnabled(false);
     }
@@ -257,9 +259,13 @@ public class Grip : Interactable
 
         if (currentScaleFactor > scale)
         {
-            transform.localScale = scale * initialScale;
-            currentScaleFactor = scale;
+            SetScale(scale);
         }
+    }
+
+    private void SetScale(float scale) {
+        transform.localScale = scale * initialScale;
+        currentScaleFactor = scale;
     }
 
     /// <summary>
