@@ -529,7 +529,7 @@ public class BlobController : Controllable
     public bool TryToGrab(GameObject obj)
     {
         int objectBurden = obj.GetComponent<Grip>().burden;
-        if (currentBurden + objectBurden > CARRYING_CAPACITY)
+        if (!CanCarry(objectBurden))
             return false;
         
         for (int i = 0; i < INVENTORY_SIZE; i++) {
@@ -543,6 +543,11 @@ public class BlobController : Controllable
         }
 
         return false;
+    }
+
+    public bool CanCarry(int burden)
+    {
+        return currentBurden + burden <= CARRYING_CAPACITY;
     }
 
     /// <summary>

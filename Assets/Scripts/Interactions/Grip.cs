@@ -161,7 +161,7 @@ public class Grip : Interactable
     /// </param>
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.IsHolding(null) && blob.IsSticky())
+        if (blob.IsHolding(null) && blob.IsSticky() && blob.CanCarry(burden))
         {
             GrabBy(blob);
         }
