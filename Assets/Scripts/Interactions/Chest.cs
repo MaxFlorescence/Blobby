@@ -103,4 +103,10 @@ public class Chest : Grip
         audioSource.PlayOneShot(opened ? chestClose : chestOpen);
         opened = !opened;
     }
+
+    public override string ToString()
+    {
+        string baseString = base.ToString()[..^1];
+        return string.Format("{0}, ChestState: {1})", baseString, chestState.ToString());
+    }
 }  

@@ -1,9 +1,14 @@
+using TMPro;
 using UnityEngine;
 
-class DebugControls : MonoBehaviour
+class DebugController : MonoBehaviour
 {
+    public TMP_Text debugWindow;
+
     void Update()
     {
+        UpdateDebugInfo();
+
         if (Input.GetKeyDown(KeyCode.Slash)) {
             GameInfo.DebugMode = !GameInfo.DebugMode;
             GameInfo.AlertSystem.Send("Debug mode is " + (GameInfo.DebugMode ? "on" : "off"));
@@ -21,6 +26,11 @@ class DebugControls : MonoBehaviour
             else if (Input.GetKeyDown(KeyCode.Alpha2))
                 GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.LAVA);
         }
+    }
+
+    private void UpdateDebugInfo()
+    {
+        debugWindow.text = GameInfo.DebugMode ? "<mspace=0.75em>" + GameInfo.ControlledBlob.ToString() : "";
     }
 
     public void Toggle()

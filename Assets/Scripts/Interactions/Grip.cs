@@ -313,4 +313,9 @@ public class Grip : Interactable
             child.gameObject.layer = newLayer;
         }
     }
+
+    public override string ToString()
+    {
+        return string.Format("{0} (Burden: {1}, GripState: {2})", gameObject.name, burden, gripState.ToString());
+    }
 }

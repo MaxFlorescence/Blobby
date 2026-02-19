@@ -4,8 +4,7 @@ using UnityEngine;
 
 public enum BlobMaterials
 {
-    WATER,
-    LAVA
+    WATER, LAVA
 }
 
 [Flags]
@@ -52,5 +51,9 @@ public static class BlobMaterialExtensions
     public static bool HasProperty(this BlobMaterials blobMaterial, MaterialProperties property)
     {
         return (map[blobMaterial].Item3 & property) > 0;
+    }
+    public static MaterialProperties GetProperties(this BlobMaterials blobMaterial)
+    {
+        return map[blobMaterial].Item3;
     }
 }

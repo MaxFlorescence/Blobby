@@ -739,4 +739,29 @@ public class BlobController : Controllable
             atom.transform.position += ghostSpeed * translation;
         }
     }
+
+    public override string ToString()
+    {
+        string inventoryString = "";
+        for (int i = 0; i < INVENTORY_SIZE; i++)
+        {
+            inventoryString += string.Format("  {0}{1}: {2}\n",
+                inventorySelection == i ? ">" : " ", i,
+                inventory[i] == null ? "null" : inventory[i].GetComponent<Grip>().ToString()
+            );
+        }
+
+        return string.Format("BlobController:\n"
+        + " ghostMode: {0}\n"
+        + " blobMaterials: {1} ({2})\n"
+        + " stickyMode: {3}\n"
+        + " inventory: (currentBurden: {4})\n{5}",
+            ghostMode,
+            blobMaterials.ToString(),
+            blobMaterials.GetProperties().ToString(),
+            stickyMode,
+            currentBurden,
+            inventoryString
+        );
+    }
 }
