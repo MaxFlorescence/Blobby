@@ -145,3 +145,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   finalScaleFactor: 0.33
   gripSound: {fileID: 0}
+  randomPitchBounds: {x: 0.8, y: 1.2}
+  spinFactor: 0.1
+  burden: 2

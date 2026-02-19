@@ -132,6 +132,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   finalScaleFactor: 0.33
   gripSound: {fileID: 0}
+  randomPitchBounds: {x: 0.8, y: 1.2}
+  spinFactor: 0.1
+  burden: 3
 --- !u!1 &4291656006547718127 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 84502384288598511, guid: 9c746498225791a4999940a6b7f428a8, type: 3}

@@ -56,6 +56,25 @@ public class BlobController : Controllable
     private bool stickyMode = false;
     private float stickyModifier = 1.2f;
 
+    // Inventory
+    /// <summary>
+    ///     The list of gameObjects carried by the blob.
+    /// </summary>
+    private GameObject[] inventory;
+    private const int INVENTORY_SIZE = 10;
+    /// <summary>
+    ///     Which inventory object is currently selected.
+    /// </summary>
+    private int inventorySelection = 0;
+    /// <summary>
+    ///     How much burden the blob can carry in its inventory.
+    /// </summary>
+    private const int CARRYING_CAPACITY = 10;
+    /// <summary>
+    ///     The current burden the blob is carrying.
+    /// </summary>
+    private int currentBurden = 0;
+
     // Fire
     public bool canIgnite { get; private set; } = false;
     public bool canExtinguish { get; private set; }= false;
@@ -66,7 +85,6 @@ public class BlobController : Controllable
     public Mesh dropletMesh { get; private set; }
 
     // Misc
-    private GameObject grabbedObject;
     /// <summary>
     ///     The factor by which the blob can grow from its original size.
     /// </summary>
@@ -107,6 +125,8 @@ public class BlobController : Controllable
             atomControllers[i].blobController = this;
         }
         atomControllers[0].GetComponent<AtomController>().SetCenterAtom(true);
+
+        inventory = new GameObject[INVENTORY_SIZE];
 
         SetBlobMaterials(BlobMaterials.WATER);
 
@@ -374,6 +394,12 @@ public class BlobController : Controllable
             Release();
         }
 
+        float mouseScroll = Input.mouseScrollDelta.y;
+        if (mouseScroll != 0)
+        {
+            SelectNextNonEmptyObject(mouseScroll > 0);
+        }
+
         if (movementInputEnabled)
         {
             if (Input.GetButtonDown("Jump"))
@@ -502,10 +528,18 @@ public class BlobController : Controllable
     /// </returns>
     public bool TryToGrab(GameObject obj)
     {
-        if (grabbedObject == null)
-        {
-            grabbedObject = obj;
-            return true;
+        int objectBurden = obj.GetComponent<Grip>().burden;
+        if (currentBurden + objectBurden > CARRYING_CAPACITY)
+            return false;
+        
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+            if (inventory[i] == null)
+            {
+                inventory[i] = obj;
+                currentBurden += objectBurden;
+                SelectInventoryObject(i);
+                return true;
+            }
         }
 
         return false;
@@ -516,16 +550,31 @@ public class BlobController : Controllable
     /// </summary>
     public void Release()
     {
-        if (grabbedObject != null)
+        if (currentBurden == 0)
+            return;
+
+        if (inventory[inventorySelection] != null)
         {
-            grabbedObject.GetComponent<Grip>().Release();
+            inventory[inventorySelection].GetComponent<Grip>().Release();
+            currentBurden -= inventory[inventorySelection].GetComponent<Grip>().burden;
         }
-        grabbedObject = null;
+        inventory[inventorySelection] = null;
+        SelectNextNonEmptyObject(true);
     }
 
     public bool IsHolding(GameObject obj)
     {
-        return grabbedObject == obj;
+        if (currentBurden == 0)
+            return obj == null;
+
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+            if (inventory[i] == obj)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -539,7 +588,44 @@ public class BlobController : Controllable
     /// </returns>
     public bool HoldingObjectWithTag(string tag)
     {
-        return grabbedObject != null && grabbedObject.CompareTag(tag);
+        if (currentBurden == 0)
+            return false;
+
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+            if (inventory[i] != null && inventory[i].CompareTag(tag))
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private void SelectInventoryObject(int i)
+    {
+        if (inventory[inventorySelection] != null) {
+            inventory[inventorySelection].GetComponent<Grip>().SetVisible(false);
+        }
+        if (inventory[i] != null) {
+            inventory[i].GetComponent<Grip>().SetVisible(true);
+        }
+        inventorySelection = i;
+    }
+
+    private void SelectNextNonEmptyObject(bool forward)
+    {
+        if (currentBurden == 0) 
+            return;
+
+        for (int i = 1; i < INVENTORY_SIZE; i++)
+        {
+            int index = (INVENTORY_SIZE + inventorySelection + (forward ? i : -i)) % INVENTORY_SIZE;
+            if (inventory[index] != null)
+            {
+                SelectInventoryObject(index);
+                return;
+            }
+        }
     }
 
     /// <summary>

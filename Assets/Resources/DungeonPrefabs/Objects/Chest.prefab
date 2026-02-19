@@ -313,6 +313,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   finalScaleFactor: 0.33
   gripSound: {fileID: 0}
+  randomPitchBounds: {x: 0.8, y: 1.2}
+  spinFactor: 0.1
+  burden: 4
   chestState: 1
   contents: {fileID: 5098124715001449125}
 --- !u!82 &2409640578900595915

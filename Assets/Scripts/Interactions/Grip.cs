@@ -23,7 +23,18 @@ public class Grip : Interactable
     ///    The sound played when the object is grabbed.
     /// </summary>
     public AudioClip gripSound;
+    /// <summary>
+    ///    The range of possible pitches for <tt>gripSound</tt>.
+    /// </summary>
     public Vector2 randomPitchBounds = new(0.8f, 1.2f);
+    /// <summary>
+    ///    The factor by which a blob's motion affects the object's spin while grabbed.
+    /// </summary>
+    public float spinFactor = 0.1f;
+    /// <summary>
+    ///    The cost of carrying the object, charged to a blob's carrying capacity.
+    /// </summary>
+    public int burden = 1;
 
     // PRIVATE MEMBERS
     // Movement
@@ -126,6 +137,7 @@ public class Grip : Interactable
             else if (gripState == GripState.Held)
             {
                 transform.position = grabbedBy.transform.position;
+                gripRigidbody.AddTorque(spinFactor * Vector3.Cross(Vector3.up, grabbedBy.GetVelocity()));
             }
         }
     }
@@ -288,6 +300,17 @@ public class Grip : Interactable
         {
             transform.localScale = scale * initialScale;
             currentScaleFactor = scale;
+        }
+    }
+
+    public void SetVisible(bool visible)
+    {        
+        int newLayer = visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER;
+
+        gameObject.layer = newLayer;
+        foreach (Transform child in GetComponentsInChildren<Transform>())
+        {
+            child.gameObject.layer = newLayer;
         }
     }
 }

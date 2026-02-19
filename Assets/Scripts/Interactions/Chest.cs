@@ -82,6 +82,7 @@ public class Chest : Grip
         audioSource.PlayOneShot(chestLoot, 0.5f);
         empty = true;
         contents.SetActive(false);
+        burden = 3;
 
         // TODO: incorporate with actual inventory system.
         int goldAmount = Random.Range(1, 100);
