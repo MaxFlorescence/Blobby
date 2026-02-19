@@ -304,17 +304,6 @@ public class Grip : Interactable
         }
     }
 
-    public void SetVisible(bool visible)
-    {        
-        int newLayer = visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER;
-
-        gameObject.layer = newLayer;
-        foreach (Transform child in GetComponentsInChildren<Transform>())
-        {
-            child.gameObject.layer = newLayer;
-        }
-    }
-
     public override string ToString()
     {
         return string.Format("{0} (Burden: {1}, GripState: {2})", gameObject.name, burden, gripState.ToString());

@@ -91,12 +91,23 @@ public static class Extensions
 
         return min;
     }
+
+    public static void SetLayer(this GameObject obj, LayerMask layer)
+    {
+        obj.layer = layer;
+        foreach (Transform child in obj.GetComponentsInChildren<Transform>())
+        {
+            child.gameObject.layer = layer;
+        }
+    }
 }
 
 class Utilities : MonoBehaviour
 {
     public static int DEFAULT_LAYER { get; private set; }
     public static int INVISIBLE_LAYER { get; private set; }
+    public static int INVENTORY_UI_LAYER { get; private set; }
+
     public static readonly Vector3Int[] cardinalDirections = new Vector3Int[]
     {
         Vector3Int.forward,
@@ -128,6 +139,7 @@ class Utilities : MonoBehaviour
     {
         DEFAULT_LAYER = LayerMask.NameToLayer("Default");
         INVISIBLE_LAYER = LayerMask.NameToLayer("Invisible");
+        INVENTORY_UI_LAYER = LayerMask.NameToLayer("InventoryUI");
     }
     
     public static int[] ArgShuffle<T>(T[] array)

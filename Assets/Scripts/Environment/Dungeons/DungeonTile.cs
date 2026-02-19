@@ -117,15 +117,9 @@ public class DungeonTile : MonoBehaviour
     public void SetVisible(bool visible, bool? visibleOnMap = null)
     {
         if (Type == DungeonTileType.NONE) return;
-        visibleOnMap ??= visible;
-        
-        int newLayer = visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER;
 
-        gameObject.layer = newLayer;
-        foreach (Transform child in GetComponentsInChildren<Transform>())
-        {
-            child.gameObject.layer = newLayer;
-        }
+        visibleOnMap ??= visible;
+        gameObject.SetLayer(visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER);
 
         mapIcon.SetActive((bool)visibleOnMap);
     }

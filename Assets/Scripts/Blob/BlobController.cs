@@ -79,6 +79,7 @@ public class BlobController : Controllable
     /// </summary>
     private AudioClip releaseSound;
     private AudioSource audioSource;
+    private Camera inventoryCamera;
 
     // Fire
     public bool canIgnite { get; private set; } = false;
@@ -134,6 +135,8 @@ public class BlobController : Controllable
         atomControllers[0].GetComponent<AtomController>().SetCenterAtom(true);
 
         inventory = new GameObject[INVENTORY_SIZE];
+        inventoryCamera = transform.parent.GetComponentsInChildren<Camera>()[0];
+        inventoryCamera.enabled = true;
 
         SetBlobMaterials(BlobMaterials.WATER);
 
@@ -395,6 +398,8 @@ public class BlobController : Controllable
     /// </summary>
     void Update()
     {
+        MoveInventoryCamera();
+
         if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
             return;
 
@@ -436,6 +441,12 @@ public class BlobController : Controllable
                 SetStickyMode(false);
             }
         }
+    }
+
+    private void MoveInventoryCamera()
+    {
+        inventoryCamera.transform.position = transform.position + 2 * Vector3.back;
+        inventoryCamera.transform.LookAt(transform);
     }
 
     /// <summary>
@@ -544,6 +555,7 @@ public class BlobController : Controllable
                 if (inventory[i] == null)
                 {
                     inventory[i] = obj;
+                    obj.SetLayer(Utilities.INVENTORY_UI_LAYER);
                     currentBurden += objectBurden;
                     SelectInventoryObject(i);
                     return true;
@@ -574,6 +586,7 @@ public class BlobController : Controllable
             inventory[inventorySelection].GetComponent<Grip>().Release();
             currentBurden -= inventory[inventorySelection].GetComponent<Grip>().burden;
         }
+        inventory[inventorySelection].SetLayer(Utilities.DEFAULT_LAYER);
         inventory[inventorySelection] = null;
         SelectNextNonEmptyObject(true);
         audioSource.pitch = Random.Range(0.8f, 1.2f);
@@ -622,10 +635,10 @@ public class BlobController : Controllable
     private void SelectInventoryObject(int i)
     {
         if (inventory[inventorySelection] != null) {
-            inventory[inventorySelection].GetComponent<Grip>().SetVisible(false);
+            inventory[inventorySelection].SetLayer(Utilities.INVISIBLE_LAYER);
         }
         if (inventory[i] != null) {
-            inventory[i].GetComponent<Grip>().SetVisible(true);
+            inventory[i].SetLayer(Utilities.INVENTORY_UI_LAYER);
         }
         inventorySelection = i;
     }
