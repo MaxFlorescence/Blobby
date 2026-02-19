@@ -213,13 +213,14 @@ public class Grip : Interactable
     /// </summary>
     protected override void OnInteractionCooldownEnd()
     {
+        // Don't allow an object to become collide-able again while a blob is inside of it.
         GameObject[] atoms = GameObject.FindGameObjectsWithTag("Atom");
         foreach (GameObject atom in atoms)
         {
             foreach (Collider collider in gripColliders) {
                 if (collider.bounds.Intersects(atom.GetComponent<Collider>().bounds))
                 {
-                    GrabBy(atom.GetComponent<AtomController>().GetBlobController());
+                    Release();
                     return;
                 }
             }

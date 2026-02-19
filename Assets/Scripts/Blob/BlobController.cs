@@ -74,6 +74,11 @@ public class BlobController : Controllable
     ///     The current burden the blob is carrying.
     /// </summary>
     private int currentBurden = 0;
+    /// <summary>
+    ///     The sound to play when releasing an object.
+    /// </summary>
+    private AudioClip releaseSound;
+    private AudioSource audioSource;
 
     // Fire
     public bool canIgnite { get; private set; } = false;
@@ -107,6 +112,8 @@ public class BlobController : Controllable
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         dropletMesh = Instantiate(sphere.GetComponent<MeshFilter>().mesh);
         Destroy(sphere);
+
+        audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     /// <summary>
@@ -222,6 +229,8 @@ public class BlobController : Controllable
     {
         squisher = centerAtom.AddComponent<Squisher>();
         squisher.audioSource = centerAtom.AddComponent<AudioSource>();
+        
+        releaseSound = Resources.Load("Sounds/bubble_pop", typeof(AudioClip)) as AudioClip;
     }
 
     /// <summary>
@@ -529,19 +538,21 @@ public class BlobController : Controllable
     public bool TryToGrab(GameObject obj)
     {
         int objectBurden = obj.GetComponent<Grip>().burden;
-        if (!CanCarry(objectBurden))
-            return false;
         
-        for (int i = 0; i < INVENTORY_SIZE; i++) {
-            if (inventory[i] == null)
-            {
-                inventory[i] = obj;
-                currentBurden += objectBurden;
-                SelectInventoryObject(i);
-                return true;
+        if (CanCarry(objectBurden)) {
+            for (int i = 0; i < INVENTORY_SIZE; i++) {
+                if (inventory[i] == null)
+                {
+                    inventory[i] = obj;
+                    currentBurden += objectBurden;
+                    SelectInventoryObject(i);
+                    return true;
+                }
             }
         }
 
+        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.PlayOneShot(releaseSound);
         return false;
     }
 
@@ -565,6 +576,8 @@ public class BlobController : Controllable
         }
         inventory[inventorySelection] = null;
         SelectNextNonEmptyObject(true);
+        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.PlayOneShot(releaseSound);
     }
 
     public bool IsHolding(GameObject obj)
