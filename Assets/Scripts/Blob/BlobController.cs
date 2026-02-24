@@ -80,6 +80,7 @@ public class BlobController : Controllable
     private AudioClip releaseSound;
     private AudioSource audioSource;
     private Camera inventoryCamera;
+    private Light inventoryLight;
 
     // Fire
     public bool canIgnite { get; private set; } = false;
@@ -136,6 +137,7 @@ public class BlobController : Controllable
 
         inventory = new GameObject[INVENTORY_SIZE];
         inventoryCamera = transform.parent.GetComponentsInChildren<Camera>()[0];
+        inventoryLight = inventoryCamera.GetComponentsInChildren<Light>()[0];
         inventoryCamera.enabled = true;
 
         SetBlobMaterials(BlobMaterials.WATER);
@@ -447,7 +449,7 @@ public class BlobController : Controllable
     {
         Transform targetTransform = inventory[inventorySelection] != null ?
             inventory[inventorySelection].transform : transform;
-        inventoryCamera.transform.position = targetTransform.position + 2 * Vector3.back;
+        inventoryCamera.transform.position = targetTransform.position + Vector3.back;
         inventoryCamera.transform.LookAt(targetTransform);
     }
 
@@ -712,6 +714,11 @@ public class BlobController : Controllable
     public BlobMaterials GetBlobMaterials()
     {
         return blobMaterials;
+    }
+
+    public void EnableInventoryLight(bool enable)
+    {
+        inventoryLight.enabled = enable;
     }
 
     public void SetBlobMaterials(BlobMaterials newBlobMaterials)

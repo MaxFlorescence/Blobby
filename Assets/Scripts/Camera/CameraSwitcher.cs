@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Rendering;
 
 public class CameraSwitcher : MonoBehaviour
 {
@@ -8,16 +9,39 @@ public class CameraSwitcher : MonoBehaviour
     private int cameraCount;
     private int activeCamera = -1;
 
+    void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+    {
+        if (camera.gameObject.layer == Utilities.INVENTORY_UI_LAYER) {
+            GameInfo.ControlledBlob.EnableInventoryLight(true);
+        }
+    }
+
+    void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
+    {
+        if (camera.gameObject.layer == Utilities.INVENTORY_UI_LAYER) {
+            GameInfo.ControlledBlob.EnableInventoryLight(false);
+        }
+    }
+
+    void Start()
+    {
+        RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
+        RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
+
+        ActivateHighesetPriorityCamera();
+    }
+
+    void OnDestroy()
+    {
+        RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
+        RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
+    }
+
     void Awake()
     {
         cameras = Array.ConvertAll(Camera.allCameras, camera => camera.GetComponent<PriorityCamera>());
         cameraCount = cameras.Length;
         DeactivateAll();
-    }
-
-    void Start()
-    {
-        ActivateHighesetPriorityCamera();
     }
 
     void Update()
