@@ -30,7 +30,7 @@ public class Grip : Interactable
     /// <summary>
     ///    The factor by which a blob's motion affects the object's spin while grabbed.
     /// </summary>
-    public float spinFactor = 0.1f;
+    public float spinFactor = 0.5f;
     /// <summary>
     ///    The cost of carrying the object, charged to a blob's carrying capacity.
     /// </summary>
