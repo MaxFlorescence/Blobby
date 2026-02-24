@@ -445,8 +445,10 @@ public class BlobController : Controllable
 
     private void MoveInventoryCamera()
     {
-        inventoryCamera.transform.position = transform.position + 2 * Vector3.back;
-        inventoryCamera.transform.LookAt(transform);
+        Transform targetTransform = inventory[inventorySelection] != null ?
+            inventory[inventorySelection].transform : transform;
+        inventoryCamera.transform.position = targetTransform.position + 2 * Vector3.back;
+        inventoryCamera.transform.LookAt(targetTransform);
     }
 
     /// <summary>
