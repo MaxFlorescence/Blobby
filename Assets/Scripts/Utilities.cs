@@ -107,6 +107,7 @@ class Utilities : MonoBehaviour
     public static int DEFAULT_LAYER { get; private set; }
     public static int INVISIBLE_LAYER { get; private set; }
     public static int INVENTORY_UI_LAYER { get; private set; }
+    public static int IGNORE_CAMERA_LAYER { get; private set; }
 
     public static readonly Vector3Int[] cardinalDirections = new Vector3Int[]
     {
@@ -140,6 +141,7 @@ class Utilities : MonoBehaviour
         DEFAULT_LAYER = LayerMask.NameToLayer("Default");
         INVISIBLE_LAYER = LayerMask.NameToLayer("Invisible");
         INVENTORY_UI_LAYER = LayerMask.NameToLayer("InventoryUI");
+        IGNORE_CAMERA_LAYER = LayerMask.NameToLayer("Ignore Camera");
     }
     
     public static int[] ArgShuffle<T>(T[] array)

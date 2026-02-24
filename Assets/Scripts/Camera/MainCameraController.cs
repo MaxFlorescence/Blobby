@@ -6,6 +6,7 @@ public class MainCameraController : PriorityCamera
     private Transform trackedTransform = null;
     private Vector3 lastPosition;
     private const float EPSILON = 1E-2f;
+    private float beginRaycastDistance = 0f;
     public float trackingDistance = 10f;
 
     void Awake()
@@ -78,9 +79,10 @@ public class MainCameraController : PriorityCamera
         RaycastHit hitInfo;
         LayerMask layerMask = ~LayerMask.GetMask("Ignore Camera");
 
+        Vector3 rayDirection = offset.normalized;
         bool hitSomething = Physics.Raycast(
-            trackedTransform.position,
-            offset.normalized,
+            trackedTransform.position + beginRaycastDistance * rayDirection,
+            rayDirection,
             out hitInfo,
             offset.magnitude,
             layerMask.value,

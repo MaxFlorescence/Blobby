@@ -189,6 +189,7 @@ public class Grip : Interactable
     /// </summary>
     public void Release()
     {
+        gameObject.SetLayer(Utilities.IGNORE_CAMERA_LAYER);
         StartInteractionCooldown(maxCooldown);
     }
 
@@ -226,6 +227,7 @@ public class Grip : Interactable
             }
         }
 
+        gameObject.SetLayer(Utilities.DEFAULT_LAYER);
         gripState = GripState.Idle;
         IgnoreAtomCollisions(false);
     }

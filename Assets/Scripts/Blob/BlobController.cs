@@ -1,6 +1,12 @@
 using System.Collections;
 using UnityEngine;
 
+public enum BlobLight
+{
+    Inventory = 0,
+    Material = 1
+}
+
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
@@ -80,11 +86,12 @@ public class BlobController : Controllable
     private AudioClip releaseSound;
     private AudioSource audioSource;
     private Camera inventoryCamera;
-    private Light inventoryLight;
+    private float inventoryCameraDistance = 2f;
+    private (Light, bool)[] blobLights = new (Light, bool)[2];
 
     // Fire
     public bool canIgnite { get; private set; } = false;
-    public bool canExtinguish { get; private set; }= false;
+    public bool canExtinguish { get; private set; } = false;
 
     // Visuals
     private MeshRenderer blobMesh;
@@ -137,8 +144,11 @@ public class BlobController : Controllable
 
         inventory = new GameObject[INVENTORY_SIZE];
         inventoryCamera = transform.parent.GetComponentsInChildren<Camera>()[0];
-        inventoryLight = inventoryCamera.GetComponentsInChildren<Light>()[0];
         inventoryCamera.enabled = true;
+
+        Light[] lights = transform.parent.GetComponentsInChildren<Light>();
+        blobLights[(int)BlobLight.Material] = (lights[0], false);
+        blobLights[(int)BlobLight.Inventory] = (lights[1], false);
 
         SetBlobMaterials(BlobMaterials.WATER);
 
@@ -449,7 +459,7 @@ public class BlobController : Controllable
     {
         Transform targetTransform = inventory[inventorySelection] != null ?
             inventory[inventorySelection].transform : transform;
-        inventoryCamera.transform.position = targetTransform.position + Vector3.back;
+        inventoryCamera.transform.position = targetTransform.position + inventoryCameraDistance * Vector3.back;
         inventoryCamera.transform.LookAt(targetTransform);
     }
 
@@ -590,7 +600,6 @@ public class BlobController : Controllable
             inventory[inventorySelection].GetComponent<Grip>().Release();
             currentBurden -= inventory[inventorySelection].GetComponent<Grip>().burden;
         }
-        inventory[inventorySelection].SetLayer(Utilities.DEFAULT_LAYER);
         inventory[inventorySelection] = null;
         SelectNextNonEmptyObject(true);
         audioSource.pitch = Random.Range(0.8f, 1.2f);
@@ -716,9 +725,22 @@ public class BlobController : Controllable
         return blobMaterials;
     }
 
-    public void EnableInventoryLight(bool enable)
+    public void SetLight(BlobLight light, bool? enable, bool save = false)
     {
-        inventoryLight.enabled = enable;
+        int index = (int)light;
+        enable ??= !blobLights[index].Item2;
+
+        blobLights[index].Item1.enabled = (bool)enable;
+
+        if (save)
+        {
+            blobLights[index].Item2 = (bool)enable;
+        }
+    }
+
+    public void ResetLight(BlobLight light)
+    {
+        blobLights[(int)light].Item1.enabled = blobLights[(int)light].Item2;
     }
 
     public void SetBlobMaterials(BlobMaterials newBlobMaterials)
@@ -727,7 +749,7 @@ public class BlobController : Controllable
 
         canIgnite = newBlobMaterials.HasProperty(MaterialProperties.CAN_IGNITE);
         canExtinguish = newBlobMaterials.HasProperty(MaterialProperties.CAN_EXTINGUISH);
-        createBlob.SetLightEnabled(newBlobMaterials.HasProperty(MaterialProperties.GLOWS));
+        SetLight(BlobLight.Material, newBlobMaterials.HasProperty(MaterialProperties.GLOWS), true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
