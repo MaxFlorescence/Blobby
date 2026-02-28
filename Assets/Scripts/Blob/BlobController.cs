@@ -243,7 +243,7 @@ public class BlobController : Controllable
     private void SetupSounds()
     {
         squisher = centerAtom.AddComponent<Squisher>();
-        squisher.audioSource = centerAtom.AddComponent<AudioSource>();
+        squisher.audioSource = audioSource;
         
         releaseSound = Resources.Load("Sounds/bubble_pop", typeof(AudioClip)) as AudioClip;
     }
