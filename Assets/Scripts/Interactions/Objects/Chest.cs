@@ -15,6 +15,7 @@ public class Chest : Grip
 {
     public ChestState chestState = ChestState.Closed;
     public GameObject contents;
+    public int lootedBurden = 1;
 
     private Animator animator;
     private AudioClip chestOpen, chestClose, chestLoot;
@@ -82,7 +83,7 @@ public class Chest : Grip
         audioSource.PlayOneShot(chestLoot, 0.5f);
         empty = true;
         contents.SetActive(false);
-        burden = 3;
+        burden = lootedBurden;
 
         // TODO: incorporate with actual inventory system.
         int goldAmount = Random.Range(1, 100);
