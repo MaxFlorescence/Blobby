@@ -18,6 +18,7 @@ public class Dungeon : MonoBehaviour
     private GameObject upperBlocker;
     private GameObject lowerBlocker;
     private const string LAYOUT_PATH = "DungeonLayouts/";
+    private const int LAYER_HEIGHT = 20;
 
     public DungeonTile NoneTile;
 
@@ -171,7 +172,7 @@ public class Dungeon : MonoBehaviour
 
     private int LayerOf(float coordinateY)
     {
-        return dims.y - 1 - Mathf.CeilToInt((transform.position.y - coordinateY) / 20);
+        return dims.y - 1 - Mathf.CeilToInt((transform.position.y - coordinateY) / LAYER_HEIGHT);
     }
 
     private void SetActiveNearStairs(int level, bool active)
