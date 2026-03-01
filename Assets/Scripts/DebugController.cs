@@ -10,7 +10,7 @@ class DebugController : MonoBehaviour
         UpdateDebugInfo();
 
         if (Input.GetKeyDown(KeyCode.Slash)) {
-            GameInfo.DebugMode = !GameInfo.DebugMode;
+            Toggle();
             GameInfo.AlertSystem.Send("Debug mode is " + (GameInfo.DebugMode ? "on" : "off"));
         }
 
@@ -36,5 +36,7 @@ class DebugController : MonoBehaviour
     public void Toggle()
     {
         GameInfo.DebugMode = !GameInfo.DebugMode;
+
+        GameInfo.ControlledBlob.SetAtomsVisible(GameInfo.DebugMode);
     }
 }

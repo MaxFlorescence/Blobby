@@ -10,10 +10,14 @@ using UnityEngine;
 /// </summary>
 public class AtomController : MonoBehaviour
 {
+    //----------------------------------------------------------------------------------------------
     // PUBLIC MEMBERS
+    //----------------------------------------------------------------------------------------------
     public BlobController blobController;
 
+    //----------------------------------------------------------------------------------------------
     // PRIVATE MEMBERS
+    //----------------------------------------------------------------------------------------------
     private Rigidbody atomRigidBody;
     private Collider atomCollider;
     /// <summary>
@@ -34,7 +38,12 @@ public class AtomController : MonoBehaviour
     /// </summary>
     private HashSet<GameObject> touching = new HashSet<GameObject>();
 
+    //----------------------------------------------------------------------------------------------
     // Sticking
+    //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     Dynamically created joint to allow this atom to be stuck to an object.
+    /// </summary>
     private SpringJoint stickyJoint;
     /// <summary>
     ///     Spring constant for when the atom sticks to an object.
@@ -45,7 +54,9 @@ public class AtomController : MonoBehaviour
     /// </summary>
     private const float BREAK_FORCE = 500;
 
+    //----------------------------------------------------------------------------------------------
     // Particles
+    //----------------------------------------------------------------------------------------------
     private ParticleSystem drips;
     private ParticleSystem.EmissionModule dripsEmission;
     /// <summary>
@@ -53,22 +64,35 @@ public class AtomController : MonoBehaviour
     /// </summary>
     private bool centerAtom = false;
 
+    //----------------------------------------------------------------------------------------------
+    // Debug Mode
+    //----------------------------------------------------------------------------------------------
+    private MeshRenderer atomMeshRenderer;
+    private Material[] atomMaterials;
+    private Material[] stickyMaterials;
+
     void Awake() {
         drips = gameObject.AddComponent<ParticleSystem>();
         drips.Stop();
+
+        atomMaterials = new Material[] {Resources.Load("Materials/Blob Materials/EyeSclera", typeof(Material)) as Material};
+        stickyMaterials = new Material[] {Resources.Load("Materials/Blob Materials/Highlighted", typeof(Material)) as Material};
     }
 
     void Start()
     {
         atomRigidBody = GetComponent<Rigidbody>();
         atomCollider = GetComponent<Collider>();
+        atomMeshRenderer = GetComponent<MeshRenderer>();
+        atomMeshRenderer.materials = atomMaterials;
         squisher = blobController.GetComponent<Squisher>();
 
         SetupDripParticles();
+        SetVisible(false);
     }
 
     /// <summary>
-    ///     Add and configre the particle system component for dripping.
+    ///     Add and configure the particle system component for dripping.
     /// </summary>
     private void SetupDripParticles()
     {
@@ -117,18 +141,15 @@ public class AtomController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Change the material of each droplet particle.
-    /// <param name="material">
-    ///     The material to change to.
-    /// </param>
-    public void SetDropletMaterial(Material material)
+    ///     Apply forces to the atom. Impulse forces reset immediately.
+    /// </summary>
+    void FixedUpdate()
     {
-        if (centerAtom) return;
+        atomRigidBody.AddForce(force, ForceMode.Force);
+        atomRigidBody.AddForce(impulse, ForceMode.Impulse);
+        impulse = Vector3.zero;
 
-        if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
-        {
-            renderer.material = material;
-        }
+        // UpdateDripParticles(); // Disabled to increase particles
     }
 
     /// <summary>
@@ -141,40 +162,6 @@ public class AtomController : MonoBehaviour
 
         Vector3 direction = transform.position - blobController.transform.position;
         dripsEmission.enabled = Vector3.Dot(direction, Vector3.down) > 0;
-    }
-
-    /// <summary>
-    ///     Apply forces to the atom. Impulse forces reset immediately.
-    /// </summary>
-    void FixedUpdate()
-    {
-        atomRigidBody.AddForce(force, ForceMode.Force);
-        atomRigidBody.AddForce(impulse, ForceMode.Impulse);
-        impulse = Vector3.zero;
-
-        // UpdateDripParticles();
-    }
-
-    /// <summary>
-    ///    Enable or disable gravity for this atom.
-    /// </summary>
-    /// <param name="gravity">
-    ///     <tt>true</tt> enables gravity, <tt>false</tt> disables it.
-    /// </param>
-    public void SetGravity(bool gravity)
-    {
-        atomRigidBody.useGravity = gravity;
-    }
-
-    /// <summary>
-    ///    Set the velocity of this atom.
-    /// </summary>
-    /// <param name="velocity">
-    ///     The new velocity for the atom.
-    /// </param>
-    public void SetVelocity(Vector3 velocity)
-    {
-        atomRigidBody.velocity = velocity;
     }
 
     /// <summary>
@@ -242,65 +229,6 @@ public class AtomController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Create a new spring joint to stick this atom to the <tt>obj</tt>.
-    /// </summary>
-    /// <param name="obj">
-    ///     The object to stick this atom to.
-    /// </param>
-    public void StickTo(Rigidbody obj)
-    {
-        stickyJoint = gameObject.AddComponent<SpringJoint>();
-        stickyJoint.connectedBody = obj;
-
-        stickyJoint.enableCollision = true;
-        stickyJoint.spring = STICKY_STRENGTH;
-        stickyJoint.breakForce = BREAK_FORCE;
-
-        // manually set anchor positions
-        stickyJoint.autoConfigureConnectedAnchor = false;
-        stickyJoint.anchor = Vector3.zero;
-        stickyJoint.connectedAnchor = obj.transform.InverseTransformPoint(transform.position);
-    }
-
-    /// <summary>
-    ///     Destroy the spring joint sticking this atom to an object.
-    /// </summary>
-    public void Unstick()
-    {
-        if (stickyJoint != null)
-        {
-            Destroy(stickyJoint);
-        }
-    }
-
-    void OnJointBreak(float breakForce)
-    {
-        blobController.Unstick(gameObject);
-    }
-
-    // Getters and setters
-    public BlobController GetBlobController()
-    {
-        return blobController;
-    }
-    public void SetForce(Vector3 force)
-    {
-        this.force = force;
-    }
-    public void SetImpulse(Vector3 impulse)
-    {
-        this.impulse = impulse;
-    }
-    public void SetCollider(bool enabled)
-    {
-        atomCollider.enabled = enabled;
-
-        if (!enabled) {
-            touching.Clear(); 
-        }
-    }
-
-    /// <summary>
     ///     Is this atom touching an object?
     /// </summary>
     /// <param name="obj">
@@ -319,12 +247,113 @@ public class AtomController : MonoBehaviour
 
         return touching.Contains(obj);
     }
-    private void SetVisible(bool visible)
+
+    /// <summary>
+    ///     Create a new spring joint to stick this atom to the <tt>obj</tt>.
+    /// </summary>
+    /// <param name="obj">
+    ///     The object to stick this atom to.
+    /// </param>
+    public void StickTo(Rigidbody obj)
     {
-        GetComponent<MeshRenderer>().enabled = visible;
+        atomMeshRenderer.materials = stickyMaterials;
+
+        stickyJoint = gameObject.AddComponent<SpringJoint>();
+        stickyJoint.connectedBody = obj;
+
+        stickyJoint.enableCollision = true;
+        stickyJoint.spring = STICKY_STRENGTH;
+        stickyJoint.breakForce = BREAK_FORCE;
+
+        // manually set anchor positions
+        stickyJoint.autoConfigureConnectedAnchor = false;
+        stickyJoint.anchor = Vector3.zero;
+        stickyJoint.connectedAnchor = obj.transform.InverseTransformPoint(transform.position);
+    }
+
+    public bool IsSticking()
+    {
+        return stickyJoint != null;
+    }
+
+    /// <summary>
+    ///     Destroy the spring joint sticking this atom to an object.
+    /// </summary>
+    public void Unstick()
+    {
+        if (IsSticking())
+        {
+            atomMeshRenderer.materials = atomMaterials;
+            Destroy(stickyJoint);
+        }
+    }
+
+    void OnJointBreak(float breakForce)
+    {
+        atomMeshRenderer.materials = atomMaterials;
+        blobController.Unstick(gameObject);
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Getters
+    //----------------------------------------------------------------------------------------------
+    public BlobController GetBlobController()
+    {
+        return blobController;
+    }
+    //----------------------------------------------------------------------------------------------
+    // Setters
+    //----------------------------------------------------------------------------------------------
+    public void SetGravity(bool gravity)
+    {
+        atomRigidBody.useGravity = gravity;
+    }
+    public void SetVelocity(Vector3 velocity)
+    {
+        atomRigidBody.velocity = velocity;
+    }
+    public void SetForce(Vector3 force)
+    {
+        this.force = force;
+    }
+    public void SetImpulse(Vector3 impulse)
+    {
+        this.impulse = impulse;
+    }
+    public void SetVisible(bool visible)
+    {
+        atomMeshRenderer.enabled = visible;
     }
     public void SetAsCenterAtom(bool isCenterAtom)
     {
         centerAtom = isCenterAtom;
+    }
+    /// <summary>
+    ///     Change the material of each droplet particle.
+    /// <param name="material">
+    ///     The material to change to.
+    /// </param>
+    public void SetDropletMaterial(Material material)
+    {
+        if (centerAtom) return;
+
+        if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
+        {
+            renderer.material = material;
+        }
+    }
+    /// <summary>
+    ///     Enables/disables the atom's collider. On disabling, the atom stops touching everything.
+    /// </summary>
+    /// <param name="enabled">
+    ///     The new state for the atom's collider. If false, the atom to stops touching everything.
+    /// </param>
+    public void SetCollider(bool enabled)
+    {
+        atomCollider.enabled = enabled;
+
+        if (!enabled) {
+            touching.Clear(); 
+        }
     }
 }

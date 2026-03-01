@@ -704,6 +704,14 @@ public class BlobController : Controllable
         }
     }
 
+    public void SetAtomsVisible(bool visible)
+    {
+        foreach (GameObject atom in createBlob.GetAtoms())
+        {
+            atom.GetComponent<AtomController>().SetVisible(visible);
+        }
+    }
+
     public BlobMaterials GetBlobMaterials()
     {
         return blobMaterials;

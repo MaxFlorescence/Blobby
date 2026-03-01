@@ -185,7 +185,6 @@ public class CreateBlob : MonoBehaviour
     private GameObject SpawnAtom(Vector3 position, int ID)
     {
         GameObject atom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        atom.GetComponent<MeshRenderer>().enabled = false; // make it invisible
 
         atom.name = string.Format("Mesh {0} Atom {1}", BLOB_ID, ID);
         atom.layer = LayerMask.NameToLayer(IGNORE_CAMERA_LAYER);
