@@ -67,7 +67,6 @@ public class BlobController : Controllable
     ///     The list of gameObjects carried by the blob.
     /// </summary>
     private GameObject[] inventory;
-    private const int INVENTORY_SIZE = 10;
     /// <summary>
     ///     Which inventory object is currently selected.
     /// </summary>
@@ -140,9 +139,9 @@ public class BlobController : Controllable
             atomControllers[i] = createBlob.GetAtoms()[i].AddComponent<AtomController>();
             atomControllers[i].blobController = this;
         }
-        atomControllers[0].GetComponent<AtomController>().SetCenterAtom(true);
+        atomControllers[0].GetComponent<AtomController>().SetAsCenterAtom(true);
 
-        inventory = new GameObject[INVENTORY_SIZE];
+        inventory = new GameObject[CARRYING_CAPACITY];
         inventoryCamera = transform.parent.GetComponentsInChildren<Camera>()[0];
         inventoryCamera.enabled = true;
 
@@ -301,7 +300,7 @@ public class BlobController : Controllable
     /// </param>
     public void ApplyForces(Vector3? force, Vector3? impulse, bool requireTouching)
     {
-        if (requireTouching && !TouchingSomething())
+        if (requireTouching && !IsTouching())
         {
             force = Vector3.zero;
             impulse = Vector3.zero;
@@ -501,14 +500,18 @@ public class BlobController : Controllable
     }
 
     /// <summary>
-    ///     Returns a bool indicating if the blob character is touching something.
+    ///     Are any of the blob's atoms touching an object?
     /// </summary>
+    /// <param name="obj">
+    ///     The object to test for. If null, test if the blob is touching anything.
+    /// </param>
     /// <returns>
-    ///     <tt>true</tt> if touching something, <tt>false</tt> if not.
+    ///     (If object is not null) True iff the blob is touching the object.<br/>
+    ///     (If object is null) True iff the blob is touching anything.
     /// </returns>
-    private bool TouchingSomething()
-    {
-        if (stickyMode)
+    public bool IsTouching(GameObject obj = null)
+    {        
+        if (obj == null && stickyMode)
         {
             for (int i = 0; i < STICKY_COUNT; i++)
             {
@@ -518,26 +521,7 @@ public class BlobController : Controllable
                 }
             }
         }
-        
-        foreach (AtomController atom in atomControllers)
-            {
-                if (atom.GetTouchCount() > 0)
-                {
-                    return true;
-                }
-            }
 
-        return false;
-    }
-
-    /// <summary>
-    ///     Returns a bool indicating if the blob character is touching the game object.
-    /// </summary>
-    /// <returns>
-    ///     <tt>true</tt> if touching something, <tt>false</tt> if not.
-    /// </returns>
-    public bool IsTouching(GameObject obj)
-    {        
         foreach (AtomController atom in atomControllers)
             {
                 if (atom.IsTouching(obj))
@@ -565,7 +549,7 @@ public class BlobController : Controllable
         int objectBurden = obj.GetComponent<Grip>().burden;
         
         if (CanCarry(objectBurden)) {
-            for (int i = 0; i < INVENTORY_SIZE; i++) {
+            for (int i = 0; i < CARRYING_CAPACITY; i++) {
                 if (inventory[i] == null)
                 {
                     inventory[i] = obj;
@@ -611,7 +595,7 @@ public class BlobController : Controllable
         if (currentBurden == 0)
             return obj == null;
 
-        for (int i = 0; i < INVENTORY_SIZE; i++) {
+        for (int i = 0; i < CARRYING_CAPACITY; i++) {
             if (inventory[i] == obj)
             {
                 return true;
@@ -635,7 +619,7 @@ public class BlobController : Controllable
         if (currentBurden == 0)
             return false;
 
-        for (int i = 0; i < INVENTORY_SIZE; i++) {
+        for (int i = 0; i < CARRYING_CAPACITY; i++) {
             if (inventory[i] != null && inventory[i].CompareTag(tag))
             {
                 return true;
@@ -661,9 +645,9 @@ public class BlobController : Controllable
         if (currentBurden == 0) 
             return;
 
-        for (int i = 1; i < INVENTORY_SIZE; i++)
+        for (int i = 1; i < CARRYING_CAPACITY; i++)
         {
-            int index = (INVENTORY_SIZE + inventorySelection + (forward ? i : -i)) % INVENTORY_SIZE;
+            int index = (CARRYING_CAPACITY + inventorySelection + (forward ? i : -i)) % CARRYING_CAPACITY;
             if (inventory[index] != null)
             {
                 SelectInventoryObject(index);
@@ -716,7 +700,7 @@ public class BlobController : Controllable
     {
         foreach (GameObject atom in createBlob.GetAtoms())
         {
-            atom.GetComponent<Collider>().enabled = enabled;
+            atom.GetComponent<AtomController>().SetCollider(enabled);
         }
     }
 
@@ -805,25 +789,16 @@ public class BlobController : Controllable
     public override string ToString()
     {
         string inventoryString = "";
-        for (int i = 0; i < INVENTORY_SIZE; i++)
+        for (int i = 0; i < CARRYING_CAPACITY; i++)
         {
-            inventoryString += string.Format("  {0}{1}: {2}\n",
-                inventorySelection == i ? ">" : " ", i,
-                inventory[i] == null ? "null" : inventory[i].GetComponent<Grip>().ToString()
-            );
+            inventoryString += $"  {(inventorySelection == i ? ">" : " ")}{i}: {(inventory[i] == null ? "null" : inventory[i].GetComponent<Grip>())}\n";
         }
 
-        return string.Format("BlobController:\n"
-        + " ghostMode: {0}\n"
-        + " blobMaterials: {1} ({2})\n"
-        + " stickyMode: {3}\n"
-        + " inventory: (currentBurden: {4})\n{5}",
-            ghostMode,
-            blobMaterials.ToString(),
-            blobMaterials.GetProperties().ToString(),
-            stickyMode,
-            currentBurden,
-            inventoryString
-        );
+        return $"BlobController: {name}\n"
+        + $" ghostMode: {ghostMode}\n"
+        + $" blobMaterials: {blobMaterials} ({blobMaterials.GetProperties()})\n"
+        + $" stickyMode: {stickyMode}\n"
+        + $" touchingSomething: {IsTouching()}\n"
+        + $" inventory: (currentBurden: {currentBurden})\n{inventoryString}";
     }
 }

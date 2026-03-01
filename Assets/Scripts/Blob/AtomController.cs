@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 /// <summary>
@@ -14,11 +14,12 @@ public class AtomController : MonoBehaviour
     public BlobController blobController;
 
     // PRIVATE MEMBERS
+    private Rigidbody atomRigidBody;
+    private Collider atomCollider;
     /// <summary>
     ///     Makes squishy noises on collisions.
     /// </summary>
     private Squisher squisher;
-    private Rigidbody rigidBody;
     /// <summary>
     ///     Typical force vector to apply every fixed update.
     /// </summary>
@@ -57,12 +58,10 @@ public class AtomController : MonoBehaviour
         drips.Stop();
     }
 
-    /// <summary>
-    ///     Initialize rigidbody and audio.
-    /// </summary>
     void Start()
     {
-        rigidBody = GetComponent<Rigidbody>();
+        atomRigidBody = GetComponent<Rigidbody>();
+        atomCollider = GetComponent<Collider>();
         squisher = blobController.GetComponent<Squisher>();
 
         SetupDripParticles();
@@ -117,6 +116,11 @@ public class AtomController : MonoBehaviour
         drips.Play();
     }
 
+    /// <summary>
+    ///     Change the material of each droplet particle.
+    /// <param name="material">
+    ///     The material to change to.
+    /// </param>
     public void SetDropletMaterial(Material material)
     {
         if (centerAtom) return;
@@ -144,8 +148,8 @@ public class AtomController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        rigidBody.AddForce(force, ForceMode.Force);
-        rigidBody.AddForce(impulse, ForceMode.Impulse);
+        atomRigidBody.AddForce(force, ForceMode.Force);
+        atomRigidBody.AddForce(impulse, ForceMode.Impulse);
         impulse = Vector3.zero;
 
         // UpdateDripParticles();
@@ -159,7 +163,7 @@ public class AtomController : MonoBehaviour
     /// </param>
     public void SetGravity(bool gravity)
     {
-        rigidBody.useGravity = gravity;
+        atomRigidBody.useGravity = gravity;
     }
 
     /// <summary>
@@ -170,7 +174,7 @@ public class AtomController : MonoBehaviour
     /// </param>
     public void SetVelocity(Vector3 velocity)
     {
-        rigidBody.velocity = velocity;
+        atomRigidBody.velocity = velocity;
     }
 
     /// <summary>
@@ -287,19 +291,39 @@ public class AtomController : MonoBehaviour
     {
         this.impulse = impulse;
     }
-    public int GetTouchCount()
+    public void SetCollider(bool enabled)
     {
-        return touching.Count;
+        atomCollider.enabled = enabled;
+
+        if (!enabled) {
+            touching.Clear(); 
+        }
     }
-    public bool IsTouching(GameObject obj)
+
+    /// <summary>
+    ///     Is this atom touching an object?
+    /// </summary>
+    /// <param name="obj">
+    ///     The object to test for. If null, test if the atom is touching anything.
+    /// </param>
+    /// <returns>
+    ///     (If object is not null) True iff atom is touching the object.<br/>
+    ///     (If object is null) True iff atom is touching anything.
+    /// </returns>
+    public bool IsTouching(GameObject obj = null)
     {
+        if (obj == null)
+        {
+            return touching.Count > 0;
+        }
+
         return touching.Contains(obj);
     }
     private void SetVisible(bool visible)
     {
         GetComponent<MeshRenderer>().enabled = visible;
     }
-    public void SetCenterAtom(bool isCenterAtom)
+    public void SetAsCenterAtom(bool isCenterAtom)
     {
         centerAtom = isCenterAtom;
     }
