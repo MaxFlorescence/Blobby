@@ -21,10 +21,6 @@ public class AtomController : MonoBehaviour
     private Rigidbody atomRigidBody;
     private Collider atomCollider;
     /// <summary>
-    ///     Makes squishy noises on collisions.
-    /// </summary>
-    private Squisher squisher;
-    /// <summary>
     ///     Typical force vector to apply every fixed update.
     /// </summary>
     private Vector3 force;
@@ -85,7 +81,6 @@ public class AtomController : MonoBehaviour
         atomCollider = GetComponent<Collider>();
         atomMeshRenderer = GetComponent<MeshRenderer>();
         atomMeshRenderer.materials = atomMaterials;
-        squisher = blobController.GetComponent<Squisher>();
 
         SetupDripParticles();
         SetVisible(false);
@@ -174,7 +169,7 @@ public class AtomController : MonoBehaviour
 
         if (!blobController.IsAtom(obj))
         { // do nothing special when colliding with other atoms
-            squisher.squish();
+            blobController.Squish();
 
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.

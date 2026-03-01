@@ -6,9 +6,15 @@ using UnityEngine;
 /// </summary>
 public class BlobController : Controllable
 {
+    //----------------------------------------------------------------------------------------------
     // PUBLIC MEMBERS
+    //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     Makes squishy noises on collisions.
+    /// </summary>
     public Squisher squisher;
 
+    //----------------------------------------------------------------------------------------------
     // PRIVATE MEMBERS
     //----------------------------------------------------------------------------------------------
     private AudioSource audioSource;
@@ -17,18 +23,26 @@ public class BlobController : Controllable
     /// </summary>
     private BlobLightController blobLightController = new();
     /// <summary>
-    ///     Strength of the blob's movement.
+    ///     The factor by which the blob can grow from its original size.
     /// </summary>
-    private float movementIntensity = 10f;
+    private float blobGrowingFactor = 1.5f;
     /// <summary>
-    ///     Strength of the blob's jumps.
+    ///     The factor by which the blob can shrink from its original size.
     /// </summary>
-    private float jumpIntensity = 8f;
+    private float blobShrinkingFactor = 0.5f;
+    
+    //----------------------------------------------------------------------------------------------
+    // Input
+    //----------------------------------------------------------------------------------------------
     private Vector3 jumpDirection = Vector3.up;
-    private bool doJump = false;
+    private bool jumpOnNextFixedUpdate = false;
     private bool movementInputEnabled = true;
+    private float movementIntensityFactor = 10f;
+    private float jumpIntensityFactor = 8f;
 
+    //----------------------------------------------------------------------------------------------
     // Atoms
+    //----------------------------------------------------------------------------------------------
     private CreateBlob createBlob;
     /// <summary>
     ///     Quick reference for <tt>blobAtoms[0]</tt>.
@@ -41,7 +55,9 @@ public class BlobController : Controllable
     /// </summary>
     private float savedSpringFactor = 1f;
 
+    //----------------------------------------------------------------------------------------------
     // Sticking
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     How many atoms can be sticky at once.
     /// </summary>
@@ -59,9 +75,11 @@ public class BlobController : Controllable
     ///     Indicates if atoms can become sticky. If <tt>false</tt>, no atoms are sticky.
     /// </summary>
     private bool stickyMode = false;
-    private float stickyModifier = 1.2f;
+    private float stickyMovementModifier = 1.2f;
 
+    //----------------------------------------------------------------------------------------------
     // Inventory
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The list of gameObjects carried by the blob.
     /// </summary>
@@ -85,25 +103,22 @@ public class BlobController : Controllable
     private Camera inventoryCamera;
     private float inventoryCameraDistance = 2f;
 
+    //----------------------------------------------------------------------------------------------
     // Fire
+    //----------------------------------------------------------------------------------------------
     public bool canIgnite { get; private set; } = false;
     public bool canExtinguish { get; private set; } = false;
 
+    //----------------------------------------------------------------------------------------------
     // Visuals
+    //----------------------------------------------------------------------------------------------
     private MeshRenderer blobMesh;
     private BlobMaterials blobMaterials;
     public Mesh dropletMesh { get; private set; }
-
-    // Misc
-    /// <summary>
-    ///     The factor by which the blob can grow from its original size.
-    /// </summary>
-    private float blobGrowingFactor = 1.5f;
-    /// <summary>
-    ///     The factor by which the blob can shrink from its original size.
-    /// </summary>
-    private float blobShrinkingFactor = 0.5f;
+    
+    //----------------------------------------------------------------------------------------------
     // Ghost mode
+    //----------------------------------------------------------------------------------------------
     private bool ghostMode = false;
     private float ghostSpeed = 0.5f;
 
@@ -262,12 +277,12 @@ public class BlobController : Controllable
         {
             movementForce = movementForce.normalized;
         }
-        movementForce *= movementIntensity * (stickyMode ? stickyModifier : 1);
+        movementForce *= movementIntensityFactor * (stickyMode ? stickyMovementModifier : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
         // so detect the keypress in Update() and perform the action in FixedUpdate().
-        Vector3 jumpForce = doJump ? (jumpIntensity * jumpDirection) : Vector3.zero;
-        doJump = false;
+        Vector3 jumpForce = jumpOnNextFixedUpdate ? (jumpIntensityFactor * jumpDirection) : Vector3.zero;
+        jumpOnNextFixedUpdate = false;
 
         ApplyForces(movementForce, jumpForce, true);
     }
@@ -426,7 +441,7 @@ public class BlobController : Controllable
         {
             if (Input.GetButtonDown("Jump"))
             {
-                doJump = true;
+                jumpOnNextFixedUpdate = true;
             }
             if (Input.GetMouseButtonDown(0)) // left mouse shrinks
             {
@@ -781,6 +796,11 @@ public class BlobController : Controllable
         {
             atom.transform.position += ghostSpeed * translation;
         }
+    }
+
+    public void Squish()
+    {
+        squisher.squish();
     }
 
     public override string ToString()
