@@ -1,12 +1,6 @@
 using System.Collections;
 using UnityEngine;
 
-public enum BlobLight
-{
-    Inventory = 0,
-    Material = 1
-}
-
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
@@ -16,7 +10,12 @@ public class BlobController : Controllable
     public Squisher squisher;
 
     // PRIVATE MEMBERS
-    // Input
+    //----------------------------------------------------------------------------------------------
+    private AudioSource audioSource;
+    /// <summary>
+    ///     Light sources attached to the blob, paired with flags indicating their default states.
+    /// </summary>
+    private BlobLightController blobLightController = new();
     /// <summary>
     ///     Strength of the blob's movement.
     /// </summary>
@@ -83,10 +82,8 @@ public class BlobController : Controllable
     ///     The sound to play when releasing an object.
     /// </summary>
     private AudioClip releaseSound;
-    private AudioSource audioSource;
     private Camera inventoryCamera;
     private float inventoryCameraDistance = 2f;
-    private (Light, bool)[] blobLights = new (Light, bool)[2];
 
     // Fire
     public bool canIgnite { get; private set; } = false;
@@ -146,8 +143,8 @@ public class BlobController : Controllable
         inventoryCamera.enabled = true;
 
         Light[] lights = transform.parent.GetComponentsInChildren<Light>();
-        blobLights[(int)BlobLight.Material] = (lights[0], false);
-        blobLights[(int)BlobLight.Inventory] = (lights[1], false);
+        blobLightController.AddLight(BlobLight.MaterialGlow, lights[0], false);
+        blobLightController.AddLight(BlobLight.InventoryIcon, lights[1], false);
 
         SetBlobMaterials(BlobMaterials.WATER);
 
@@ -717,22 +714,14 @@ public class BlobController : Controllable
         return blobMaterials;
     }
 
-    public void SetLight(BlobLight light, bool? enable, bool save = false)
+    public void SetLight(BlobLight blobLight, bool? enable, bool save = false)
     {
-        int index = (int)light;
-        enable ??= !blobLights[index].Item2;
-
-        blobLights[index].Item1.enabled = (bool)enable;
-
-        if (save)
-        {
-            blobLights[index].Item2 = (bool)enable;
-        }
+        blobLightController.SetLight(blobLight, enable, save);
     }
 
-    public void ResetLight(BlobLight light)
+    public void ResetLight(BlobLight blobLight)
     {
-        blobLights[(int)light].Item1.enabled = blobLights[(int)light].Item2;
+        blobLightController.ResetLight(blobLight);
     }
 
     public void SetBlobMaterials(BlobMaterials newBlobMaterials)
@@ -741,7 +730,7 @@ public class BlobController : Controllable
 
         canIgnite = newBlobMaterials.HasProperty(MaterialProperties.CAN_IGNITE);
         canExtinguish = newBlobMaterials.HasProperty(MaterialProperties.CAN_EXTINGUISH);
-        SetLight(BlobLight.Material, newBlobMaterials.HasProperty(MaterialProperties.GLOWS), true);
+        blobLightController.SetLight(BlobLight.MaterialGlow, newBlobMaterials.HasProperty(MaterialProperties.GLOWING), true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 

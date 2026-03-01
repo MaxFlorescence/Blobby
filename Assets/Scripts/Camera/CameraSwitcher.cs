@@ -12,16 +12,16 @@ public class CameraSwitcher : MonoBehaviour
     void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (camera.gameObject.layer == Utilities.INVENTORY_UI_LAYER) {
-            GameInfo.ControlledBlob.SetLight(BlobLight.Inventory, true);
-            GameInfo.ControlledBlob.SetLight(BlobLight.Material, false);
+            GameInfo.ControlledBlob.SetLight(BlobLight.InventoryIcon, true);
+            GameInfo.ControlledBlob.SetLight(BlobLight.MaterialGlow, false);
         }
     }
 
     void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (camera.gameObject.layer == Utilities.INVENTORY_UI_LAYER) {
-            GameInfo.ControlledBlob.ResetLight(BlobLight.Inventory);
-            GameInfo.ControlledBlob.ResetLight(BlobLight.Material);
+            GameInfo.ControlledBlob.ResetLight(BlobLight.InventoryIcon);
+            GameInfo.ControlledBlob.ResetLight(BlobLight.MaterialGlow);
         }
     }
 
