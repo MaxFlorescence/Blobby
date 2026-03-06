@@ -7,31 +7,6 @@ using UnityEngine;
 public class BlobController : Controllable
 {
     //----------------------------------------------------------------------------------------------
-    // PUBLIC MEMBERS
-    //----------------------------------------------------------------------------------------------
-    /// <summary>
-    ///     Makes squishy noises on collisions.
-    /// </summary>
-    public Squisher squisher;
-
-    //----------------------------------------------------------------------------------------------
-    // PRIVATE MEMBERS
-    //----------------------------------------------------------------------------------------------
-    private AudioSource audioSource;
-    /// <summary>
-    ///     Light sources attached to the blob, paired with flags indicating their default states.
-    /// </summary>
-    private BlobLightController blobLightController = new();
-    /// <summary>
-    ///     The factor by which the blob can grow from its original size.
-    /// </summary>
-    private float blobGrowingFactor = 1.5f;
-    /// <summary>
-    ///     The factor by which the blob can shrink from its original size.
-    /// </summary>
-    private float blobShrinkingFactor = 0.5f;
-    
-    //----------------------------------------------------------------------------------------------
     // Input
     //----------------------------------------------------------------------------------------------
     private Vector3 jumpDirection = Vector3.up;
@@ -41,7 +16,7 @@ public class BlobController : Controllable
     private float jumpIntensityFactor = 8f;
 
     //----------------------------------------------------------------------------------------------
-    // Atoms
+    // Structure
     //----------------------------------------------------------------------------------------------
     private CreateBlob createBlob;
     /// <summary>
@@ -54,6 +29,14 @@ public class BlobController : Controllable
     ///     Stores the blob's spring length factor to restore after overrides.
     /// </summary>
     private float savedSpringFactor = 1f;
+    /// <summary>
+    ///     The factor by which the blob can grow from its original size.
+    /// </summary>
+    private float blobGrowingFactor = 1.5f;
+    /// <summary>
+    ///     The factor by which the blob can shrink from its original size.
+    /// </summary>
+    private float blobShrinkingFactor = 0.5f;
 
     //----------------------------------------------------------------------------------------------
     // Sticking
@@ -104,17 +87,24 @@ public class BlobController : Controllable
     private float inventoryCameraDistance = 2f;
 
     //----------------------------------------------------------------------------------------------
-    // Fire
-    //----------------------------------------------------------------------------------------------
-    public bool canIgnite { get; private set; } = false;
-    public bool canExtinguish { get; private set; } = false;
-
-    //----------------------------------------------------------------------------------------------
     // Visuals
     //----------------------------------------------------------------------------------------------
     private MeshRenderer blobMesh;
     private BlobMaterials blobMaterials;
     public Mesh dropletMesh { get; private set; }
+    /// <summary>
+    ///     Light sources attached to the blob, paired with flags indicating their default states.
+    /// </summary>
+    private BlobLightController blobLightController = new();
+
+    //----------------------------------------------------------------------------------------------
+    // Audio
+    //----------------------------------------------------------------------------------------------
+    private AudioSource audioSource;
+    /// <summary>
+    ///     Makes squishy noises on collisions.
+    /// </summary>
+    private Squisher squisher;
     
     //----------------------------------------------------------------------------------------------
     // Ghost mode
@@ -136,9 +126,6 @@ public class BlobController : Controllable
         audioSource = gameObject.AddComponent<AudioSource>();
     }
 
-    /// <summary>
-    ///     Create the atom controllers and set up the audio sources.
-    /// </summary>
     void Start()
     {
         numAtoms = createBlob.GetAtoms().Length;
@@ -167,21 +154,188 @@ public class BlobController : Controllable
     }
 
     /// <summary>
-    ///     Returns the index of the given <tt>atom</tt> in the <tt>atomStickies</tt> buffer.
+    ///     Create and attach the audio source components to the center atom.
     /// </summary>
-    /// <param name="atom">
-    ///     The atom to search for.
+    private void SetupSounds()
+    {
+        squisher = centerAtom.AddComponent<Squisher>();
+        squisher.audioSource = audioSource;
+        
+        releaseSound = Resources.Load("Sounds/bubble_pop", typeof(AudioClip)) as AudioClip;
+    }
+    
+    /// <summary>
+    ///     Apply user input as blob character movement.
+    /// </summary>
+    void FixedUpdate()
+    {
+        if (ghostMode) ApplyGhostMovement();
+
+        if (!movementInputEnabled || !controlled)
+            return;
+
+        (Vector3 forwardForce, Vector3 rightwardForce) = GetInputAxisForces();
+
+        // Constrain initial movementForce to the unit disk.
+        Vector3 movementForce = forwardForce + rightwardForce;
+        if (movementForce.magnitude > 1)
+        {
+            movementForce = movementForce.normalized;
+        }
+        movementForce *= movementIntensityFactor * (stickyMode ? stickyMovementModifier : 1);
+
+        // Jumps should only require a single keypress which might not align with physics updates,
+        // so detect the keypress in Update() and perform the action in FixedUpdate().
+        Vector3 jumpForce = jumpOnNextFixedUpdate ? (jumpIntensityFactor * jumpDirection) : Vector3.zero;
+        jumpOnNextFixedUpdate = false;
+
+        ApplyForces(movementForce, jumpForce, true);
+    }
+
+    /// <summary>
+    ///     Read the player's movement input on the horizontal (left-right) and vertical
+    ///     (forward-back) axes as component force vectors in the z-plane.
+    /// </summary>
+    /// <returns>
+    ///     <tt>(Vector3, Vector3)</tt> The forward and rightward component force vectors.
+    /// </returns>
+    private (Vector3, Vector3) GetInputAxisForces() {
+        // Ensure forward/rightward movement occurs in the horizontal plane.
+        Vector3 forwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.forward, Vector3.up).normalized;
+        forwardForce *= Input.GetAxis("Vertical");
+
+        Vector3 rightwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.right, Vector3.up).normalized;
+        rightwardForce *= Input.GetAxis("Horizontal");
+
+        return (forwardForce, rightwardForce);
+    }
+
+    /// <summary>
+    ///     Apply a force to the BlobController.
+    /// </summary>
+    /// <param name="force">
+    ///     The force vector to apply.
+    /// </param>
+    /// <param name="impulse">
+    ///     The impulse force vector to apply.
+    /// </param>
+    /// <param name="requireTouching">
+    ///     If true, apply zero forces if the blob character is not touching something.
+    /// </param>
+    public void ApplyForces(Vector3? force, Vector3? impulse, bool requireTouching)
+    {
+        if (requireTouching && !IsTouching())
+        {
+            force = Vector3.zero;
+            impulse = Vector3.zero;
+        }
+
+        foreach (AtomController atom in atomControllers)
+        {
+            if (force.HasValue)
+            {
+                atom.SetForce(force.Value);
+            }
+            if (impulse.HasValue)
+            {
+                atom.SetImpulse(impulse.Value);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Are any of the blob's atoms touching an object?
+    /// </summary>
+    /// <param name="obj">
+    ///     The object to test for. If null, test if the blob is touching anything.
     /// </param>
     /// <returns>
-    ///     The index of the <tt>atom</tt>, if present, -1 if not.
+    ///     (If object is not null) True iff the blob is touching the object.<br/>
+    ///     (If object is null) True iff the blob is touching anything.
     /// </returns>
-    private int StickyIndex(GameObject atom)
-    {
-        for (int i = 0; i < STICKY_COUNT; i++)
+    public bool IsTouching(GameObject obj = null)
+    {        
+        if (obj == null && stickyMode)
         {
-            if (atom == atomStickies[i]) return i;
+            for (int i = 0; i < STICKY_COUNT; i++)
+            {
+                if (atomStickies[i] != null)
+                {
+                    return true;
+                }
+            }
         }
-        return -1;
+
+        foreach (AtomController atom in atomControllers)
+            {
+                if (atom.IsTouching(obj))
+                {
+                    return true;
+                }
+            }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Apply user input for non-movement actions and unpause audio if needed.
+    /// </summary>
+    void Update()
+    {
+        MoveInventoryCamera();
+
+        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Release();
+        }
+
+        float mouseScroll = Input.mouseScrollDelta.y;
+        if (mouseScroll != 0)
+        {
+            SelectNextNonEmptyObject(mouseScroll > 0);
+        }
+
+        if (movementInputEnabled)
+        {
+            if (Input.GetButtonDown("Jump"))
+            {
+                jumpOnNextFixedUpdate = true;
+            }
+            if (Input.GetMouseButtonDown(0)) // left mouse shrinks
+            {
+                createBlob.SetSpringLengthFactor(blobShrinkingFactor);
+            }
+            if (Input.GetMouseButtonDown(1)) // right mouse grows
+            {
+                createBlob.SetSpringLengthFactor(blobGrowingFactor);
+            }
+            if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
+            {
+                createBlob.SetSpringLengthFactor();
+            }
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                SetStickyMode(true);
+            }
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                SetStickyMode(false);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Lock the inventory camera to be directly behind the inventory item held by the blob.
+    /// </summary>
+    private void MoveInventoryCamera()
+    {
+        Transform targetTransform = inventory[inventorySelection] != null ?
+            inventory[inventorySelection].transform : transform;
+        inventoryCamera.transform.position = targetTransform.position + inventoryCameraDistance * Vector3.back;
+        inventoryCamera.transform.LookAt(targetTransform);
     }
 
     /// <summary>
@@ -249,86 +403,245 @@ public class BlobController : Controllable
     }
 
     /// <summary>
-    ///     Create and attach the audio source components to the center atom.
+    ///     Returns the index of the given <tt>atom</tt> in the <tt>atomStickies</tt> buffer.
     /// </summary>
-    private void SetupSounds()
+    /// <param name="atom">
+    ///     The atom to search for.
+    /// </param>
+    /// <returns>
+    ///     The index of the <tt>atom</tt>, if present, -1 if not.
+    /// </returns>
+    private int StickyIndex(GameObject atom)
     {
-        squisher = centerAtom.AddComponent<Squisher>();
-        squisher.audioSource = audioSource;
-        
-        releaseSound = Resources.Load("Sounds/bubble_pop", typeof(AudioClip)) as AudioClip;
+        for (int i = 0; i < STICKY_COUNT; i++)
+        {
+            if (atom == atomStickies[i]) return i;
+        }
+        return -1;
     }
 
     /// <summary>
-    ///     Apply user input as blob character movement.
+    ///     Select the subsequent inventory object based on what object was previously selected.
     /// </summary>
-    void FixedUpdate()
+    /// <param name="forward">
+    ///     If <tt>True</tt>, select the first index found by 
+    /// </param>
+    private void SelectNextNonEmptyObject(bool forward)
     {
-        if (ghostMode) ApplyGhostMovement();
-
-        if (!movementInputEnabled || !controlled)
+        if (currentBurden == 0) 
             return;
+
+        for (int i = 1; i < CARRYING_CAPACITY; i++)
+        {
+            int index = (CARRYING_CAPACITY + inventorySelection + (forward ? i : -i)) % CARRYING_CAPACITY;
+            if (inventory[index] != null)
+            {
+                SelectInventoryObject(index);
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Set the blob's selected item to be the one at the given index.
+    /// </summary>
+    /// <param name="i">
+    ///     The index in the blob's inventory to select.
+    /// </param>
+    private void SelectInventoryObject(int i)
+    {
+        if (inventory[inventorySelection] != null) {
+            inventory[inventorySelection].SetLayer(Utilities.INVISIBLE_LAYER);
+        }
+        if (inventory[i] != null) {
+            inventory[i].SetLayer(Utilities.INVENTORY_UI_LAYER);
+        }
+        inventorySelection = i;
+    }
+
+    /// <summary>
+    ///     Determine if the blob has a high enough carrying capacity to add the given item to its
+    ///     inventory.
+    /// </summary>
+    /// <param name="burden">
+    ///     The burden of the item to add to the blob's inventory.
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the blob can carry the additional burden.
+    /// </returns>
+    public bool CanCarry(int burden)
+    {
+        return currentBurden + burden <= CARRYING_CAPACITY;
+    }
+
+    /// <summary>
+    ///     Tests if the blob has the given object in its inventory.
+    /// </summary>
+    /// <param name="obj">
+    ///     The object to test for.
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the blob has the object.
+    /// </returns>
+    public bool IsHolding(GameObject obj)
+    {
+        if (currentBurden == 0)
+            return obj == null;
+
+        for (int i = 0; i < CARRYING_CAPACITY; i++) {
+            if (inventory[i] == obj)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///    Return a boolean indicating if the blob character is holding an object with the specified tag.
+    /// </summary>
+    /// <param name="tag">
+    ///     The tag to check for.
+    /// </param>
+    /// <returns>
+    ///     <tt>true</tt> iff the held object has the tag.
+    /// </returns>
+    public bool HoldingObjectWithTag(string tag)
+    {
+        if (currentBurden == 0)
+            return false;
+
+        for (int i = 0; i < CARRYING_CAPACITY; i++) {
+            if (inventory[i] != null && inventory[i].CompareTag(tag))
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /// <summary>
+    ///     Attempt to grab the game object and keep it held by the blob character.
+    ///     This can fail if another object is being held, if the object refuses to be grabbed,
+    ///     or if the object does not have a Grip component.
+    /// </summary>
+    /// <param name="obj">
+    ///     The GameObject that the blob character will try to grab.
+    /// </param>
+    /// <returns>
+    ///     <tt>true</tt> iff the object was successfully grabbed.
+    /// </returns>
+    public bool TryToGrab(GameObject obj)
+    {
+        int objectBurden = obj.GetComponent<Grip>().burden;
+        
+        if (CanCarry(objectBurden)) {
+            for (int i = 0; i < CARRYING_CAPACITY; i++) {
+                if (inventory[i] == null)
+                {
+                    inventory[i] = obj;
+                    obj.SetLayer(Utilities.INVENTORY_UI_LAYER);
+                    currentBurden += objectBurden;
+                    SelectInventoryObject(i);
+                    return true;
+                }
+            }
+        }
+
+        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.PlayOneShot(releaseSound);
+        return false;
+    }
+
+    /// <summary>
+    ///     Release the currently selected inventory object.
+    /// </summary>
+    public void Release()
+    {
+        if (currentBurden == 0)
+            return;
+
+        if (inventory[inventorySelection] != null)
+        {
+            inventory[inventorySelection].GetComponent<Grip>().Release();
+            currentBurden -= inventory[inventorySelection].GetComponent<Grip>().burden;
+        }
+        inventory[inventorySelection] = null;
+        SelectNextNonEmptyObject(true);
+        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.PlayOneShot(releaseSound);
+    }
+
+/// <summary>
+///     Enables/disables ghost mode for the blob. Ghost mode disables gravity and enables flying
+///     and clipping.
+/// </summary>
+    public void ToggleGhostMode()
+    {
+        ghostMode = !ghostMode;
+
+        if (ghostMode) {
+            SetColliders(false);
+            SetMovementInputEnabled(false);
+            SetStickyMode(false);
+            SetGravity(false);
+            OverrideSpringLengths(1f);
+            ApplyForces(Vector3.zero, Vector3.zero, false);
+            StopMovement();
+        } else {
+            SetColliders(true);
+            SetGravity(true);
+            SetMovementInputEnabled(true, 0.5f);
+            RestoreSpringLengths();
+        }
+    }
+
+    /// <summary>
+    ///     Applies flying motion while ghost mode is active.
+    /// </summary>
+    private void ApplyGhostMovement()
+    {
+        if (!ghostMode) return;
 
         (Vector3 forwardForce, Vector3 rightwardForce) = GetInputAxisForces();
 
-        // Constrain initial movementForce to the unit disk.
-        Vector3 movementForce = forwardForce + rightwardForce;
-        if (movementForce.magnitude > 1)
+        Vector3 translation = forwardForce + rightwardForce;
+        
+        if (Input.GetButton("Jump"))
         {
-            movementForce = movementForce.normalized;
+            translation.y += 1;
         }
-        movementForce *= movementIntensityFactor * (stickyMode ? stickyMovementModifier : 1);
 
-        // Jumps should only require a single keypress which might not align with physics updates,
-        // so detect the keypress in Update() and perform the action in FixedUpdate().
-        Vector3 jumpForce = jumpOnNextFixedUpdate ? (jumpIntensityFactor * jumpDirection) : Vector3.zero;
-        jumpOnNextFixedUpdate = false;
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            translation.y -= 1;
+        }
 
-        ApplyForces(movementForce, jumpForce, true);
-    }
-
-    private (Vector3, Vector3) GetInputAxisForces() {
-        // Ensure forward/rightward movement occurs in the horizontal plane.
-        Vector3 forwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.forward, Vector3.up).normalized;
-        forwardForce *= Input.GetAxis("Vertical");
-
-        Vector3 rightwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.right, Vector3.up).normalized;
-        rightwardForce *= Input.GetAxis("Horizontal");
-
-        return (forwardForce, rightwardForce);
+        foreach (GameObject atom in createBlob.GetAtoms())
+        {
+            atom.transform.position += ghostSpeed * translation;
+        }
     }
 
     /// <summary>
-    ///     Apply a force to the BlobController.
+    ///     Force the blob's spring length factor to be <tt>factor</tt>. The current factor can be
+    ///     can be restored with <tt>RestoreSpringLengths()</tt>.
     /// </summary>
-    /// <param name="force">
-    ///     The force vector to apply.
-    /// </param>
-    /// <param name="impulse">
-    ///     The impulse force vector to apply.
-    /// </param>
-    /// <param name="requireTouching">
-    ///     If true, apply zero forces if the blob character is not touching something.
-    /// </param>
-    public void ApplyForces(Vector3? force, Vector3? impulse, bool requireTouching)
+    public void OverrideSpringLengths(float factor)
     {
-        if (requireTouching && !IsTouching())
-        {
-            force = Vector3.zero;
-            impulse = Vector3.zero;
-        }
+        savedSpringFactor = createBlob.GetSpringLengthFactor();
+        createBlob.SetSpringLengthFactor(factor);
+    }
 
-        foreach (AtomController atom in atomControllers)
-        {
-            if (force.HasValue)
-            {
-                atom.SetForce(force.Value);
-            }
-            if (impulse.HasValue)
-            {
-                atom.SetImpulse(impulse.Value);
-            }
-        }
+    /// <summary>
+    ///     Restore the blob's spring length factor to the value previously saved by
+    ///     <tt>OverrideSpringLengths()</tt>.
+    /// </summary>
+    public void RestoreSpringLengths()
+    {
+        createBlob.SetSpringLengthFactor(savedSpringFactor);
     }
 
     /// <summary>
@@ -376,105 +689,6 @@ public class BlobController : Controllable
     }
 
     /// <summary>
-    ///     Set the blob character's velocity to zero.
-    /// </summary>
-    public void StopMovement()
-    {
-        foreach (AtomController atom in atomControllers)
-        {
-            atom.SetVelocity(Vector3.zero);
-        }
-    }
-
-    /// <summary>
-    ///    Get the blob character's velocity.
-    /// </summary>
-    /// <returns>
-    ///     The velocity Vector3 of the center atom.
-    /// </returns>
-    public Vector3 GetVelocity()
-    {
-        return centerAtom.GetComponent<Rigidbody>().velocity;
-    }
-
-    /// <summary>
-    ///     Force the blob's spring length factor to be <tt>factor</tt>. The current factor can be
-    ///     can be restored with <tt>RestoreSpringLengths()</tt>.
-    /// </summary>
-    public void OverrideSpringLengths(float factor)
-    {
-        savedSpringFactor = createBlob.GetSpringLengthFactor();
-        createBlob.SetSpringLengthFactor(factor);
-    }
-
-    /// <summary>
-    ///     Restore the blob's spring length factor to the value previously saved by
-    ///     <tt>OverrideSpringLengths()</tt>.
-    /// </summary>
-    public void RestoreSpringLengths()
-    {
-        createBlob.SetSpringLengthFactor(savedSpringFactor);
-    }
-
-    /// <summary>
-    ///     Apply user input for non-movement actions and unpause audio if needed.
-    /// </summary>
-    void Update()
-    {
-        MoveInventoryCamera();
-
-        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
-            return;
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Release();
-        }
-
-        float mouseScroll = Input.mouseScrollDelta.y;
-        if (mouseScroll != 0)
-        {
-            SelectNextNonEmptyObject(mouseScroll > 0);
-        }
-
-        if (movementInputEnabled)
-        {
-            if (Input.GetButtonDown("Jump"))
-            {
-                jumpOnNextFixedUpdate = true;
-            }
-            if (Input.GetMouseButtonDown(0)) // left mouse shrinks
-            {
-                createBlob.SetSpringLengthFactor(blobShrinkingFactor);
-            }
-            if (Input.GetMouseButtonDown(1)) // right mouse grows
-            {
-                createBlob.SetSpringLengthFactor(blobGrowingFactor);
-            }
-            if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
-            {
-                createBlob.SetSpringLengthFactor();
-            }
-            if (Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                SetStickyMode(true);
-            }
-            if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                SetStickyMode(false);
-            }
-        }
-    }
-
-    private void MoveInventoryCamera()
-    {
-        Transform targetTransform = inventory[inventorySelection] != null ?
-            inventory[inventorySelection].transform : transform;
-        inventoryCamera.transform.position = targetTransform.position + inventoryCameraDistance * Vector3.back;
-        inventoryCamera.transform.LookAt(targetTransform);
-    }
-
-    /// <summary>
     ///     Teleport the blob character to a new position.
     /// </summary>
     /// <param name="newPosition">
@@ -489,6 +703,17 @@ public class BlobController : Controllable
         foreach (GameObject atom in createBlob.GetAtoms())
         {
             atom.transform.position += translation;
+        }
+    }
+
+    /// <summary>
+    ///     Set the blob character's velocity to zero.
+    /// </summary>
+    public void StopMovement()
+    {
+        foreach (AtomController atom in atomControllers)
+        {
+            atom.SetVelocity(Vector3.zero);
         }
     }
 
@@ -512,163 +737,6 @@ public class BlobController : Controllable
     }
 
     /// <summary>
-    ///     Are any of the blob's atoms touching an object?
-    /// </summary>
-    /// <param name="obj">
-    ///     The object to test for. If null, test if the blob is touching anything.
-    /// </param>
-    /// <returns>
-    ///     (If object is not null) True iff the blob is touching the object.<br/>
-    ///     (If object is null) True iff the blob is touching anything.
-    /// </returns>
-    public bool IsTouching(GameObject obj = null)
-    {        
-        if (obj == null && stickyMode)
-        {
-            for (int i = 0; i < STICKY_COUNT; i++)
-            {
-                if (atomStickies[i] != null)
-                {
-                    return true;
-                }
-            }
-        }
-
-        foreach (AtomController atom in atomControllers)
-            {
-                if (atom.IsTouching(obj))
-                {
-                    return true;
-                }
-            }
-
-        return false;
-    }
-
-    /// <summary>
-    ///     Attempt to grab the game object and keep it held by the blob character.
-    ///     This can fail if another object is being held, if the object refuses to be grabbed,
-    ///     or if the object does not have a Grip component.
-    /// </summary>
-    /// <param name="obj">
-    ///     The GameObject that the blob character will try to grab.
-    /// </param>
-    /// <returns>
-    ///     <tt>true</tt> iff the object was successfully grabbed.
-    /// </returns>
-    public bool TryToGrab(GameObject obj)
-    {
-        int objectBurden = obj.GetComponent<Grip>().burden;
-        
-        if (CanCarry(objectBurden)) {
-            for (int i = 0; i < CARRYING_CAPACITY; i++) {
-                if (inventory[i] == null)
-                {
-                    inventory[i] = obj;
-                    obj.SetLayer(Utilities.INVENTORY_UI_LAYER);
-                    currentBurden += objectBurden;
-                    SelectInventoryObject(i);
-                    return true;
-                }
-            }
-        }
-
-        audioSource.pitch = Random.Range(0.8f, 1.2f);
-        audioSource.PlayOneShot(releaseSound);
-        return false;
-    }
-
-    public bool CanCarry(int burden)
-    {
-        return currentBurden + burden <= CARRYING_CAPACITY;
-    }
-
-    /// <summary>
-    ///     Release the currently grabbed object.
-    /// </summary>
-    public void Release()
-    {
-        if (currentBurden == 0)
-            return;
-
-        if (inventory[inventorySelection] != null)
-        {
-            inventory[inventorySelection].GetComponent<Grip>().Release();
-            currentBurden -= inventory[inventorySelection].GetComponent<Grip>().burden;
-        }
-        inventory[inventorySelection] = null;
-        SelectNextNonEmptyObject(true);
-        audioSource.pitch = Random.Range(0.8f, 1.2f);
-        audioSource.PlayOneShot(releaseSound);
-    }
-
-    public bool IsHolding(GameObject obj)
-    {
-        if (currentBurden == 0)
-            return obj == null;
-
-        for (int i = 0; i < CARRYING_CAPACITY; i++) {
-            if (inventory[i] == obj)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///    Return a boolean indicating if the blob character is holding an object with the specified tag.
-    /// </summary>
-    /// <param name="tag">
-    ///     The tag to check for.
-    /// </param>
-    /// <returns>
-    ///     <tt>true</tt> iff the held object has the tag.
-    /// </returns>
-    public bool HoldingObjectWithTag(string tag)
-    {
-        if (currentBurden == 0)
-            return false;
-
-        for (int i = 0; i < CARRYING_CAPACITY; i++) {
-            if (inventory[i] != null && inventory[i].CompareTag(tag))
-            {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-    private void SelectInventoryObject(int i)
-    {
-        if (inventory[inventorySelection] != null) {
-            inventory[inventorySelection].SetLayer(Utilities.INVISIBLE_LAYER);
-        }
-        if (inventory[i] != null) {
-            inventory[i].SetLayer(Utilities.INVENTORY_UI_LAYER);
-        }
-        inventorySelection = i;
-    }
-
-    private void SelectNextNonEmptyObject(bool forward)
-    {
-        if (currentBurden == 0) 
-            return;
-
-        for (int i = 1; i < CARRYING_CAPACITY; i++)
-        {
-            int index = (CARRYING_CAPACITY + inventorySelection + (forward ? i : -i)) % CARRYING_CAPACITY;
-            if (inventory[index] != null)
-            {
-                SelectInventoryObject(index);
-                return;
-            }
-        }
-    }
-
-    /// <summary>
     ///     Return true if the given object is one of this blob's atoms.
     /// </summary>
     /// <param name="obj">
@@ -682,11 +750,58 @@ public class BlobController : Controllable
         return createBlob.GetAtoms().Contains(obj);
     }
 
+    //----------------------------------------------------------------------------------------------
+    // Getters
+    //----------------------------------------------------------------------------------------------
+    /// <returns>
+    ///     <tt> Vector3 </tt> The position of the blob's center atom.
+    /// </returns>
     public Vector3 GetPosition()
     {
         return centerAtom.transform.position;
     }
 
+    /// <returns>
+    ///     <tt> Vector3 </tt> The velocity of the blob's center atom.
+    /// </returns>
+    public Vector3 GetVelocity()
+    {
+        return centerAtom.GetComponent<Rigidbody>().velocity;
+    }
+
+    public bool IsSticky()
+    {
+        return stickyMode;
+    }
+    
+    public GameObject GetCenterAtom()
+    {
+        return centerAtom;
+    }
+
+    /// <summary>
+    ///     Determines if the blob has the given material properties.
+    /// </summary>
+    /// <param name="materialProperties">
+    ///     The material properties to test for.
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the blob has the material properties.
+    /// </returns>
+    public bool BlobMaterialsHas(MaterialProperties materialProperties)
+    {
+        return blobMaterials.HasProperty(materialProperties);
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Setters
+    //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     Change the sticky mode of the blob.
+    /// </summary>
+    /// <param name="enable">
+    ///     Enables sicky mode iff this is <tt>True</tt>.
+    /// </param>
     private void SetStickyMode(bool enable)
     {
         stickyMode = enable;
@@ -698,16 +813,13 @@ public class BlobController : Controllable
             }
         }
     }
-    public bool IsSticky()
-    {
-        return stickyMode;
-    }
-
-    public GameObject GetCenterAtom()
-    {
-        return centerAtom;
-    }
-
+    
+    /// <summary>
+    ///     Enables/disables each atom's collider in this blob.
+    /// </summary>
+    /// <param name="enable">
+    ///     Enables atom colliders iff this is <tt>True</tt>.
+    /// </param>
     public void SetColliders(bool enabled)
     {
         foreach (GameObject atom in createBlob.GetAtoms())
@@ -724,27 +836,16 @@ public class BlobController : Controllable
         }
     }
 
-    public BlobMaterials GetBlobMaterials()
-    {
-        return blobMaterials;
-    }
-
-    public void SetLight(BlobLight blobLight, bool? enable, bool save = false)
-    {
-        blobLightController.SetLight(blobLight, enable, save);
-    }
-
-    public void ResetLight(BlobLight blobLight)
-    {
-        blobLightController.ResetLight(blobLight);
-    }
-
+    /// <summary>
+    ///     Set the materials for the blob's body and droplets. This affects the blobs properties.
+    /// </summary>
+    /// <param name="newBlobMaterials">
+    ///     The blob materials to set.
+    /// </param>
     public void SetBlobMaterials(BlobMaterials newBlobMaterials)
     {
         blobMaterials = newBlobMaterials;
 
-        canIgnite = newBlobMaterials.HasProperty(MaterialProperties.CAN_IGNITE);
-        canExtinguish = newBlobMaterials.HasProperty(MaterialProperties.CAN_EXTINGUISH);
         blobLightController.SetLight(BlobLight.MaterialGlow, newBlobMaterials.HasProperty(MaterialProperties.GLOWING), true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
@@ -756,48 +857,38 @@ public class BlobController : Controllable
         }
     }
 
-    public void ToggleGhostMode()
+    /// <summary>
+    ///     Sets the state of one of the blob's lights, optionally saving it as the light's default.
+    /// </summary>
+    /// <param name="blobLight">
+    ///     Which blob light to modify the state of.
+    /// </param>
+    /// <param name="enable">
+    ///     <tt>True<\tt>/<tt>false</tt> enable/disable the light, respectively. <tt>null</tt> sets
+    ///     the light's state to be the opposite of its default.
+    /// </param>
+    /// <param name="save">
+    ///     <tt>True</tt> sets the lights default state to that determined by the enable parameter.
+    /// </param>
+    public void SetLight(BlobLight blobLight, bool? enable = null, bool save = false)
     {
-        ghostMode = !ghostMode;
-
-        if (ghostMode) {
-            SetColliders(false);
-            SetMovementInputEnabled(false);
-            SetStickyMode(false);
-            SetGravity(false);
-            OverrideSpringLengths(1f);
-            ApplyForces(Vector3.zero, Vector3.zero, false);
-            StopMovement();
-        } else {
-            SetColliders(true);
-            SetGravity(true);
-            SetMovementInputEnabled(true, 0.5f);
-            RestoreSpringLengths();
-        }
+        blobLightController.SetLight(blobLight, enable, save);
     }
 
-    private void ApplyGhostMovement()
+    /// <summary>
+    ///     Sets the state of one of the blob's lights back to its default.
+    /// </summary>
+    /// <param name="blobLight">
+    ///     Which blob light to modify the state of.
+    /// </param>
+    public void ResetLight(BlobLight blobLight)
     {
-        (Vector3 forwardForce, Vector3 rightwardForce) = GetInputAxisForces();
-
-        Vector3 translation = forwardForce + rightwardForce;
-        
-        if (Input.GetButton("Jump"))
-        {
-            translation.y += 1;
-        }
-
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            translation.y -= 1;
-        }
-
-        foreach (GameObject atom in createBlob.GetAtoms())
-        {
-            atom.transform.position += ghostSpeed * translation;
-        }
+        blobLightController.ResetLight(blobLight);
     }
 
+    /// <summary>
+    ///     Plays a squish noise.
+    /// </summary>
     public void Squish()
     {
         squisher.squish();

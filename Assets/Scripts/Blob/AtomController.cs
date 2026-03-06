@@ -266,11 +266,6 @@ public class AtomController : MonoBehaviour
         stickyJoint.connectedAnchor = obj.transform.InverseTransformPoint(transform.position);
     }
 
-    public bool IsSticking()
-    {
-        return stickyJoint != null;
-    }
-
     /// <summary>
     ///     Destroy the spring joint sticking this atom to an object.
     /// </summary>
@@ -283,6 +278,9 @@ public class AtomController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    ///     Makes sure the blob controller unsticks if the sticky joint for this atom breaks.
+    /// </summary>
     void OnJointBreak(float breakForce)
     {
         atomMeshRenderer.materials = atomMaterials;
@@ -296,6 +294,12 @@ public class AtomController : MonoBehaviour
     {
         return blobController;
     }
+    
+    public bool IsSticking()
+    {
+        return stickyJoint != null;
+    }
+    
     //----------------------------------------------------------------------------------------------
     // Setters
     //----------------------------------------------------------------------------------------------
@@ -303,26 +307,32 @@ public class AtomController : MonoBehaviour
     {
         atomRigidBody.useGravity = gravity;
     }
+    
     public void SetVelocity(Vector3 velocity)
     {
         atomRigidBody.velocity = velocity;
     }
+    
     public void SetForce(Vector3 force)
     {
         this.force = force;
     }
+    
     public void SetImpulse(Vector3 impulse)
     {
         this.impulse = impulse;
     }
+    
     public void SetVisible(bool visible)
     {
         atomMeshRenderer.enabled = visible;
     }
+    
     public void SetAsCenterAtom(bool isCenterAtom)
     {
         centerAtom = isCenterAtom;
     }
+    
     /// <summary>
     ///     Change the material of each droplet particle.
     /// <param name="material">
@@ -337,6 +347,7 @@ public class AtomController : MonoBehaviour
             renderer.material = material;
         }
     }
+    
     /// <summary>
     ///     Enables/disables the atom's collider. On disabling, the atom stops touching everything.
     /// </summary>
