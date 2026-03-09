@@ -2,7 +2,6 @@ using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
-
 /// <summary>
 ///     Controls effects of fires being ignited and extinguished.
 /// </summary>
@@ -63,11 +62,11 @@ public class Fire : Interactable
     {
         bool interacted = false;
 
-        if (blob.BlobMaterialsHas(MaterialProperties.CAN_IGNITE)) {
+        if (blob.BlobMaterialsHas(MaterialProperties.Can_Ignite)) {
             Ignite();
             interacted = true;
         }
-        else if (blob.BlobMaterialsHas(MaterialProperties.CAN_EXTINGUISH)) 
+        else if (blob.BlobMaterialsHas(MaterialProperties.Can_Extinguish)) 
         {
             Extinguish();
             interacted = true;

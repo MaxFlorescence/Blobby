@@ -22,9 +22,9 @@ class DebugController : MonoBehaviour
         if (Input.GetKey(KeyCode.M))
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
-                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.WATER);
+                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Water);
             else if (Input.GetKeyDown(KeyCode.Alpha2))
-                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.LAVA);
+                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Lava);
         }
     }
 

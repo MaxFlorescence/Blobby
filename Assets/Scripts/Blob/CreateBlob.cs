@@ -3,7 +3,6 @@ using UnityEngine.Assertions;
 
 // TODO: CreateBlob -> BlobFactory, BlobController handles mesh stuff
 
-[RequireComponent(typeof(MeshFilter))]
 /// <summary>
 ///     This class (1) creates the blob character and (2) maintains its appearance as the game is played.
 ///     <para/>
@@ -13,74 +12,90 @@ using UnityEngine.Assertions;
 ///     The surface atoms ensure that the overall shape of the blob is maintained, while the center
 ///     atom ensures that the blob doesn't collapse on itself.
 /// </summary>
+[RequireComponent(typeof(MeshFilter))]
 public class CreateBlob : MonoBehaviour
 {
-    // PUBLIC MEMBERS
-    /// <summary>
-    ///     Spring constant for the springs maintaining the blob's shape.
-    /// </summary>
-    public float springForce = 100f;
-    /// <summary>
-    ///     How big each atom of the blob is.
-    /// </summary>
-    public float atomScale = 0.5f;
+    //----------------------------------------------------------------------------------------------
+    // Parameters
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///    TODO: id strings for multiplayer
     /// </summary>
     public const int BLOB_ID = 0;
-
     // TODO: can/should these be found automatically?
     public GameObject leftEye;
     public GameObject rightEye;
 
-    // PRIVATE MEMBERS
+    //----------------------------------------------------------------------------------------------
     // Spawning
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     Initial position of the blob.
     /// </summary>
     private Vector3 spawnPoint;
-    private BlobController blobController;
 
+    //----------------------------------------------------------------------------------------------
     // Atoms
+    //----------------------------------------------------------------------------------------------
+    private GameObject[] blobAtoms;
+    private Rigidbody[] atomRigidbodies;
+    /// <summary>
+    ///     How big each atom of the blob is.
+    /// </summary>
+    private float atomScale = 0.5f;
     /// <summary>
     ///     Number of vertices in an icosahedron, plus 1 for the center point.
     /// </summary>
     private const int NUM_ATOMS = 13;
     /// <summary>
-    ///     Custom epsilon for floating point comparisons. Used to determine if two atoms are adjacent.
+    ///     Custom epsilon for floating point comparisons. Used to determine if two atoms are
+    ///     adjacent.
     /// </summary>
     private const float EPSILON = 1E-3f;
+    /// <summary>
+    ///     The physics material for the blob's atoms. Extremely high friction and bounciness.
+    /// </summary>
     private const string JELLY_PHYSIC_MATERIAL = "Materials/Blob Materials/JellyPhysic";
-    private const string IGNORE_CAMERA_LAYER = "Ignore Camera";
-    private GameObject[] blobAtoms;
-    private Rigidbody[] atomRigidbodies;
     /// <summary>
     ///     Quick reference for <tt>blobAtoms[0]</tt>.
     /// </summary>
     private GameObject centerAtom;
 
+    //----------------------------------------------------------------------------------------------
     // Springs
+    //----------------------------------------------------------------------------------------------
+    private SpringJoint[] springJoints;
+    /// <summary>
+    ///     Spring constant for the springs maintaining the blob's shape.
+    /// </summary>
+    private float springForce = 100f;
     /// <summary>
     ///    Number of edges in an icosahedron, plus 12 for radial connections (one per vertex).
     /// </summary>
     private const int NUM_SPRINGS = 42;
     /// <summary>
-    ///     Distance between blob's surface atoms. Equal to side length of radius 1 icosahedron: csc(2/5 * pi).
+    ///     Distance between blob's surface atoms. Equal to side length of radius-1 icosahedron:
+    ///     csc(2/5 * pi).
     /// </summary>
     private const float SIDE_LENGTH = 1.051462224f;
     /// <summary>
-    ///     Scalar for each spring's length. 1 corresponds to spring lengths equal to <tt>SIDE_LENGTH</tt>.
+    ///     Scalar for each spring's length. 1 corresponds to spring lengths equal to
+    ///     <tt>SIDE_LENGTH</tt>.
     /// </summary>
     private float springLengthFactor = 1f;
-    private SpringJoint[] springJoints;
+    /// <summary>
+    ///     The anchors for each spring joint.
+    /// </summary>
     private Vector3[] connectedAnchors;
 
+    //----------------------------------------------------------------------------------------------
     // Mesh
+    //----------------------------------------------------------------------------------------------
+    private Mesh blobMesh;
     /// <summary>
     ///    Ratio of blob mesh radius to actual blob radius.
     /// </summary>
     private float meshScale = 1.5f;
-    private Mesh blobMesh;
     /// <summary>
     ///     Maps mesh vertices <tt>i</tt> to blob atoms <tt>meshToAtomMap[i]</tt>.
     ///     Necessary for positioning each mesh vertex at its corresponding atom,
@@ -89,7 +104,8 @@ public class CreateBlob : MonoBehaviour
     private int[] meshToAtomMap;
 
     /// <summary>
-    ///     Create the blob. This assumes the script is a component of an icosahedron mesh, which may change later.
+    ///     Create the blob. This assumes the script is a component of an icosahedron mesh, which
+    ///     may change later.
     /// </summary>
     void Awake()
     {
@@ -106,7 +122,15 @@ public class CreateBlob : MonoBehaviour
 
         springJoints = ConnectAtoms(false);
 
-        blobController = centerAtom.AddComponent<BlobController>();
+        centerAtom.AddComponent<BlobController>();
+    }
+
+    void Start()
+    {
+        foreach (GameObject atom in blobAtoms)
+        {
+            atom.SetLayer(Utilities.IGNORE_CAMERA_LAYER);
+        }
     }
 
     /// <summary>
@@ -117,7 +141,8 @@ public class CreateBlob : MonoBehaviour
     /// </param>
     /// <param name="vertexToAtomMap">
     ///     A list mapping which mesh verices correspond to which atoms.
-    ///     vertexToAtomMap[i] = j iff mesh.vertices[i] corresponds to the returned array's j-th element. 
+    ///     <tt>vertexToAtomMap[i] = j</tt> iff <tt>mesh.vertices[i]</tt> corresponds to the
+    ///     returned array's j-th element. 
     /// </param>
     /// <returns>
     ///     An array of GameObjects containing the spawned atoms.
@@ -134,7 +159,8 @@ public class CreateBlob : MonoBehaviour
         for (int i = 0; i < blobMesh.vertexCount; i++)
         {
 
-            Vector3 newPosition = transform.TransformPoint(blobMesh.vertices[i]); // working in world coordinates is easier
+            // working in world coordinates is easier
+            Vector3 newPosition = transform.TransformPoint(blobMesh.vertices[i]); 
             positionSum += newPosition;
 
             // Search for an existing atom that was spawned at this new atom's position.
@@ -171,7 +197,8 @@ public class CreateBlob : MonoBehaviour
     }
 
     /// <summary>
-    ///     Instantiates one atom (sphere) at the given position, parented to the given parent's transform.
+    ///     Instantiates one atom (sphere) at the given position, parented to the given parent's
+    ///     transform.
     /// </summary>
     /// <param name="position">
     ///     The position at which to spawn this atom.
@@ -186,8 +213,7 @@ public class CreateBlob : MonoBehaviour
     {
         GameObject atom = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-        atom.name = string.Format("Mesh {0} Atom {1}", BLOB_ID, ID);
-        atom.layer = LayerMask.NameToLayer(IGNORE_CAMERA_LAYER);
+        atom.name = string.Format("Blob {0} Atom {1}", BLOB_ID, ID);
         atom.tag = "Atom";
 
         atom.transform.localScale = atomScale * Vector3.one;
@@ -202,7 +228,7 @@ public class CreateBlob : MonoBehaviour
     /// </summary>
     /// <returns>
     ///     The array of Rigidbodies added.
-    ///     objects[i] has the Rigidbody at index i.
+    ///     <tt>objects[i]</tt> has the Rigidbody at index i.
     /// </returns>
     private Rigidbody[] AddRigidBodies()
     {
@@ -230,16 +256,17 @@ public class CreateBlob : MonoBehaviour
 
     /// <summary>
     ///     Inter-connects the objects with spring joints.
-    ///     <br/>
+    ///     <para/>
     ///     Note: For object A's spring joint connected to object B, the anchor (relative to A)
     ///     "wants" to rest at the connectedAnchor (relative to B).
     ///     e.g. anchor=(0,0,0), connectedAnchor=(0,1,0) => A's origin "wants" to rest one unit
     ///     above B's origin.
     /// </summary>
     /// <param name="ballAdjacency">
-    ///     Option for deciding how to interpret the `distance` threshold.
-    ///     `true` indicates that objects are connected iff they are at most `distance` apart.
-    ///     `false` indicates that objects are connected iff they are approximately `distance` apart.
+    ///     Option for deciding how to interpret the <tt>distance</tt> threshold.
+    ///     <tt>true</tt> indicates that objects are connected iff they are at most
+    ///     <tt>distance</tt> apart. <tt>false</tt> indicates that objects are connected iff they
+    ///     are approximately <tt>distance</tt> apart.
     /// </param>
     /// <returns>
     ///     The array of SpringJoints added, in no particular order.
@@ -294,20 +321,13 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     Tests if atoms i and j are adjacent by the given parameters.
     /// </summary>
-    /// </param>
-    /// <param name="i">
-    ///     The index of the first object.
-    /// </param>
-    /// <param name="j">
-    ///     The index of the second object.
-    /// </param>
     /// <param name="distance">
     ///     The threshold that determines if the two objects are adjacent.
     /// </param>
     /// <param name="ballAdjacency">
-    ///     Option for deciding how to interpret the `distance` threshold.
-    ///     `true` indicates the objects are adjacent iff they are at most `distance` apart.
-    ///     `false` indicates the objects are adjacent iff they are approximately `distance` apart.
+    ///     Option for deciding how to interpret the <tt>distance</tt> threshold.
+    ///     <tt>true</tt> indicates the objects are adjacent iff they are at most <tt>distance</tt> apart.
+    ///     <tt>false</tt> indicates the objects are adjacent iff they are approximately <tt>distance</tt> apart.
     /// </param>
     /// <returns>
     ///     A boolean indicating if i and j are adjacent.
@@ -353,26 +373,12 @@ public class CreateBlob : MonoBehaviour
     }
 
     /// <summary>
-    ///     Transforms the `objectToSnap` such that it is positioned between the three given objects.
-    ///     The distance between the objects and the center object (index 0) is first scaled.
+    ///     Transforms the given object such that it is positioned between the three given atom
+    ///     indices. The distance between the objects and the center object (index 0) is first
+    ///     scaled.
     /// </summary>
     /// <param name="objectToSnap">
     ///     The object that is being transformed.
-    /// </param>
-    /// <param name="objects">
-    ///     The array of objects.
-    /// </param>
-    /// <param name="i">
-    ///     The index of the first object.
-    /// </param>
-    /// <param name="j">
-    ///     The index of the second object.
-    /// </param>
-    /// <param name="k">
-    ///     The index of the third object.
-    /// </param>
-    /// <param name="scale">
-    ///     The scale between the given objects and the center object.
     /// </param>
     private void SnapToTriangle(GameObject objectToSnap, int i, int j, int k)
     {
@@ -389,20 +395,9 @@ public class CreateBlob : MonoBehaviour
     }
 
     /// <summary>
-    ///     Calculates the barycenter of the triangle formed by the tips of three vectors scaled away from a center.
+    ///     Calculates the barycenter of the triangle formed by the tips of three vectors scaled
+    ///     away from a center.
     /// </summary>
-    /// <param name="center">
-    ///     The center position.
-    /// </param>
-    /// <param name="pos1">
-    ///     The first position.
-    /// </param>
-    /// <param name="pos2">
-    ///     The second position.
-    /// </param>
-    /// <param name="pos3">
-    ///     The third position.
-    /// </param>
     /// <param name="scale">
     ///     The scale between the given positions and the center.
     /// </param>
@@ -417,22 +412,11 @@ public class CreateBlob : MonoBehaviour
     }
 
     /// <summary>
-    ///     Calculates the normal vector of the triangle formed by the tips of three vectors, oriented away from the center.
+    ///     Calculates the normal vector of the triangle formed by the tips of three vectors,
+    ///     oriented away from the center.
     /// </summary>
-    /// <param name="center">
-    ///     The center position.
-    /// </param>
-    /// <param name="pos1">
-    ///     The first position.
-    /// </param>
-    /// <param name="pos2">
-    ///     The second position.
-    /// </param>
-    /// <param name="pos3">
-    ///     The third position.
-    /// </param>
     /// <param name="barycenter">
-    ///     The barycenter of the triangle.
+    ///     The barycenter of the triangle formed by the three positions.
     /// </param>
     /// <returns>
     ///     The normal Vector3 of the triangle.
@@ -455,7 +439,8 @@ public class CreateBlob : MonoBehaviour
     }
 
     /// <summary>
-    ///     Sets the vertex positions for the mesh to equal the given object positions, mapped and scaled accordingly.
+    ///     Sets the vertex positions for the mesh to equal the given object positions, mapped and
+    ///     scaled accordingly.
     /// </summary>
     private void SnapMeshToAtoms()
     {
@@ -472,7 +457,9 @@ public class CreateBlob : MonoBehaviour
         blobMesh.vertices = newVertices;
     }
 
-    // Getters and setters
+    //----------------------------------------------------------------------------------------------
+    // Getters
+    //----------------------------------------------------------------------------------------------
     public GameObject[] GetAtoms()
     {
         return blobAtoms;
@@ -483,6 +470,9 @@ public class CreateBlob : MonoBehaviour
         return springLengthFactor;
     }
 
+    //----------------------------------------------------------------------------------------------
+    // Setters
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     Modify each spring's connectedAnchor to be <tt>factor</tt> times the original value.
     /// </summary>

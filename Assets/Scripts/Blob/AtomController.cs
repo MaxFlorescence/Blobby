@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+///    This class defines the behavior of each individual atom in the blob.
+/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
-/// <summary>
-///    This class defines the behavior of each individual atom in the blob.
-/// </summary>
 public class AtomController : MonoBehaviour
 {
     //----------------------------------------------------------------------------------------------
@@ -230,7 +230,8 @@ public class AtomController : MonoBehaviour
     ///     The object to test for. If null, test if the atom is touching anything.
     /// </param>
     /// <returns>
-    ///     (If object is not null) True iff atom is touching the object.<br/>
+    ///     (If object is not null) True iff atom is touching the object.
+    ///     <br/>
     ///     (If object is null) True iff atom is touching anything.
     /// </returns>
     public bool IsTouching(GameObject obj = null)

@@ -148,7 +148,7 @@ public class BlobController : Controllable
         blobLightController.AddLight(BlobLight.MaterialGlow, lights[0], false);
         blobLightController.AddLight(BlobLight.InventoryIcon, lights[1], false);
 
-        SetBlobMaterials(BlobMaterials.WATER);
+        SetBlobMaterials(BlobMaterials.Water);
 
         SetupSounds();
     }
@@ -499,7 +499,8 @@ public class BlobController : Controllable
     }
 
     /// <summary>
-    ///    Return a boolean indicating if the blob character is holding an object with the specified tag.
+    ///    Return a boolean indicating if the blob character is holding an object with the specified
+    ///     tag.
     /// </summary>
     /// <param name="tag">
     ///     The tag to check for.
@@ -846,7 +847,7 @@ public class BlobController : Controllable
     {
         blobMaterials = newBlobMaterials;
 
-        blobLightController.SetLight(BlobLight.MaterialGlow, newBlobMaterials.HasProperty(MaterialProperties.GLOWING), true);
+        blobLightController.SetLight(BlobLight.MaterialGlow, newBlobMaterials.HasProperty(MaterialProperties.Glowing), true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
@@ -868,7 +869,7 @@ public class BlobController : Controllable
     ///     the light's state to be the opposite of its default.
     /// </param>
     /// <param name="save">
-    ///     <tt>True</tt> sets the lights default state to that determined by the enable parameter.
+    ///     <tt>True</tt> sets the light's default state to that determined by the enable parameter.
     /// </param>
     public void SetLight(BlobLight blobLight, bool? enable = null, bool save = false)
     {
