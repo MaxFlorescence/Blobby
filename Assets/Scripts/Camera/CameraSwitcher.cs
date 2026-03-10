@@ -1,14 +1,22 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
+/// <summary>
+///     A class for managing multiple cameras in a scene.
+/// </summary>
 public class CameraSwitcher : MonoBehaviour
 {
     private PriorityCamera[] cameras;
     private int cameraCount;
-    private int activeCamera = -1;
+    private int activeCameraIndex = -1;
+    private const string IGNORE_CAMERA_TAG = "Independent Camera";
 
+    /// <summary>
+    ///     Make sure the inventory camera can only see the light for the inventory.
+    /// </summary>
     void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (camera.gameObject.layer == Utilities.INVENTORY_UI_LAYER) {
@@ -17,12 +25,29 @@ public class CameraSwitcher : MonoBehaviour
         }
     }
 
+    /// <summary>
+    ///     Reset changes made in <tt>OnBeginCameraRendering()</tt>.
+    /// </summary>
     void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (camera.gameObject.layer == Utilities.INVENTORY_UI_LAYER) {
             GameInfo.ControlledBlob.ResetLight(BlobLight.InventoryIcon);
             GameInfo.ControlledBlob.ResetLight(BlobLight.MaterialGlow);
         }
+    }
+
+    /// <summary>
+    ///     Collect all enabled priority cameras in the scene that aren't tagged with
+    ///     <tt>IGNORE_CAMERA_TAG</tt>.
+    /// </summary>
+    void Awake()
+    {
+        cameras = Array.ConvertAll(
+            Camera.allCameras.Where(camera => !camera.CompareTag(IGNORE_CAMERA_TAG)).ToArray(),
+            camera => camera.GetComponent<PriorityCamera>()
+        );
+        cameraCount = cameras.Length;
+        DeactivateAll();
     }
 
     void Start()
@@ -39,18 +64,14 @@ public class CameraSwitcher : MonoBehaviour
         RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
     }
 
-    void Awake()
-    {
-        cameras = Array.ConvertAll(Camera.allCameras, camera => camera.GetComponent<PriorityCamera>());
-        cameraCount = cameras.Length;
-        DeactivateAll();
-    }
-
     void Update()
     {
         ActivateHighesetPriorityCamera();
     }
 
+    /// <summary>
+    ///     Deactivate all cameras, regardless of priority.
+    /// </summary>
     private void DeactivateAll()
     {
         foreach (PriorityCamera camera in cameras)
@@ -59,6 +80,10 @@ public class CameraSwitcher : MonoBehaviour
         }
     }
 
+    /// <summary>
+    ///     Search <tt>cameras[]</tt> for the one with the current highest priority, and activate
+    ///     it while deactivating the rest.
+    /// </summary>
     private void ActivateHighesetPriorityCamera()
     {
         int maxPriority = -1;
@@ -73,19 +98,14 @@ public class CameraSwitcher : MonoBehaviour
             }
         }
         
-        if (newActiveCamera == activeCamera) return;
+        if (newActiveCamera == activeCameraIndex) return;
 
         Assert.IsTrue(newActiveCamera >= 0);
-        if (activeCamera >= 0)
+        if (activeCameraIndex >= 0)
         {
-            cameras[activeCamera].Deactivate();
+            cameras[activeCameraIndex].Deactivate();
         }
         cameras[newActiveCamera].Activate();
-        activeCamera = newActiveCamera;
-    }
-    
-    public bool IsMainCameraActive()
-    {
-        return cameras[activeCamera].IsMain();
+        activeCameraIndex = newActiveCamera;
     }
 }
