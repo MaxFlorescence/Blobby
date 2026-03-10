@@ -77,6 +77,9 @@ public abstract class PriorityCamera : Controllable
         OnActivate();
     }
 
+    /// <summary>
+    ///     Method for extenders to override. Called after this camera is activated.
+    /// </summary>
     virtual protected void OnActivate() {}
 
     public void Deactivate()
@@ -86,5 +89,8 @@ public abstract class PriorityCamera : Controllable
         OnDeactivate();
     }
 
+    /// <summary>
+    ///     Method for extenders to override. Called after this camera is deactivated.
+    /// </summary>
     virtual protected void OnDeactivate() {}
 }
