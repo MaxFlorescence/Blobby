@@ -22,12 +22,12 @@ class DungeonLayoutGenerator
 
     public DungeonLayoutGenerator(string[] layoutFileLines)
     {
-        string[] preppedStr = PrepareString(layoutFileLines[0]);
+        string[] preppedStr = PrepareString(layoutFileLines[0], ' ');
         dims.x = int.Parse(preppedStr[0]);
         dims.y = int.Parse(preppedStr[1]);
         dims.z = int.Parse(preppedStr[2]);
 
-        preppedStr = PrepareString(layoutFileLines[1]);
+        preppedStr = PrepareString(layoutFileLines[1], ' ');
         root.x = int.Parse(preppedStr[0]);
         root.y = int.Parse(preppedStr[1]);
         root.z = int.Parse(preppedStr[2]);
@@ -63,10 +63,10 @@ class DungeonLayoutGenerator
 
     private (string, DungeonTileType, Quaternion) GetTileFromLines(int index)
     {
-        (string tileName, char tileRot) = SplitLine(layoutFileLines[index]);
+        (string tileName, string tileRotation) = SplitLine(layoutFileLines[index]);
 
         Enum.TryParse(tileName, true, out DungeonTileType tileType);
-        return (tileName, tileType, Rotation.Parse(tileRot));
+        return (tileName, tileType, Rotation.Parse(tileRotation));
     }
     
     private (string, DungeonTileType, Quaternion) GetTileInternal(Vector3Int position)
@@ -106,9 +106,9 @@ class DungeonLayoutGenerator
         return s.Split(delimiter);
     }
     
-    private (string, char) SplitLine(string line)
+    private (string, string) SplitLine(string line)
     {
-        line = PrepareString(line)[0];
-        return (line[..^1], line[^1]);
+        string[] elements = PrepareString(line, ' ');
+        return (elements[0], elements[1]);
     }
 }
