@@ -60,7 +60,7 @@ public static class WallsExtensions
 
     private static readonly Dictionary<Walls, (DungeonTileType, Quaternion)> wallsToTile = new()
     {
-        {Walls.SET,           (DungeonTileType.NONE,        Rotation.FORWARD)},
+        {Walls.SET,           (DungeonTileType.EMPTY,       Rotation.FORWARD)},
         {Walls.CROSSING,      (DungeonTileType.CROSSING,    Rotation.FORWARD)},
         {Walls.JUNCTION_F,    (DungeonTileType.JUNCTION,    Rotation.FORWARD)},
         {Walls.JUNCTION_R,    (DungeonTileType.JUNCTION,    Rotation.RIGHT)},

@@ -4,7 +4,7 @@ using UnityEngine.Assertions;
 
 public enum DungeonTileType
 {
-    NONE,
+    EMPTY,
     HALLWAY, CORNER, JUNCTION, CROSSING, DEAD_END,
     STAIRS_UP, STAIRS_DOWN,
     ENTRANCE
@@ -47,9 +47,9 @@ public class DungeonTile : MonoBehaviour
 {
     public static DungeonTile MakeTile(string name, DungeonTileType tileType, Vector3Int position, Quaternion tileRotation, Dungeon dungeon)
     {
-        if (tileType == DungeonTileType.NONE)
+        if (tileType == DungeonTileType.EMPTY)
         {
-            return dungeon.GetComponent<Dungeon>().NoneTile;
+            return dungeon.GetComponent<Dungeon>().emptyTile;
         }
 
         Vector3 tilePosition = dungeon.PositionOf(position);
@@ -72,12 +72,12 @@ public class DungeonTile : MonoBehaviour
     }
     
     private DungeonTile[] neighbors = new DungeonTile[6] { null, null, null, null, null, null };
-    public DungeonTileType Type { get; private set; } = DungeonTileType.NONE;
+    public DungeonTileType Type { get; private set; } = DungeonTileType.EMPTY;
     private GameObject mapIcon;
 
     public void SetName(string name)
     {
-        if (Type == DungeonTileType.NONE) return;
+        if (Type == DungeonTileType.EMPTY) return;
 
         this.name = name;
     }
@@ -89,7 +89,7 @@ public class DungeonTile : MonoBehaviour
     }
 
     private void GoAddNeighbor(DungeonTile neighbor, Vector3Int direction) {
-        if (Type == DungeonTileType.NONE) return;
+        if (Type == DungeonTileType.EMPTY) return;
 
         if (direction == Vector3Int.forward)
         {
@@ -116,7 +116,7 @@ public class DungeonTile : MonoBehaviour
 
     public void SetVisible(bool visible, bool? visibleOnMap = null)
     {
-        if (Type == DungeonTileType.NONE) return;
+        if (Type == DungeonTileType.EMPTY) return;
 
         visibleOnMap ??= visible;
         gameObject.SetLayer(visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER);
