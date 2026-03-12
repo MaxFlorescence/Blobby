@@ -1,102 +1,131 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+/// <summary>
+///     A class for generating a dungeon randomly or based on a file.
+/// </summary>
 public class Dungeon : MonoBehaviour
 {
-    public TextAsset layoutFile;
-    public string layoutFileName;
-    public int randomSeed = 0;
-    public Vector3Int randomDimMin = new(5, 5, 5);
-    public Vector3Int randomDimMax = new(20, 20, 20);
     
-    private int activeLevel = -1;
-    private Vector3Int dims;
-    private Vector3Int entrance;
-    private DungeonTile[,,] layout;
-    private Vector3Int[,] stairs;
+    // ---------------------------------------------------------------------------------------------
+    // Information
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The actual size of each tile of the dungeon.
+    /// </summary>
+    private readonly Vector3Int TILE_WORLD_SIZE = new(10, 20, 10);
+    protected bool isRandomlyGenerated;
+    private int activeLevelIndex = -1;
+    /// <summary>
+    ///     The size of the dungeon.
+    /// </summary>
+    private Vector3Int layoutDimensions;
+    /// <summary>
+    ///     The position of the entrance tile.
+    /// </summary>
+    protected Vector3Int entranceTilePosition;
+    /// <summary>
+    ///     The actual grid of tiles for the dungeon.
+    /// </summary>
+    private DungeonTile[,,] tileLayout;
+    /// <summary>
+    ///     The positions of the stairs up and stairs down tiles for each dungeon level.
+    /// </summary>
+    private Vector3Int[,] stairPositions;
+    
+    // ---------------------------------------------------------------------------------------------
+    // Occlusion
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The blocker prefab is a collection of black planes that blocks the player's line of
+    ///     sight up/down stairs.
+    /// </summary>
     private static GameObject blockerPrefab;
+    /// <summary>
+    ///     A blocker prefab that blocks line of sight up stairs.
+    /// </summary>
     private GameObject upperBlocker;
+    /// <summary>
+    ///     A blocker prefab that blocks line of sight down stairs.
+    /// </summary>
     private GameObject lowerBlocker;
-    private const string LAYOUT_PATH = "DungeonLayouts/";
-    private const int LAYER_HEIGHT = 20;
 
-    public DungeonTile NoneTile;
+    /// <summary>
+    ///     This dungeon's tile that represents empty space.
+    /// </summary>
+    public DungeonTile emptyTile;
 
     void Awake()
     {
         GameInfo.CurrentDungeon = this;
-    }
+    // }
 
-    void Start()
-    {
+    // void Start()
+    // {
         blockerPrefab = TileTypeExtensions.LoadCorridorAssets("Blocker").Item1;
-        NoneTile = gameObject.AddComponent<DungeonTile>();
+        emptyTile = gameObject.AddComponent<DungeonTile>();
         
         upperBlocker = Instantiate(blockerPrefab);
         upperBlocker.transform.parent = transform;
 
         lowerBlocker = Instantiate(blockerPrefab);
         lowerBlocker.transform.parent = transform;
-
-        // Generate layout at start if a method is provided
-        if (randomSeed != 0)
-        {
-            GenerateRandomLayout(randomSeed);
-        }
-        else if (!layoutFile)
-        {
-            GenerateLayoutFromFile(layoutFileName);
-        }
-        else
-        {
-            GenerateLayoutFromFile(layoutFile);
-        }
-
-        UpdateActiveLevel(entrance.y);
     }
 
     void Update()
     {
         float blobPositionY = GameInfo.ControlledBlob.GetPosition().y;
-        UpdateActiveLevel(LayerOf(blobPositionY));
+        UpdateActiveLevel(LevelOf(blobPositionY));
     }
 
-    private void GenerateRandomLayout(int seed)
+    /// <summary>
+    ///     Generates a dungeon layout with random dimensions and random tiles.
+    /// </summary>
+    /// <param name="minLayoutDimensions">
+    ///     The minimum size of each dimension of the layout.
+    /// </param>
+    /// <param name="maxLayoutDimensions">
+    ///     The maximum size of each dimension of the layout.
+    /// </param>
+    protected void GenerateRandomLayout(Vector3Int minLayoutDimensions, Vector3Int maxLayoutDimensions, int seed = 0)
     {
         Random.InitState(seed);
-        dims.x = Random.Range(randomDimMin.x, randomDimMax.x + 1);
-        dims.y = Random.Range(randomDimMin.y, randomDimMax.y + 1);
-        dims.z = Random.Range(randomDimMin.z, randomDimMax.z + 1);
-        entrance = new(Random.Range(0, dims.x), dims.y-1, Random.Range(0, dims.z));
+        layoutDimensions.x = Random.Range(minLayoutDimensions.x, maxLayoutDimensions.x + 1);
+        layoutDimensions.y = Random.Range(minLayoutDimensions.y, maxLayoutDimensions.y + 1);
+        layoutDimensions.z = Random.Range(minLayoutDimensions.z, maxLayoutDimensions.z + 1);
+        entranceTilePosition = new(Random.Range(0, layoutDimensions.x), layoutDimensions.y-1, Random.Range(0, layoutDimensions.z));
 
-        DungeonLayoutGenerator tree = new(dims, entrance);
+        DungeonLayoutGenerator tree = new(layoutDimensions, entranceTilePosition);
         PopulateLayout(tree);
     }
-    
-    public void GenerateLayoutFromFile(string layoutFileName)
-    {
-        GenerateLayoutFromFile(
-            Resources.Load(LAYOUT_PATH + layoutFileName, typeof(TextAsset)) as TextAsset
-        );
-    }
 
-    private void GenerateLayoutFromFile(TextAsset layoutFile)
+    /// <summary>
+    ///     Generates a dungeon layout using the contents of the specified file.
+    /// </summary>
+    /// <param name="layoutFile">
+    ///     The file to read the dungeon layout from. See <tt>LoadedDungeon.layoutFile</tt> for an
+    ///     example dungeon layout file.
+    /// </param>
+    protected void GenerateLayoutFromFile(TextAsset layoutFile)
     {
         string[] layoutFromFile = layoutFile.text.Split("\n");
         DungeonLayoutGenerator loaded = new(layoutFromFile);
-        entrance = loaded.root;
-        dims = loaded.dims;
+        entranceTilePosition = loaded.root;
+        layoutDimensions = loaded.dims;
 
         PopulateLayout(loaded);
     }
 
+    /// <summary>
+    ///     Fill the <tt>tileLayout</tt> array using the given layout generator.
+    /// </summary>
     private void PopulateLayout(DungeonLayoutGenerator generator)
     {
-        stairs = new Vector3Int[dims.y, 2];
-        layout = new DungeonTile[dims.x, dims.y, dims.z];
+        stairPositions = new Vector3Int[layoutDimensions.y, 2];
+        tileLayout = new DungeonTile[layoutDimensions.x, layoutDimensions.y, layoutDimensions.z];
 
         int flatIndex = 0;
-        foreach ((int x, int y, int z) in Utilities.Indices3D(dims))
+        foreach ((int x, int y, int z) in Utilities.Indices3D(layoutDimensions))
         {
             Vector3Int index = new(x, y, z);
 
@@ -108,14 +137,14 @@ public class Dungeon : MonoBehaviour
             DungeonTile tile = generator.GetTile(flatIndex, index, this);
             if (tile.Type == DungeonTileType.STAIRS_UP)
             {
-                stairs[y, 0] = index;
+                stairPositions[y, 0] = index;
             }
             if (tile.Type == DungeonTileType.STAIRS_DOWN)
             {
-                stairs[y, 1] = index;
+                stairPositions[y, 1] = index;
             }
 
-            layout[x, y, z] = tile;
+            tileLayout[x, y, z] = tile;
 
             foreach (Vector3Int dir in Utilities.cardinalDirections)
             {
@@ -123,7 +152,7 @@ public class Dungeon : MonoBehaviour
 
                 try
                 {
-                    layout[x, y, z].AddNeighbor(layout[pos.x, pos.y, pos.z], dir);
+                    tileLayout[x, y, z].AddNeighbor(tileLayout[pos.x, pos.y, pos.z], dir);
                 }
                 catch { /* do nothing */ }
             }
@@ -136,11 +165,34 @@ public class Dungeon : MonoBehaviour
         }
     }
 
+    /// <returns>
+    ///     The world position of the tile at the given index.
+    /// </returns>
     public Vector3 PositionOf(Vector3Int index)
     {
-        return new Vector3Int(10, 20, 10) * (index - entrance);
+        return TILE_WORLD_SIZE * (index - entranceTilePosition);
     }
 
+    // TODO: this function is weird.
+    /// <summary>
+    ///     Transforms the given position based on the given flags.
+    /// </summary>
+    /// <param name="dungeonPosition">
+    ///     The position to transform.
+    /// </param>
+    /// <param name="relativeToCenter">
+    ///     If <tt>true</tt>, transform the position to be relative to the center point of the
+    ///     dungeon.
+    /// </param>
+    /// <param name="normalize">
+    ///     If <tt>true</tt>, divide the position element-wise by the dungeon layout's dimensions.
+    /// </param>
+    /// <param name="correctForTiles">
+    ///     If <tt>true</tt>, shift the position in the positive direction (left-up-forward) by 0.5.
+    /// </param>
+    /// <returns>
+    ///     The transformed position.
+    /// </returns>
     public Vector3 TransformPosition(Vector3 dungeonPosition, bool relativeToCenter, bool normalize, bool correctForTiles)
     {
         if (correctForTiles)
@@ -149,47 +201,77 @@ public class Dungeon : MonoBehaviour
         }
         if (relativeToCenter)
         {
-            dungeonPosition -= dims/2;
+            dungeonPosition -= layoutDimensions/2;
         }
         if (normalize)
         {
-            dungeonPosition.x /= dims.x;
-            dungeonPosition.y /= dims.y;
-            dungeonPosition.z /= dims.z;
+            dungeonPosition.x /= layoutDimensions.x;
+            dungeonPosition.y /= layoutDimensions.y;
+            dungeonPosition.z /= layoutDimensions.z;
         }
 
         return dungeonPosition;
     }
 
-    public Vector3 CoordinatesOf(Vector3 worldPosition, bool dungeonCentered = false, bool normalized = false, bool tileCentered = false)
+    /// <summary>
+    ///     Transforms the given position to be in the dungeon's coordinate system.
+    /// </summary>
+    /// <param name="worldPosition">
+    ///     The position in world coordinates to transform.
+    /// </param>
+    /// <returns>
+    ///     The position transformed such that the origin is at the center of tile (0, 0, 0) and 
+    ///     each tile is a unit cube.
+    /// </returns>
+    public Vector3 CoordinatesOf(Vector3 worldPosition)
     {
         Vector3 relativePosition = worldPosition - PositionOf(Vector3Int.zero);
-        relativePosition /= 10;
-        relativePosition.y /= 2;
+        relativePosition.x /= TILE_WORLD_SIZE.x;
+        relativePosition.y /= TILE_WORLD_SIZE.y;
+        relativePosition.z /= TILE_WORLD_SIZE.z;
 
         return relativePosition;
     }
 
-    private int LayerOf(float coordinateY)
+    /// <summary>
+    ///     Calculates which level a given y-value falls within.
+    /// </summary>
+    /// <param name="coordinateY">
+    ///     The y-value to test.
+    /// </param>
+    /// <returns>
+    ///     The index of the level that the y-value is within.
+    /// </returns>
+    private int LevelOf(float coordinateY)
     {
-        return dims.y - 1 - Mathf.CeilToInt((transform.position.y - coordinateY) / LAYER_HEIGHT);
+        return layoutDimensions.y - 1 - Mathf.CeilToInt((transform.position.y - coordinateY) / TILE_WORLD_SIZE.y);
     }
 
-    private void SetActiveNearStairs(int level, bool active)
+    /// <summary>
+    ///     Set the tiles that are adjacent to the stairs of the given level to be active/inactive.
+    /// </summary>
+    /// <param name="levelIndex">
+    ///     The index of the level to start at. The tiles around the connecting stairs in the levels
+    ///     directly above and below this one will be updated.
+    /// </param>
+    /// <param name="active">
+    ///     The state to set the tiles to.
+    /// </param>
+    private void SetActiveNearStairs(int levelIndex, bool active)
     {
         Vector3Int centerPos, stairsDir;
 
         // Upper level
-        if (level < dims.y-1)
+        if (levelIndex < layoutDimensions.y-1)
         { // TODO: block entrance
-            stairsDir = stairs[level+1, 1] - stairs[level, 0] + Vector3Int.down;
+            stairsDir = stairPositions[levelIndex+1, 1] - stairPositions[levelIndex, 0] + Vector3Int.down;
             Vector3Int flip = 180*stairsDir;
-            centerPos = stairs[level+1, 1] + stairsDir;
+            centerPos = stairPositions[levelIndex+1, 1] + stairsDir;
 
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
                 try {
-                    layout[centerPos.x + x-1, level+1 , centerPos.z + z-1].SetVisible(active, false);
+                    tileLayout[centerPos.x + x-1, levelIndex+1 , centerPos.z + z-1].SetVisible(active, false);
                 } catch { /* continue */ }
             }
             upperBlocker.SetActive(true);
@@ -203,15 +285,15 @@ public class Dungeon : MonoBehaviour
         }
 
         // Lower level
-        if (level > 0)
+        if (levelIndex > 0)
         {
-            stairsDir = stairs[level-1, 0] - stairs[level, 1] + Vector3Int.up;
-            centerPos = stairs[level-1, 0] + stairsDir;
+            stairsDir = stairPositions[levelIndex-1, 0] - stairPositions[levelIndex, 1] + Vector3Int.up;
+            centerPos = stairPositions[levelIndex-1, 0] + stairsDir;
 
             foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
             {
                 try {
-                    layout[centerPos.x + x-1, level-1, centerPos.z + z-1].SetVisible(active, false);
+                    tileLayout[centerPos.x + x-1, levelIndex-1, centerPos.z + z-1].SetVisible(active, false);
                 } catch { /* continue */ }
             }
             lowerBlocker.SetActive(true);
@@ -225,24 +307,31 @@ public class Dungeon : MonoBehaviour
         }
     }
 
-    public void UpdateActiveLevel(int level)
+    /// <summary>
+    ///     Sets all tiles in the given level, as well as the tiles near its stairs, to be active.
+    ///     Also deactivates the corresponding tiles from the last active level.
+    /// </summary>
+    /// <param name="levelIndex">
+    ///     The index of the level to activate.
+    /// </param>
+    public void UpdateActiveLevel(int levelIndex)
     {
-        if (activeLevel == level) return;
-        level = Utilities.Clamp(level, 0, dims.y - 1);
+        if (activeLevelIndex == levelIndex) return;
+        levelIndex = Utilities.Clamp(levelIndex, 0, layoutDimensions.y - 1);
 
-        if (activeLevel >= 0) {
-            foreach ((int x, int z) in Utilities.Indices2D(dims))
+        if (activeLevelIndex >= 0) {
+            foreach ((int x, int z) in Utilities.Indices2D(layoutDimensions))
             {
-                layout[x, activeLevel, z].SetVisible(false);
+                tileLayout[x, activeLevelIndex, z].SetVisible(false);
             }
-            SetActiveNearStairs(activeLevel, false);
+            SetActiveNearStairs(activeLevelIndex, false);
         }
 
-        activeLevel = level;
-        foreach ((int x, int z) in Utilities.Indices2D(dims))
+        activeLevelIndex = levelIndex;
+        foreach ((int x, int z) in Utilities.Indices2D(layoutDimensions))
         {
-            layout[x, activeLevel, z].SetVisible(true);
+            tileLayout[x, activeLevelIndex, z].SetVisible(true);
         }
-        SetActiveNearStairs(activeLevel, true);
+        SetActiveNearStairs(activeLevelIndex, true);
     }
 }
