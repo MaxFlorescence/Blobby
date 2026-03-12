@@ -28,28 +28,18 @@ public static class Rotation
         };
     }
 
-    public static Quaternion ParseChar(char rot, string name)
-    {
-        return char.ToLower(rot) switch
-        {
-            'u' => UP,
-            'f' => FORWARD,
-            'r' => RIGHT,
-            'b' => BACK,
-            'l' => LEFT,
-            'd' => DOWN,
-            _ => throw new FormatException('\"' + name + "\" does not represent an available rotation!"),
-        };
-    }
-
     public static Quaternion Parse(string rotation)
     {
-        return ParseChar(rotation[0], rotation);
-    }
-
-    public static Quaternion Parse(char rotation)
-    {
-        return ParseChar(rotation, rotation.ToString());
+        return rotation.ToLower() switch
+        {
+            "up" => UP,
+            "forward" => FORWARD,
+            "right" => RIGHT,
+            "back" => BACK,
+            "left" => LEFT,
+            "down" => DOWN,
+            _ => throw new FormatException('\"' + rotation + "\" does not represent an available rotation!"),
+        };
     }
 }
 
@@ -221,5 +211,10 @@ class Utilities : MonoBehaviour
             }
         }
         yield break;
+    }
+
+    public static TextAsset LoadTextFile(string filePath)
+    {
+        return Resources.Load(filePath, typeof(TextAsset)) as TextAsset;
     }
 }
