@@ -17,7 +17,7 @@ public enum Walls
     BACK    = 0b_0000_0100,
     LEFT    = 0b_0000_0010,
     DOWN    = 0b_0000_0001,
-    NONE    = 0b_0100_0000,
+    ZERO    = 0b_0000_0000,
 
     // Dungeon tile wall configurations
     CROSSING = SET | UP | DOWN,
@@ -60,7 +60,7 @@ public static class WallsExtensions
 
     private static readonly Dictionary<Walls, (DungeonTileType, Quaternion)> wallsToTile = new()
     {
-        {Walls.NONE,          (DungeonTileType.NONE,        Rotation.FORWARD)},
+        {Walls.SET,           (DungeonTileType.NONE,        Rotation.FORWARD)},
         {Walls.CROSSING,      (DungeonTileType.CROSSING,    Rotation.FORWARD)},
         {Walls.JUNCTION_F,    (DungeonTileType.JUNCTION,    Rotation.FORWARD)},
         {Walls.JUNCTION_R,    (DungeonTileType.JUNCTION,    Rotation.RIGHT)},
@@ -88,7 +88,7 @@ public static class WallsExtensions
 
     private static readonly Dictionary<Walls, char> wallCharacters = new()
     {
-        {Walls.NONE,          'O'},
+        {Walls.SET,           'O'},
         {Walls.CROSSING,      '┼'},
         {Walls.JUNCTION_F,    '┴'},
         {Walls.JUNCTION_R,    '├'},
@@ -147,6 +147,7 @@ class LatticeGraph
         this.dims = dims;
         walls = new Walls[dims.x, dims.y, dims.z];
         GenerateRandomLayout(root);
+        // PrintLayout();
     }
 
     private void ResetUnsetWalls()
@@ -175,18 +176,20 @@ class LatticeGraph
         return IsSet(index.x, index.y, index.z);
     }
 
-    public void Lock(int x, int y, int z)
+    public void Lock(int x, int y, int z, bool clear = false)
     {
         if (!IsSet(x, y, z))
         {
             UnsetWalls--;
         }
 
-        this[x, y, z] |= Walls.LOCKED | Walls.SET;
+        Walls baseWalls = clear ? Walls.ZERO : this[x, y, z];
+
+        this[x, y, z] = baseWalls | Walls.LOCKED | Walls.SET;
     }
-    public void Lock(Vector3Int index)
+    public void Lock(Vector3Int index, bool clear = false)
     {
-        Lock(index.x, index.y, index.z);
+        Lock(index.x, index.y, index.z, clear);
     }
     public bool IsLocked(int x, int y, int z)
     {
@@ -199,7 +202,7 @@ class LatticeGraph
 
     public void SetAsNone(Vector3Int node)
     {
-        Lock(node);
+        Lock(node, true);
         foreach (Vector3Int dir in Utilities.planarDirections)
         {
             try {
@@ -392,6 +395,9 @@ class LatticeGraph
         throw new InvalidOperationException("[AddEntrance] Could not add an entrance at " + entrancePosition.ToString());
     }
 
+    // FIX: bug where if a stairs_down is placed such that its corresponding none tile is adjacent
+    // to a stairs_up's none tile, then the second none tile gets the connecting wall set
+    // incorrectly.
     private (Vector3Int, Vector3Int) AddRandomStairsDown(int y)
     {
         HashSet<(Vector3Int, Vector3Int)> foundSpots = new();
@@ -439,7 +445,7 @@ class LatticeGraph
 
     private void PrintLayout()
     {
-        string result = "";
+        string result = "↑ Front\n";
 
         for (int y = dims.y-1; y >= 0; y--)
         {
