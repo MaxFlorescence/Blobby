@@ -205,9 +205,10 @@ class LatticeGraph
         Lock(node, true);
         foreach (Vector3Int dir in Utilities.planarDirections)
         {
+            Vector3Int neighbor = node + dir;
             try {
-                if (IsSet(node + dir)) {
-                    this[node + dir] |= (-dir).GetWall();
+                if (IsSet(neighbor) && !IsLocked(neighbor)) {
+                    this[neighbor] |= (-dir).GetWall();
                 }
             }
             catch { /* continue */ }
@@ -395,13 +396,12 @@ class LatticeGraph
         throw new InvalidOperationException("[AddEntrance] Could not add an entrance at " + entrancePosition.ToString());
     }
 
-    // FIX: bug where if a stairs_down is placed such that its corresponding none tile is adjacent
-    // to a stairs_up's none tile, then the second none tile gets the connecting wall set
-    // incorrectly.
     private (Vector3Int, Vector3Int) AddRandomStairsDown(int y)
     {
         HashSet<(Vector3Int, Vector3Int)> foundSpots = new();
 
+        // search all tiles on the given y level for an adjacent pair of unset tiles that are
+        // co-linear with a set tile
         foreach ((int x, int z) in Utilities.Indices2D(dims))
         {
             if (IsSet(x, y, z)) continue;
@@ -421,11 +421,13 @@ class LatticeGraph
             }
         }
 
+        // randomly iterate through the indices found 
         (Vector3Int, Vector3Int)[] possibleSpots = foundSpots.ToArray();
         foreach (int i in Utilities.ArgShuffle(possibleSpots))
         {
             (Vector3Int stairsDownIndex, Vector3Int stairDir) = possibleSpots[i];
 
+            // make sure that the stairs_up tile does not lead to the edge of the dungeon
             Vector3Int exit = stairsDownIndex + Vector3Int.down + 2*stairDir;
             if (!IsOutOfBounds(exit)) {
                 if(Connect(stairsDownIndex, -stairDir))

@@ -2732,7 +2732,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   emptyTile: {fileID: 0}
-  randomSeed: 4
+  randomSeed: 0
   minLayoutDimensions: {x: 8, y: 8, z: 8}
   maxLayoutDimensions: {x: 8, y: 8, z: 8}
 --- !u!4 &1298357497 stripped
