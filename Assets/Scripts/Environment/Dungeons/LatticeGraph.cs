@@ -200,7 +200,7 @@ class LatticeGraph
         return IsLocked(index.x, index.y, index.z);
     }
 
-    public void SetAsNone(Vector3Int node)
+    public void SetAsEmpty(Vector3Int node)
     {
         Lock(node, true);
         foreach (Vector3Int dir in Utilities.planarDirections)
@@ -300,15 +300,14 @@ class LatticeGraph
 
     public Vector3Int? FindBridgePoint()
     {
-        foreach((int x, int y, int z) in Utilities.Indices3D(dims)) {
-            Vector3Int unsetIndex = new(x, y, z);
+        foreach((int _, Vector3Int unsetIndex) in Utilities.EnumerateIndices3D(dims)) {
             if (IsSet(unsetIndex)) continue;
 
-            foreach (Vector3Int dir in Utilities.RandomDirections(true))
+            foreach (Vector3Int direction in Utilities.RandomDirections(true))
             {
                 try
                 {
-                    Vector3Int index = unsetIndex + dir;
+                    Vector3Int index = unsetIndex + direction;
                     if (IsSet(index) && !IsLocked(index))
                     {
                         return index;
@@ -387,7 +386,7 @@ class LatticeGraph
                 if (Connect(entrancePosition, dir)) {
                     this[entrancePosition] &= ~Walls.UP;
                     Lock(entrancePosition);
-                    SetAsNone(entrancePosition - dir);
+                    SetAsEmpty(entrancePosition - dir);
                     return entrancePosition + dir;
                 }
             } catch { /* continue */ }
@@ -435,7 +434,7 @@ class LatticeGraph
                     this[stairsDownIndex] &= ~Walls.DOWN;
                     Lock(stairsDownIndex);
 
-                    SetAsNone(stairsDownIndex + stairDir);
+                    SetAsEmpty(stairsDownIndex + stairDir);
 
                     return (stairsDownIndex + stairDir + Vector3Int.down, stairDir);
                 }

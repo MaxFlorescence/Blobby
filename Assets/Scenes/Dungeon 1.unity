@@ -2698,7 +2698,7 @@ GameObject:
   - component: {fileID: 1287475397}
   - component: {fileID: 1287475398}
   m_Layer: 0
-  m_Name: TestDungeon
+  m_Name: Test Random Dungeon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2731,7 +2731,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d6d938b444a2be4884f39257d4bb7d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  emptyTile: {fileID: 0}
   randomSeed: 0
   minLayoutDimensions: {x: 8, y: 8, z: 8}
   maxLayoutDimensions: {x: 8, y: 8, z: 8}
@@ -3920,6 +3919,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1630867528201859872, guid: 293c3f56f2860134d8efa82ee5ef0bd9, type: 3}
   m_PrefabInstance: {fileID: 1834473862}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1728576260
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1728576262}
+  - component: {fileID: 1728576261}
+  m_Layer: 0
+  m_Name: Dungeon2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1728576261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728576260}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52f1656b02f9d4749b6a21f31d629365, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layoutFile: {fileID: 4900000, guid: d5034a3a391d3104da5f5f2d5de7e938, type: 3}
+--- !u!4 &1728576262
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728576260}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1766667415 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2768731671656108911, guid: df94e00f2db9ea645bc6720cd1ee7167, type: 3}
@@ -5964,6 +6008,7 @@ SceneRoots:
   - {fileID: 1387380584}
   - {fileID: 921496884}
   - {fileID: 1287475397}
+  - {fileID: 1728576262}
   - {fileID: 700032796}
   - {fileID: 846904120}
   - {fileID: 160506121}

@@ -186,15 +186,17 @@ class Utilities : MonoBehaviour
         yield break;
     }
 
-    public static IEnumerable<(int, int, int)> Indices3D(Vector3Int dims)
+    public static IEnumerable<(int, Vector3Int)> EnumerateIndices3D(Vector3Int dims)
     {
+        int i = 0;
         for (int x = 0; x < dims.x; x++)
         {
             for (int y = 0; y < dims.y; y++)
             {
                 for (int z = 0; z < dims.z; z++)
                 {
-                    yield return (x, y, z);
+                    yield return (i, new(x, y, z));
+                    i++;
                 }
             }
         }

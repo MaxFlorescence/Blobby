@@ -6,9 +6,8 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class Dungeon : MonoBehaviour
 {
-    
     // ---------------------------------------------------------------------------------------------
-    // Information
+    // Characteristics
     // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     The actual size of each tile of the dungeon.
@@ -53,15 +52,12 @@ public class Dungeon : MonoBehaviour
     /// <summary>
     ///     This dungeon's tile that represents empty space.
     /// </summary>
-    public DungeonTile emptyTile;
+    private DungeonTile emptyTile;
 
     void Awake()
     {
         GameInfo.CurrentDungeon = this;
-    // }
 
-    // void Start()
-    // {
         blockerPrefab = TileTypeExtensions.LoadCorridorAssets("Blocker").Item1;
         emptyTile = gameObject.AddComponent<DungeonTile>();
         
@@ -95,7 +91,7 @@ public class Dungeon : MonoBehaviour
         layoutDimensions.z = Random.Range(minLayoutDimensions.z, maxLayoutDimensions.z + 1);
         entranceTilePosition = new(Random.Range(0, layoutDimensions.x), layoutDimensions.y-1, Random.Range(0, layoutDimensions.z));
 
-        DungeonLayoutGenerator tree = new(layoutDimensions, entranceTilePosition);
+        DungeonLayoutGenerator tree = new(layoutDimensions, entranceTilePosition, this);
         PopulateLayout(tree);
     }
 
@@ -108,10 +104,10 @@ public class Dungeon : MonoBehaviour
     /// </param>
     protected void GenerateLayoutFromFile(TextAsset layoutFile)
     {
-        string[] layoutFromFile = layoutFile.text.Split("\n");
-        DungeonLayoutGenerator loaded = new(layoutFromFile);
-        entranceTilePosition = loaded.root;
-        layoutDimensions = loaded.dims;
+        DungeonLayoutGenerator loaded = new(layoutFile, this);
+
+        entranceTilePosition = loaded.rootPosition;
+        layoutDimensions = loaded.layoutDimensions;
 
         PopulateLayout(loaded);
     }
@@ -124,43 +120,36 @@ public class Dungeon : MonoBehaviour
         stairPositions = new Vector3Int[layoutDimensions.y, 2];
         tileLayout = new DungeonTile[layoutDimensions.x, layoutDimensions.y, layoutDimensions.z];
 
-        int flatIndex = 0;
-        foreach ((int x, int y, int z) in Utilities.Indices3D(layoutDimensions))
+        foreach ((int index, Vector3Int position) in Utilities.EnumerateIndices3D(layoutDimensions))
         {
-            Vector3Int index = new(x, y, z);
-
-            if (generator.IsNone(flatIndex, index))
+            if (generator.IsEmpty(index, position))
             {
                 continue;
             }
 
-            DungeonTile tile = generator.GetTile(flatIndex, index, this);
+            DungeonTile tile = generator.GetTile(index, position);
             if (tile.Type == DungeonTileType.STAIRS_UP)
             {
-                stairPositions[y, 0] = index;
+                stairPositions[position.y, 0] = position;
             }
             if (tile.Type == DungeonTileType.STAIRS_DOWN)
             {
-                stairPositions[y, 1] = index;
+                stairPositions[position.y, 1] = position;
             }
 
-            tileLayout[x, y, z] = tile;
+            tileLayout[position.x, position.y, position.z] = tile;
 
-            foreach (Vector3Int dir in Utilities.cardinalDirections)
+            foreach (Vector3Int direction in Utilities.cardinalDirections)
             {
-                Vector3Int pos = dir + index;
+                Vector3Int neighbor = direction + position;
 
                 try
                 {
-                    tileLayout[x, y, z].AddNeighbor(tileLayout[pos.x, pos.y, pos.z], dir);
+                    tileLayout[position.x, position.y, position.z].AddNeighbor(
+                        tileLayout[neighbor.x, neighbor.y, neighbor.z], direction
+                    );
                 }
                 catch { /* do nothing */ }
-            }
-
-            flatIndex++;
-            if (flatIndex >= generator.Length)
-            {
-                return;
             }
         }
     }
@@ -333,5 +322,10 @@ public class Dungeon : MonoBehaviour
             tileLayout[x, activeLevelIndex, z].SetVisible(true);
         }
         SetActiveNearStairs(activeLevelIndex, true);
+    }
+
+    public DungeonTile GetEmptyTile()
+    {
+        return emptyTile;
     }
 }

@@ -49,7 +49,7 @@ public class DungeonTile : MonoBehaviour
     {
         if (tileType == DungeonTileType.EMPTY)
         {
-            return dungeon.GetComponent<Dungeon>().emptyTile;
+            return dungeon.GetComponent<Dungeon>().GetEmptyTile();
         }
 
         Vector3 tilePosition = dungeon.PositionOf(position);
