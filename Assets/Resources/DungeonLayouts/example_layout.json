@@ -1,0 +1,75 @@
+{
+    "dungeonName": "Test Loaded Dungeon",
+    "layoutDimensions" : {
+        "x": 4, "y": 1, "z": 4
+    },
+    "rootPosition": {
+        "x": 0, "y": 0, "z": 3
+    },
+    "layout": [
+        {
+            "tileName": "dead_end",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "corner",
+            "tileOrientation": "back"
+        },
+        {
+            "tileName": "corner",
+            "tileOrientation": "right"
+        },
+        {
+            "tileName": "stairs_up",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "dead_end",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "junction",
+            "tileOrientation": "back"
+        },
+        {
+            "tileName": "junction",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "dead_end",
+            "tileOrientation": "back"
+        },
+        {
+            "tileName": "dead_end",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "crossing",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "crossing",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "dead_end",
+            "tileOrientation": "back"
+        },
+        {
+            "tileName": "dead_end",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "corner",
+            "tileOrientation": "left"
+        },
+        {
+            "tileName": "corner",
+            "tileOrientation": "forward"
+        },
+        {
+            "tileName": "dead_end",
+            "tileOrientation": "back"
+        }
+    ]
+}
