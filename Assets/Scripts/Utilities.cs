@@ -90,6 +90,14 @@ public static class Extensions
             child.gameObject.layer = layer;
         }
     }
+
+    /// <returns>
+    ///     <tt>True</tt> iff the integer is within the given bounds (inclusive).
+    /// </returns>
+    public static bool OutOfBounds(this int i, int lowerBound, int upperBound)
+    {
+        return i < lowerBound || upperBound < i;
+    }
 }
 
 class Utilities : MonoBehaviour
@@ -201,6 +209,53 @@ class Utilities : MonoBehaviour
             }
         }
         yield break;
+    }
+
+    /// <summary>
+    ///     Calculates the flattened index of the given position <tt>(x, y, z)</tt>.
+    /// </summary>
+    /// <param name="xMax">
+    ///     The maximum value (+1) of the 3D indices' x component.
+    /// </param>
+    /// <param name="yMax">
+    ///     The maximum value (+1) of the 3D indices' y component.
+    /// </param>
+    /// <returns>
+    ///     <tt>flatIndex = z + yMax*(y + xMax*x)</tt>
+    /// </returns>
+    public static int IndexFlatOf(Vector3Int indices, int xMax, int yMax)
+    {
+        return indices.z + yMax * (indices.y + xMax * indices.x);
+    }
+
+    /// <summary>
+    ///     Calculates the 3D index of the given flat index <tt>i</tt>
+    /// </summary>
+    /// <param name="xMax">
+    ///     The maximum value (+1) of the 3D indices' x component.
+    /// </param>
+    /// <param name="yMax">
+    ///     The maximum value (+1) of the 3D indices' y component.
+    /// </param>
+    /// <returns>
+    ///     <tt>(
+    ///         x = index / p,
+    ///         y = (index % p) / yMax,
+    ///         z = (index % p) % yMax
+    ///     )</tt>
+    ///     <br/> Where <tt>/</tt> indicates integer division and <tt>p = xMax * yMax</tt>.
+    /// </returns>
+    public static Vector3Int Index3dOf(int index, int xMax, int yMax)
+    {
+        int prodMax = xMax * yMax;
+
+        Vector3Int position = new();
+        position.x = index / prodMax;
+        index %= prodMax;
+        position.y = index / yMax;
+        position.z = index % yMax;
+
+        return position;
     }
 
     public static IEnumerable<(int, int)> Indices2D(Vector3Int dims)

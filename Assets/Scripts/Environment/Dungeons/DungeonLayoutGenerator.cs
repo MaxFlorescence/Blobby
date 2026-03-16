@@ -85,33 +85,73 @@ class DungeonLayoutGenerator
         parentDungeon.gameObject.name = layoutStruct.dungeonName;
     }
 
+    /// <param name="index">
+    ///     The flat index of the tile to get, if the dungeon is loaded from a file.
+    ///     <br/>
+    ///     If this is out of bounds and the given position is valid, then the index
+    ///     will be calculated from the posision.
+    /// </param>
     /// <param name="position">
-    ///     The position of the tile to get.
+    ///     The 3D position of the tile to get, if the dungeon is randomly generated.
+    ///     <br/>
+    ///     If this is invalid and the given index is within bounds, then the position will
+    ///     be calculated from the index.
     /// </param>
     /// <returns>
     ///     The tile at the specified position.
     /// </returns>
-    public DungeonTile GetTile(int index, Vector3Int position)
+    public DungeonTile GetTile(int index = -1, Vector3Int? position = null)
     {
         string tileName;
         DungeonTileType tileType;
         Quaternion tileRotation;
+        ArgumentException argumentException = new($"Both given arguments are out of bounds or invalid!");
 
         if (fromFile)
         {
+            if (index.OutOfBounds(0, tileCount-1)) {
+                if (IsInvalid(position)) throw argumentException;
+                index = Utilities.IndexFlatOf(
+                    (Vector3Int)position, layoutDimensions.x, layoutDimensions.y
+                );
+            }
+
             (tileName, tileType, tileRotation) = GetTileFromFile(index);
         }
         else
         {
-            (tileName, tileType, tileRotation) = GetTileFromLattice(position);
+            if (IsInvalid(position)) {
+                if (index.OutOfBounds(0, tileCount-1)) throw argumentException;
+                position = Utilities.Index3dOf(
+                    index, layoutDimensions.x, layoutDimensions.y
+                );
+            }
+
+            (tileName, tileType, tileRotation) = GetTileFromLattice((Vector3Int)position);
         }
         
         DungeonTile tile = DungeonTile.MakeTile(
             parentDungeon.name + "-" + tileName + "-" + string.Join("_", position),
-            tileType, position, tileRotation, parentDungeon
+            tileType, (Vector3Int)position, tileRotation, parentDungeon
         );
 
         return tile;
+    }
+
+    /// <param name="position">
+    ///     The position to check.
+    /// </param>
+    /// <returns>
+    ///     Checks if the given position is <tt>null</tt> or out of bounds.
+    /// </returns>
+    private bool IsInvalid(Vector3Int? position)
+    {
+        if (position == null) return true;
+        Vector3Int positionNonNull = (Vector3Int)position;
+
+        return positionNonNull.x.OutOfBounds(0, layoutDimensions.x-1)
+            || positionNonNull.y.OutOfBounds(0, layoutDimensions.y-1)
+            || positionNonNull.z.OutOfBounds(0, layoutDimensions.z-1);
     }
 
     /// <param name="position">
