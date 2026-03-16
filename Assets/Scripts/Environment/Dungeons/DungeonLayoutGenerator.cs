@@ -162,7 +162,7 @@ class DungeonLayoutGenerator
     /// </returns>
     private (string, DungeonTileType, Quaternion) GetTileFromFile(int index)
     {
-        string tileName = fileTiles[index].tileName;
+        string tileName = fileTiles[index].tileType;
         string tileOrientation = fileTiles[index].tileOrientation;
 
         Enum.TryParse(tileName, true, out DungeonTileType tileType);
@@ -192,7 +192,7 @@ class DungeonLayoutGenerator
     {
         if (fromFile)
         {
-            return fileTiles[index].tileName == "empty";
+            return fileTiles[index].tileType == "empty";
         }
         else
         {
