@@ -2,7 +2,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 /// <summary>
-///     A class for generating a dungeon randomly or based on a file.
+///     A class defining a dungeon that has been randomly generated or loaded from a file.
 /// </summary>
 public class Dungeon : MonoBehaviour
 {
@@ -128,11 +128,11 @@ public class Dungeon : MonoBehaviour
             }
 
             DungeonTile tile = generator.GetTile(index, position);
-            if (tile.Type == DungeonTileType.STAIRS_UP)
+            if (tile.type == DungeonTileType.Stairs_Up)
             {
                 stairPositions[position.y, 0] = position;
             }
-            if (tile.Type == DungeonTileType.STAIRS_DOWN)
+            if (tile.type == DungeonTileType.Stairs_Down)
             {
                 stairPositions[position.y, 1] = position;
             }
@@ -145,7 +145,7 @@ public class Dungeon : MonoBehaviour
 
                 try
                 {
-                    tileLayout[position.x, position.y, position.z].AddNeighbor(
+                    tileLayout[position.x, position.y, position.z].SetNeighbor(
                         tileLayout[neighbor.x, neighbor.y, neighbor.z], direction
                     );
                 }

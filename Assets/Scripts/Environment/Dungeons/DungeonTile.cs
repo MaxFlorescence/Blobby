@@ -1,122 +1,191 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Assertions;
 
+/// <summary>
+///     The different types (configurations of walls) of dungeon tiles that can exist.
+/// </summary>
 public enum DungeonTileType
 {
-    EMPTY,
-    HALLWAY, CORNER, JUNCTION, CROSSING, DEAD_END,
-    STAIRS_UP, STAIRS_DOWN,
-    ENTRANCE
+    Empty,
+    Hallway, Corner, Junction, Crossing, Dead_End,
+    Stairs_Up, Stairs_Down,
+    Entrance
 }
 
 public static class TileTypeExtensions
 {
+    /// <summary>
+    ///     A mapping from dungeon tile types to their corresponding assets.
+    /// </summary>
     private static Dictionary<DungeonTileType, (GameObject, Sprite)> map = new()
     {
-        {DungeonTileType.DEAD_END,    LoadCorridorAssets("DungeonDeadEnd")},    // |_| (no wall forward)
-        {DungeonTileType.CORNER,      LoadCorridorAssets("DungeonCorner")},     // '_| (no wall left/forward)
-        {DungeonTileType.HALLWAY,     LoadCorridorAssets("DungeonHallway")},    // | | (no wall back/foward)
-        {DungeonTileType.JUNCTION,    LoadCorridorAssets("DungeonJunction")},   // '_' (wall back)
-        {DungeonTileType.CROSSING,    LoadCorridorAssets("DungeonCrossing")},   // :: (no walls)
-        {DungeonTileType.STAIRS_UP,   LoadCorridorAssets("DungeonStairsUp")},   // |^| (stairs go forward)
-        {DungeonTileType.STAIRS_DOWN, LoadCorridorAssets("DungeonStairsDown")}, // |v| (stairs go back)
-        {DungeonTileType.ENTRANCE,    LoadCorridorAssets("DungeonDeadEnd")} // TODO
+        {DungeonTileType.Dead_End,    LoadCorridorAssets("DungeonDeadEnd")},    // |_| (no wall forward)
+        {DungeonTileType.Corner,      LoadCorridorAssets("DungeonCorner")},     // '_| (no wall left/forward)
+        {DungeonTileType.Hallway,     LoadCorridorAssets("DungeonHallway")},    // | | (no wall back/foward)
+        {DungeonTileType.Junction,    LoadCorridorAssets("DungeonJunction")},   // '_' (wall back)
+        {DungeonTileType.Crossing,    LoadCorridorAssets("DungeonCrossing")},   // :: (no walls)
+        {DungeonTileType.Stairs_Up,   LoadCorridorAssets("DungeonStairsUp")},   // |^| (stairs go forward)
+        {DungeonTileType.Stairs_Down, LoadCorridorAssets("DungeonStairsDown")}, // |v| (stairs go back)
+        {DungeonTileType.Entrance,    LoadCorridorAssets("DungeonDeadEnd")} // TODO
     };
-    public static (GameObject, Sprite) LoadCorridorAssets(string name)
+    /// <summary>
+    ///     Loads prefabs and minimap sprites for dungeon tiles.
+    /// </summary>
+    /// <param name="tileName">
+    ///     The tile to load the assets for.
+    /// </param>
+    /// <returns>
+    ///     The prefab and sprite corresponding to the given tile name.
+    /// </returns>
+    public static (GameObject, Sprite) LoadCorridorAssets(string tileName)
     {
-        GameObject prefab = Resources.Load("DungeonPrefabs/Corridors/" + name, typeof(GameObject)) as GameObject;
-        Sprite sprite = Resources.Load("Images/Minimap Icons/" + name, typeof(Sprite)) as Sprite;
+        GameObject prefab = Resources.Load("DungeonPrefabs/Corridors/" + tileName, typeof(GameObject)) as GameObject;
+        Sprite sprite = Resources.Load("Images/Minimap Icons/" + tileName, typeof(Sprite)) as Sprite;
 
         return (prefab, sprite);
     }
+    /// <returns>
+    ///     The prefab corresponding to this type of tile.
+    /// </returns>
     public static GameObject GetPrefab(this DungeonTileType tile) {
         return map[tile].Item1;
     }
+    /// <returns>
+    ///     The minimap sprite corresponding to this type of tile.
+    /// </returns>
     public static Sprite GetMapSprite(this DungeonTileType tile)
     {
         return map[tile].Item2;
     }
+    /// <returns>
+    ///     The name of this type of tile.
+    /// </returns>
     public static string GetName(this DungeonTileType tile)
     {
         return tile.ToString().ToLower();
     }
 }
 
+/// <summary>
+///     A class defining a tile of a dungeon.
+/// </summary>
 public class DungeonTile : MonoBehaviour
 {
-    public static DungeonTile MakeTile(string name, DungeonTileType tileType, Vector3Int position, Quaternion tileRotation, Dungeon dungeon)
+    /// <summary>
+    ///     Instantiates the given tile type with the given position, orientation, name.
+    ///     As a child object of the given dungeon.
+    /// </summary>
+    /// <param name="name">
+    ///     The name of the new tile object.
+    /// </param>
+    /// <param name="tileType">
+    ///     The type of tile to instantiate.
+    /// </param>
+    /// <param name="position">
+    ///     The dungeon position of the new tile.
+    /// </param>
+    /// <param name="orientation">
+    ///     The orientation of the new tile.
+    /// </param>
+    /// <param name="dungeon">
+    ///     The parent dungeon for the new tile.
+    /// </param>
+    /// <returns>
+    ///     A reference to the <tt>DungeonTile</tt> component of the new tile.
+    /// </returns>
+    public static DungeonTile MakeTile(string name, DungeonTileType tileType, Vector3Int position, Quaternion orientation, Dungeon dungeon)
     {
-        if (tileType == DungeonTileType.EMPTY)
+        if (tileType == DungeonTileType.Empty)
         {
             return dungeon.GetComponent<Dungeon>().GetEmptyTile();
         }
 
         Vector3 tilePosition = dungeon.PositionOf(position);
 
-        GameObject tileObject = Instantiate(tileType.GetPrefab(), tilePosition, tileRotation, dungeon.transform);
+        GameObject tileObject = Instantiate(tileType.GetPrefab(), tilePosition, orientation, dungeon.transform);
         DungeonTile tile = tileObject.AddComponent<DungeonTile>();
 
         tile.mapIcon = GameInfo.ActiveMiniMap.AddIcon(
             name + "-Minimap_Icon",
             tileType.GetMapSprite(),
             dungeon.TransformPosition(position, true, true, true),
-            -tileRotation.eulerAngles.y,
+            -orientation.eulerAngles.y,
             0.333f // why?
         );
 
-        tile.Type = tileType;
+        tile.type = tileType;
         tile.SetVisible(false);
 
         return tile;
     }
     
+    /// <summary>
+    ///     References to the immediate neighbors of this tile.
+    /// </summary>
     private DungeonTile[] neighbors = new DungeonTile[6] { null, null, null, null, null, null };
-    public DungeonTileType Type { get; private set; } = DungeonTileType.EMPTY;
+    /// <summary>
+    ///     This tile's type.
+    /// </summary>
+    public DungeonTileType type { get; private set; } = DungeonTileType.Empty;
+    /// <summary>
+    ///     The minimap icon for this tile.
+    /// </summary>
     private GameObject mapIcon;
 
+    /// <summary>
+    ///     Changes the name of this tile.
+    /// </summary>
+    /// <param name="name">
+    ///     The new tile name.
+    /// </param>
     public void SetName(string name)
     {
-        if (Type == DungeonTileType.EMPTY) return;
+        if (type == DungeonTileType.Empty) return;
 
         this.name = name;
     }
 
-    public void AddNeighbor(DungeonTile neighbor, Vector3Int direction)
+    /// <summary>
+    ///     Symmetrically designates this tile to be the neighbor of the given tile, in the given
+    ///     direction.
+    /// </summary>
+    /// <param name="neighbor">
+    ///     The tile to set as this tile's neighbor, and vice versa.
+    /// </param>
+    /// <param name="direction">
+    ///     The vector pointing from this tile to the given neighbor tile.
+    /// </param>
+    public void SetNeighbor(DungeonTile neighbor, Vector3Int direction)
     {
-        GoAddNeighbor(neighbor, direction);
-        neighbor.GoAddNeighbor(this, -direction);
+        GoSetNeighbor(neighbor, direction);
+        neighbor.GoSetNeighbor(this, -direction);
     }
 
-    private void GoAddNeighbor(DungeonTile neighbor, Vector3Int direction) {
-        if (Type == DungeonTileType.EMPTY) return;
+    /// <summary>
+    ///     Sets this tile's neighbor in the given direction to be the given tile.
+    /// </summary>
+    /// <param name="neighbor">
+    ///     The tile to set as this tile's neighbor.
+    /// </param>
+    /// <param name="direction">
+    ///     The vector pointing from this tile to the given neighbor tile.
+    /// </param>
+    private void GoSetNeighbor(DungeonTile neighbor, Vector3Int direction) {
+        if (type == DungeonTileType.Empty) return;
 
-        if (direction == Vector3Int.forward)
-        {
-            neighbors[0] = neighbor;
-        } else if (direction == Vector3Int.right)
-        {
-            neighbors[1] = neighbor;
-        } else if (direction == Vector3Int.back)
-        {
-            neighbors[2] = neighbor;
-        } else if (direction == Vector3Int.left)
-        {
-            neighbors[3] = neighbor;
-        } else if (direction == Vector3Int.up)
-        {
-            neighbors[4] = neighbor;
-        } else if (direction == Vector3Int.down)
-        {
-            neighbors[5] = neighbor;
-        }
+        neighbors[Utilities.IntOfDirection(direction)] = neighbor;
+    }
 
-        Assert.IsTrue(Utilities.cardinalDirections.Contains(direction));
+    public DungeonTile GetNeighbor(Vector3Int direction)
+    {
+        if (type == DungeonTileType.Empty) return null;
+        
+        return neighbors[Utilities.IntOfDirection(direction)];
     }
 
     public void SetVisible(bool visible, bool? visibleOnMap = null)
     {
-        if (Type == DungeonTileType.EMPTY) return;
+        if (type == DungeonTileType.Empty) return;
 
         visibleOnMap ??= visible;
         gameObject.SetLayer(visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER);
