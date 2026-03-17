@@ -153,7 +153,7 @@ public class DungeonTile : MonoBehaviour
     ///     The tile to set as this tile's neighbor, and vice versa.
     /// </param>
     /// <param name="direction">
-    ///     The vector pointing from this tile to the given neighbor tile.
+    ///     The unit vector pointing from this tile to the given neighbor tile.
     /// </param>
     public void SetNeighbor(DungeonTile neighbor, Vector3Int direction)
     {
@@ -168,7 +168,7 @@ public class DungeonTile : MonoBehaviour
     ///     The tile to set as this tile's neighbor.
     /// </param>
     /// <param name="direction">
-    ///     The vector pointing from this tile to the given neighbor tile.
+    ///     The unit vector pointing from this tile to the given neighbor tile.
     /// </param>
     private void GoSetNeighbor(DungeonTile neighbor, Vector3Int direction) {
         if (type == DungeonTileType.Empty) return;
@@ -176,19 +176,39 @@ public class DungeonTile : MonoBehaviour
         neighbors[Utilities.IntOfDirection(direction)] = neighbor;
     }
 
+    /// <param name="direction">
+    ///     The unit vector pointing from this tile to a neighbor tile.
+    /// </param>
+    /// <returns>
+    ///     The neighbor of this tile that corresponds to the given direction.
+    /// </returns>
     public DungeonTile GetNeighbor(Vector3Int direction)
     {
         if (type == DungeonTileType.Empty) return null;
-        
+
         return neighbors[Utilities.IntOfDirection(direction)];
     }
 
-    public void SetVisible(bool visible, bool? visibleOnMap = null)
+    /// <summary>
+    ///     Sets this tile and all of its children to be visible or invisible depending on the
+    ///     given parameters.
+    /// </summary>
+    /// <param name="visibleInWorld">
+    ///     Iff <tt>true</tt>, sets this tile and its children to be visible in the world.
+    /// </param>
+    /// <param name="visibleOnMap">
+    ///     If <tt>true</tt>, sets this tile and its children to be visible on the minimap.
+    ///     <br/>
+    ///     If <tt>false</tt>, sets this tile and its children to be invisible on the minimap.
+    ///     <br/>
+    ///     If <tt>null</tt>, this parameter will match the <tt>visibleInWorld</tt> parameter.
+    /// </param>
+    public void SetVisible(bool visibleInWorld, bool? visibleOnMap = null)
     {
         if (type == DungeonTileType.Empty) return;
 
-        visibleOnMap ??= visible;
-        gameObject.SetLayer(visible ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER);
+        visibleOnMap ??= visibleInWorld;
+        gameObject.SetLayer(visibleInWorld ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER);
 
         mapIcon.SetActive((bool)visibleOnMap);
     }
