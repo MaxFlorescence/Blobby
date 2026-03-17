@@ -2,42 +2,37 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 
 public static class Rotation
 {
-    public static readonly Quaternion UP = Quaternion.Euler(-90, 0, 0);
-    public static readonly Quaternion FORWARD = Quaternion.identity;
-    public static readonly Quaternion RIGHT = Quaternion.Euler(0, 90, 0);
-    public static readonly Quaternion BACK = Quaternion.Euler(0, 180, 0);
-    public static readonly Quaternion LEFT = Quaternion.Euler(0, -90, 0);
-    public static readonly Quaternion DOWN = Quaternion.Euler(90, 0, 0);
+    public static readonly Quaternion Up = Quaternion.Euler(-90, 0, 0);
+    public static readonly Quaternion Forward = Quaternion.identity;
+    public static readonly Quaternion Right = Quaternion.Euler(0, 90, 0);
+    public static readonly Quaternion Back = Quaternion.Euler(0, 180, 0);
+    public static readonly Quaternion Left = Quaternion.Euler(0, -90, 0);
+    public static readonly Quaternion Down = Quaternion.Euler(90, 0, 0);
+    private static readonly Quaternion[] Orientations =
+    {
+        Left, Down, Back, Forward, Up, Right
+    };
 
     public static Quaternion Parse(Vector3Int direction)
     {
-        int repr = 111 + 100*direction.x + 10*direction.y + direction.z;
-        return repr switch
-        {
-            121 => UP,
-            112 => FORWARD,
-            211 => RIGHT,
-            110 => BACK,
-            011 => LEFT,
-            101 => DOWN,
-            _ => throw new FormatException(direction.ToString() + " does not represent an available rotation!"),
-        };
+        return Orientations[Utilities.IntOfDirection(direction)];
     }
 
     public static Quaternion Parse(string rotation)
     {
         return rotation.ToLower() switch
         {
-            "up" => UP,
-            "forward" => FORWARD,
-            "right" => RIGHT,
-            "back" => BACK,
-            "left" => LEFT,
-            "down" => DOWN,
+            "up" => Up,
+            "forward" => Forward,
+            "right" => Right,
+            "back" => Back,
+            "left" => Left,
+            "down" => Down,
             _ => throw new FormatException('\"' + rotation + "\" does not represent an available rotation!"),
         };
     }
@@ -268,6 +263,25 @@ class Utilities : MonoBehaviour
             }
         }
         yield break;
+    }
+
+    /// <param name="direction">
+    ///     The direction to map.
+    /// </param>
+    /// <returns><code>
+    ///     Vector3.left    => 0
+    ///     Vector3.down    => 1
+    ///     Vector3.back    => 2
+    ///     Vector3.forward => 3
+    ///     Vector3.up      => 4
+    ///     Vector3.right   => 5
+    /// </code></returns>
+    public static int IntOfDirection(Vector3Int direction)
+    {
+        Assert.IsTrue(cardinalDirections.Contains(direction));
+
+        int ret = 3*direction.x + 2*direction.y + direction.z;
+        return ret + (ret < 0 ? 3 : 2);
     }
 
     public static TextAsset LoadTextFile(string filePath)
