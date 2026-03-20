@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-///     The different types (configurations of walls) of dungeon tiles that can exist.
+///     The different types of dungeon tiles that can exist.
 /// </summary>
 public enum DungeonTileType
 {
