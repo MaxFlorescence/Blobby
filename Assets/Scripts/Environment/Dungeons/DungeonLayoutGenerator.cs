@@ -194,7 +194,7 @@ class DungeonLayoutGenerator
         }
         else
         {
-            return !lattice.IsSet(position);
+            return !lattice[position].IsSet();
         }
     }
 }
