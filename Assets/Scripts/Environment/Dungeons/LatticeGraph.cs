@@ -1,213 +1,135 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 
-[Flags]
-public enum Walls
-{
-    ALL     = 0b_0111_1111,
-    LOCKED  = 0b_1000_0000,
-    SET     = 0b_0100_0000,
-    UP      = 0b_0010_0000,
-    FORWARD = 0b_0001_0000,
-    RIGHT   = 0b_0000_1000,
-    BACK    = 0b_0000_0100,
-    LEFT    = 0b_0000_0010,
-    DOWN    = 0b_0000_0001,
-    ZERO    = 0b_0000_0000,
-
-    // Dungeon tile wall configurations
-    CROSSING = SET | UP | DOWN,
-    JUNCTION_F = CROSSING | BACK,
-    JUNCTION_R = CROSSING | LEFT,
-    JUNCTION_B = CROSSING | FORWARD,
-    JUNCTION_L = CROSSING | RIGHT,
-    HALLWAY_RL = JUNCTION_F | FORWARD,
-    HALLWAY_FB = JUNCTION_R | RIGHT,
-    CORNER_LF = JUNCTION_L | BACK,
-    CORNER_FR = JUNCTION_F | LEFT,
-    CORNER_RB = JUNCTION_R | FORWARD,
-    CORNER_BL = JUNCTION_B | RIGHT,
-    DEAD_END_F = HALLWAY_FB | BACK,
-    DEAD_END_R = HALLWAY_RL | LEFT,
-    DEAD_END_B = HALLWAY_FB | FORWARD,
-    DEAD_END_L = HALLWAY_RL | RIGHT,
-    STAIRS_UP_F = DEAD_END_B - UP,
-    STAIRS_UP_R = DEAD_END_L - UP,
-    STAIRS_UP_B = DEAD_END_F - UP,
-    STAIRS_UP_L = DEAD_END_R - UP,
-    STAIRS_DOWN_F = DEAD_END_F - DOWN,
-    STAIRS_DOWN_R = DEAD_END_R - DOWN,
-    STAIRS_DOWN_B = DEAD_END_B - DOWN,
-    STAIRS_DOWN_L = DEAD_END_L - DOWN
-}
-
-public static class WallsExtensions
-{
-    private static readonly Dictionary<Vector3Int, Walls> dirToWall = new()
-    {
-        {Vector3Int.forward, Walls.FORWARD},
-        {Vector3Int.right,   Walls.RIGHT},
-        {Vector3Int.back,    Walls.BACK},
-        {Vector3Int.left,    Walls.LEFT},
-        {Vector3Int.up,      Walls.UP},
-        {Vector3Int.down,    Walls.DOWN}
-    };
-    public static Walls GetWall(this Vector3Int dir) => dirToWall[dir];
-
-    private static readonly Dictionary<Walls, (DungeonTileType, Quaternion)> wallsToTile = new()
-    {
-        {Walls.SET,           (DungeonTileType.EMPTY,       Rotation.FORWARD)},
-        {Walls.CROSSING,      (DungeonTileType.CROSSING,    Rotation.FORWARD)},
-        {Walls.JUNCTION_F,    (DungeonTileType.JUNCTION,    Rotation.FORWARD)},
-        {Walls.JUNCTION_R,    (DungeonTileType.JUNCTION,    Rotation.RIGHT)},
-        {Walls.JUNCTION_B,    (DungeonTileType.JUNCTION,    Rotation.BACK)},
-        {Walls.JUNCTION_L,    (DungeonTileType.JUNCTION,    Rotation.LEFT)},
-        {Walls.HALLWAY_FB,    (DungeonTileType.HALLWAY,     Rotation.FORWARD)},
-        {Walls.HALLWAY_RL,    (DungeonTileType.HALLWAY,     Rotation.RIGHT)},
-        {Walls.CORNER_LF,     (DungeonTileType.CORNER,      Rotation.FORWARD)},
-        {Walls.CORNER_FR,     (DungeonTileType.CORNER,      Rotation.RIGHT)},
-        {Walls.CORNER_RB,     (DungeonTileType.CORNER,      Rotation.BACK)},
-        {Walls.CORNER_BL,     (DungeonTileType.CORNER,      Rotation.LEFT)},
-        {Walls.DEAD_END_F,    (DungeonTileType.DEAD_END,    Rotation.FORWARD)},
-        {Walls.DEAD_END_R,    (DungeonTileType.DEAD_END,    Rotation.RIGHT)},
-        {Walls.DEAD_END_B,    (DungeonTileType.DEAD_END,    Rotation.BACK)},
-        {Walls.DEAD_END_L,    (DungeonTileType.DEAD_END,    Rotation.LEFT)},
-        {Walls.STAIRS_UP_F,   (DungeonTileType.STAIRS_UP,   Rotation.FORWARD)},
-        {Walls.STAIRS_UP_R,   (DungeonTileType.STAIRS_UP,   Rotation.RIGHT)},
-        {Walls.STAIRS_UP_B,   (DungeonTileType.STAIRS_UP,   Rotation.BACK)},
-        {Walls.STAIRS_UP_L,   (DungeonTileType.STAIRS_UP,   Rotation.LEFT)},
-        {Walls.STAIRS_DOWN_F, (DungeonTileType.STAIRS_DOWN, Rotation.FORWARD)},
-        {Walls.STAIRS_DOWN_R, (DungeonTileType.STAIRS_DOWN, Rotation.RIGHT)},
-        {Walls.STAIRS_DOWN_B, (DungeonTileType.STAIRS_DOWN, Rotation.BACK)},
-        {Walls.STAIRS_DOWN_L, (DungeonTileType.STAIRS_DOWN, Rotation.LEFT)}
-    };
-
-    private static readonly Dictionary<Walls, char> wallCharacters = new()
-    {
-        {Walls.SET,           'O'},
-        {Walls.CROSSING,      '┼'},
-        {Walls.JUNCTION_F,    '┴'},
-        {Walls.JUNCTION_R,    '├'},
-        {Walls.JUNCTION_B,    '┬'},
-        {Walls.JUNCTION_L,    '┤'},
-        {Walls.HALLWAY_FB,    '│'},
-        {Walls.HALLWAY_RL,    '─'},
-        {Walls.CORNER_LF,     '┘'},
-        {Walls.CORNER_FR,     '└'},
-        {Walls.CORNER_RB,     '┌'},
-        {Walls.CORNER_BL,     '┐'},
-        {Walls.DEAD_END_F,    '╵'},
-        {Walls.DEAD_END_R,    '╶'},
-        {Walls.DEAD_END_B,    '╷'},
-        {Walls.DEAD_END_L,    '╴'},
-        {Walls.STAIRS_UP_F,   '┆'},
-        {Walls.STAIRS_UP_R,   '┄'},
-        {Walls.STAIRS_UP_B,   '┆'},
-        {Walls.STAIRS_UP_L,   '┄'},
-        {Walls.STAIRS_DOWN_F, '┊'},
-        {Walls.STAIRS_DOWN_R, '┈'},
-        {Walls.STAIRS_DOWN_B, '┊'},
-        {Walls.STAIRS_DOWN_L, '┈'}
-    };
-    public static char ToChar(this Walls walls) {
-        try {
-            return wallCharacters[walls & ~Walls.LOCKED];
-        } catch
-        {
-            return '?';
-        }
-    }
-    public static (DungeonTileType, Quaternion) TileInfo(this Walls walls) => wallsToTile[walls & ~Walls.LOCKED];
-}
-
+/// <summary>
+///     A class for creating 3D graphs where each node is at a lattice point for use in generating
+///     dungeon layouts.
+/// </summary>
 class LatticeGraph
 {
+    /// <summary>
+    ///     Contains connectivity information for each node of the lattice graph.
+    /// </summary>
     private Walls[,,] walls;
-    public readonly Vector3Int dims;
-    public int UnsetWalls { get; private set; }
-    private const float STAIR_TIME = 0.5f;
-    private int stairThreshold;
-    private readonly float reconnectChance = 0.1f;
+    /// <summary>
+    ///     The x,y,z sizes of the lattice graph's dimensions.
+    /// </summary>
+    public readonly Vector3Int layoutDimensions;
+    /// <summary>
+    ///     Counts how many walls on the current level are not set.
+    /// </summary>
+    public int unsetWalls { get; private set; }
+    /// <summary>
+    ///     The number of set nodes to wait for before trying to connect to the next layer down in
+    ///     the lattice.
+    /// </summary>
+    private readonly int STAIR_THRESHOLD;
+    /// <summary>
+    ///     The probability that an edge will be set during each level's generation that creates a
+    ///     loop.  
+    /// </summary>
+    private readonly float RECONNECT_CHANCE;
 
+    /// <returns>
+    ///     The connectivity information for the node at the given (x, y, z) position.
+    /// </returns>
     public Walls this[int x, int y, int z] {
         private set => walls[x, y, z] = value;
         get => walls[x, y, z];
     }
-    public Walls this[Vector3Int index] {
-        private set => walls[index.x, index.y, index.z] = value;
-        get => walls[index.x, index.y, index.z];
+    /// <returns>
+    ///     The connectivity information for the given node.
+    /// </returns>
+    public Walls this[Vector3Int node] {
+        private set => walls[node.x, node.y, node.z] = value;
+        get => walls[node.x, node.y, node.z];
     }
 
-    public LatticeGraph(Vector3Int dims, Vector3Int root)
+    /// <summary>
+    ///     Creates a new lattice graph of size specified by the given dimensions and rooted at the
+    ///     given position.
+    /// </summary>
+    /// <param name="layoutDimensions">
+    ///     The bounds for each dimension of the lattice graph.
+    /// </param>
+    /// <param name="rootPosition">
+    ///     The lattice position that is to be considered the graph's origin.
+    /// </param>
+    /// <param name="stairTime">
+    ///     The point at which to try connecting to the next layer down in the lattice, as a
+    ///     proportion of the set nodes on the current layer.
+    /// </param>
+    /// <param name="reconnectChance">
+    ///     The probability that an edge will be set during each level's generation that creates a
+    ///     loop. 
+    /// </param>
+    public LatticeGraph(Vector3Int layoutDimensions, Vector3Int rootPosition,
+        float stairTime = 0.5f, float reconnectChance = 0.1f)
     {
-        this.dims = dims;
-        walls = new Walls[dims.x, dims.y, dims.z];
-        GenerateRandomLayout(root);
-        // PrintLayout();
+        // TODO: allow for 3D random layouts alongside 2D random layouts connected by stairs?
+        this.layoutDimensions = layoutDimensions;
+        walls = new Walls[layoutDimensions.x, layoutDimensions.y, layoutDimensions.z];
+
+        STAIR_THRESHOLD = (int)(stairTime * layoutDimensions.x * layoutDimensions.z);
+        RECONNECT_CHANCE = reconnectChance;
+        
+        GenerateRandomLayout(rootPosition);
+        // SaveLayoutArt("printed_layout.txt"); // debugging
     }
 
-    private void ResetUnsetWalls()
+    /// <summary>
+    ///     Resets the tally for a floor's unset walls and redefines the threshold at which a stairs
+    ///     down will be generated.
+    /// </summary>
+    private void ResetUnsetWallCount()
     {
-        UnsetWalls = dims.x * dims.z;
-        stairThreshold = (int)(STAIR_TIME * UnsetWalls);
+        unsetWalls = layoutDimensions.x * layoutDimensions.z;
     }
 
-    private bool IsOutOfBounds(Vector3Int index)
+    /// <summary>
+    ///     Sets the node at the given (x, y, z) position and prevents it from being modified again.
+    /// </summary>
+    /// <param name="clear">
+    ///     Resets all connections for the node at the given (x, y, z) position iff <tt>true</tt>.
+    /// </param>
+    private void Lock(int x, int y, int z, bool clear = false)
     {
-        try {
-            Walls test = this[index];
-            return false;
-        } catch
+        if (!this[x, y, z].IsSet())
         {
-            return true;
-        }
-    }
-
-    public bool IsSet(int x, int y, int z)
-    {
-        return (Walls.SET & walls[x, y, z]) > 0;
-    }
-    public bool IsSet(Vector3Int index)
-    {
-        return IsSet(index.x, index.y, index.z);
-    }
-
-    public void Lock(int x, int y, int z, bool clear = false)
-    {
-        if (!IsSet(x, y, z))
-        {
-            UnsetWalls--;
+            unsetWalls--;
         }
 
-        Walls baseWalls = clear ? Walls.ZERO : this[x, y, z];
+        Walls baseWalls = clear ? Walls.Zero : this[x, y, z];
 
-        this[x, y, z] = baseWalls | Walls.LOCKED | Walls.SET;
+        this[x, y, z] = baseWalls | Walls.Locked | Walls.Set;
     }
-    public void Lock(Vector3Int index, bool clear = false)
+    
+    /// <summary>
+    ///     Sets the given node and prevents it from being modified again.
+    /// </summary>
+    /// <param name="clear">
+    ///     Resets all connections for the node iff <tt>true</tt>.
+    /// </param>
+    private void Lock(Vector3Int node, bool clear = false)
     {
-        Lock(index.x, index.y, index.z, clear);
-    }
-    public bool IsLocked(int x, int y, int z)
-    {
-        return (Walls.LOCKED & walls[x, y, z]) > 0;
-    }
-    public bool IsLocked(Vector3Int index)
-    {
-        return IsLocked(index.x, index.y, index.z);
+        Lock(node.x, node.y, node.z, clear);
     }
 
-    public void SetAsEmpty(Vector3Int node)
+    /// <summary>
+    ///     Sets the given node as an unconnected, locked node, updating its neighbor nodes as well.
+    /// </summary>
+    private void SetAsEmpty(Vector3Int node)
     {
         Lock(node, true);
         foreach (Vector3Int dir in Utilities.planarDirections)
         {
             Vector3Int neighbor = node + dir;
             try {
-                if (IsSet(neighbor) && !IsLocked(neighbor)) {
+                if (this[neighbor].IsSet() && !this[neighbor].IsLocked()) {
                     this[neighbor] |= (-dir).GetWall();
                 }
             }
@@ -215,37 +137,73 @@ class LatticeGraph
         }
     }
 
-    public bool Connect(Vector3Int from, Vector3Int direction)
+    /// <summary>
+    ///     Attempts to connect the <tt>fromNode</tt> to its neighbor node in the given direction.
+    /// </summary>
+    /// <param name="direction">
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the connection was successfully made.
+    /// </returns>
+    public bool Connect(Vector3Int fromNode, Vector3Int direction)
     {
-        if (IsSet(from) && (this[from] & direction.GetWall()) == 0)
+        // check bounds
+        if ((fromNode + direction).OutOfBounds(layoutDimensions - Vector3Int.one))
         {
             return false;
         }
 
-        Vector3Int to = from + direction;
-        if (IsLocked(from) || IsLocked(to))
+        // check if the connection already exists
+        if (this[fromNode].IsSet() && !this[fromNode].HasWalls(direction.GetWall()))
         {
             return false;
         }
 
-        if (!IsSet(from)) {
-            this[from] = Walls.ALL;
-            UnsetWalls--;
+        Vector3Int toNode = fromNode + direction;
+        // don't modify locked nodes
+        if (this[fromNode].IsLocked() || this[toNode].IsLocked())
+        {
+            return false;
         }
-        this[from] &= ~direction.GetWall();
-
-        if (!IsSet(to)) {
-            this[to] = Walls.ALL;
-            UnsetWalls--;
-        }
-        this[to] &= ~(-direction).GetWall();
         
+        // remove the wall between the connection on the from-side.
+        if (!this[fromNode].IsSet()) {
+            this[fromNode] = Walls.All;
+            unsetWalls--;
+        }
+        this[fromNode] &= ~direction.GetWall();
+
+        // remove the wall between the connection on the to-side.
+        if (!this[toNode].IsSet()) {
+            this[toNode] = Walls.All;
+            unsetWalls--;
+        }
+        this[toNode] &= ~(-direction).GetWall();
+
         return true;
     }
 
-    public void ConnectRandom(Vector3Int from, Func<int, int, Vector3Int, float> connectChance,
-        float reconnectChance = 0f, HashSet<Vector3Int> newConnections = null,
-        bool planarOnly = true)
+    /// <summary>
+    ///     Randomly form connections between the <tt>fromNode</tt> and its neighbors by considering
+    ///     one neighbor at a time.
+    /// </summary>
+    /// <param name="connectChance">
+    ///     A function defining the probability that an attempted connection will succeed, taking as
+    ///     input the amount of connections made so far, the amount of connections remaining to
+    ///     attempt, and the current attempt's connection direction.
+    ///     <br/>
+    ///     One additional connection attempt will be made at the end with both counts equal to 0 if
+    ///     no connection succeeded in the initial loop.
+    /// </param>
+    /// <param name="newConnections">
+    ///     The set in which to place the nodes that have been newly connected to <tt>fromNode</tt>.
+    /// </param>
+    /// <param name="planarOnly">
+    ///     If <tt>true</tt>, attempt connections using only the 4 planar cardinal directions.
+    ///     Otherwise use all 6 cardinal directions.
+    /// </param>
+    public void ConnectRandom(Vector3Int fromNode, Func<int, int, Vector3Int, float> connectChance,
+        HashSet<Vector3Int> newConnections = null, bool planarOnly = true)
     {
         int connected = 0;
         int remaining = planarOnly ? 4 : 6;
@@ -253,15 +211,20 @@ class LatticeGraph
 
         foreach (Vector3Int dir in Utilities.RandomDirections(planarOnly))
         {
-            Vector3Int to = from + dir;
+            Vector3Int to = fromNode + dir;
             bool noLoops = true;
             
             try {
-                if (IsSet(to))
+                if (to.OutOfBounds(layoutDimensions - Vector3Int.one))
                 {
-                    if (Random.Range(0f, 1f) < reconnectChance)
+                    continue;
+                }
+
+                if (this[to].IsSet())
+                {
+                    // should the connection proceed, possibly creating a loop?
+                    if (Random.Range(0f, 1f) < RECONNECT_CHANCE)
                     {
-                        // allow a connection that forms a loop
                         noLoops = false;
                     } else {
                         continue;
@@ -270,8 +233,8 @@ class LatticeGraph
                 
                 if (Random.Range(0f, 1f) < connectChance(connected, remaining, dir))
                 {
-                    if (Connect(from, dir) && noLoops) {
-                        // a new, non-looping connection was formed
+                    // try making the connection
+                    if (Connect(fromNode, dir) && noLoops) {
                         newConnections?.Add(to);
                         connected++;
                     }
@@ -287,96 +250,169 @@ class LatticeGraph
             }
         }
 
-        // One more try
+        // try one last time if all attempts failed and at least one was tried
         if (connected == 0 && rejectedDir != null)
         {
             Vector3Int dir = (Vector3Int)rejectedDir;
-            if (Random.Range(0f, 1f) < connectChance(connected, remaining, dir) && Connect(from, dir))
+            if (Random.Range(0f, 1f) < connectChance(0, 0, dir)
+                && Connect(fromNode, dir))
             {
-                newConnections?.Add(from + dir);
+                newConnections?.Add(fromNode + dir);
             }
         }
     }
 
-    public Vector3Int? FindBridgePoint()
+    /// <summary>
+    ///     Search for a node on the given y level from which connections can potentially continue.
+    ///     <br/>
+    ///     This is a bridge node, a set and unlocked node that is adjacent to an unset node.
+    /// </summary>
+    /// <param name="y">
+    ///     The y-level to search for a bridge node on.
+    /// </param>
+    /// <param name="planarOnly">
+    ///     If <tt>true</tt>, look for bridge points using only the 4 planar cardinal directions.
+    ///     Otherwise use all 6 cardinal directions.
+    /// </param>
+    /// <returns>
+    ///     The first bridge node found, or null if none is found.
+    /// </returns>
+    public Vector3Int? FindBridgeNode(int y, bool planarOnly = true)
     {
-        foreach((int _, Vector3Int unsetIndex) in Utilities.EnumerateIndices3D(dims)) {
-            if (IsSet(unsetIndex)) continue;
+        foreach((int x, int z) in Utilities.Indices2D(layoutDimensions)) {
+            if (this[x, y, z].IsSet()) continue;
 
-            foreach (Vector3Int direction in Utilities.RandomDirections(true))
+            foreach (Vector3Int direction in Utilities.RandomDirections(planarOnly))
             {
-                try
+                Vector3Int bridge = direction + new Vector3Int(x, y, z);
+                if (!bridge.OutOfBounds(layoutDimensions - Vector3Int.one)
+                    && this[bridge].IsSet() && !this[bridge].IsLocked())
                 {
-                    Vector3Int index = unsetIndex + direction;
-                    if (IsSet(index) && !IsLocked(index))
-                    {
-                        return index;
-                    }
-                } catch { /* continue */ }
+                    return bridge;
+                }
             }
         }
 
         return null;
     }
-    public Vector3Int GetBridgePoint()
+
+    /// <param name="y">
+    ///     The y-level to get the bridge node from.
+    /// </param>
+    /// <returns>
+    ///     The first node on the given y level from which connections can potentially continue.
+    ///     <br/>
+    ///     This is a bridge node, a set and unlocked node that is adjacent to an unset node.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown if a bridge node does not exist.
+    /// </exception>
+    public Vector3Int GetBridgeNode(int y)
     {
-        Vector3Int? point = FindBridgePoint();
-
-        if (point != null)
-        {
-            return (Vector3Int)point;
-        }
-
-        throw new InvalidOperationException("[GetBridgePoint] Expected to find a bridge point, but none existed! (UnsetWalls = " + UnsetWalls.ToString() + ')');
+        return FindBridgeNode(y) ?? throw new InvalidOperationException(
+            $"Expected to find a bridge node, but none existed (UnsetWalls = {unsetWalls})"
+        );
     }
 
+    /// <summary>
+    ///     Randomly interconnects the lattice graph's nodes such that each level has exactly one
+    ///     connection to the level above it and one to the level below it.
+    /// </summary>
+    /// <param name="root">
+    ///     The position of the entrance node on the top level.
+    /// </param>
     public void GenerateRandomLayout(Vector3Int root)
     {
+        int topLevel = layoutDimensions.y - 1;
+        root.y = topLevel;
+
         Vector3Int? entrance = root;
         Vector3Int? direction = null;
-        for (int y = dims.y-1 ; y >= 0; y--) {
-            Assert.IsTrue(entrance?.y == y);
-            (entrance, direction) = GenerateRandomLayer((Vector3Int)entrance, direction);
+
+        for (int y = topLevel; y >= 0; y--) {
+            (entrance, direction) = GenerateRandomLevel((Vector3Int)entrance, direction);
         }
     }
-    private (Vector3Int?, Vector3Int?) GenerateRandomLayer(Vector3Int entrancePosition, Vector3Int? entranceDirection = null) {
-        ResetUnsetWalls();
+
+    /// <summary>
+    ///     Randomly interconnects one level of the lattice graph.
+    ///     <para/>
+    ///     This method uses a random walk with multiple "heads" to connect nodes. One head is born
+    ///     at the node neighboring the entrance position, in the entrance direction. Steps are
+    ///     performed until all heads are dead. At each step, a head can:<br/>
+    ///     - Survive/multiply by randomly creating new connections to adjacent nodes<br/>
+    ///     - Die if it fails to create any new connections<br/>
+    ///     - Ressurect if all heads are dead but some nodes remain unset.
+    /// </summary>
+    /// <param name="entrancePosition">
+    ///     The position of the connection between this level and the one above it.
+    /// </param>
+    /// <param name="entranceDirection">
+    ///     Which direction to start the generation in.
+    /// </param>
+    /// <returns>
+    ///     The entrance position and direction for the next level down.
+    /// </returns>
+    private (Vector3Int?, Vector3Int?) GenerateRandomLevel(Vector3Int entrancePosition, Vector3Int? entranceDirection = null) {
+        ResetUnsetWallCount();
         (Vector3Int?, Vector3Int?) lowerEntranceInfo = (null, null);
 
         HashSet<Vector3Int> heads = new() { AddEntrance(entrancePosition, entranceDirection) };
-        Assert.IsTrue(heads.Count > 0);
-
-        // Randomly add the rest of the tiles
         HashSet<Vector3Int> newHeads;
+
+        // randomly connect the rest of the nodes
         while (heads.Count > 0)
         {
+            // advance the heads' walks by one step
             newHeads = new();
             foreach (Vector3Int head in heads)
             {
                 ConnectRandom(head,
-                    (_, remaining, _) => { return 1f / remaining; },
-                reconnectChance, newHeads);
+                    (_, remaining, _) => { return (remaining <= 1) ? 1f : 1f / remaining; },
+                newHeads);
             }
             heads = newHeads;
 
-            if (entrancePosition.y > 0 && lowerEntranceInfo == (null, null) && UnsetWalls <= stairThreshold)
+            // connect to lower level at the first moment at least half of the nodes are set
+            if (entrancePosition.y > 0
+                && lowerEntranceInfo == (null, null)
+                && unsetWalls <= STAIR_THRESHOLD)
             {
                 lowerEntranceInfo = AddRandomStairsDown(entrancePosition.y);
             }
 
-            if (heads.Count == 0 && UnsetWalls > 0)
+            // ressurect a head if all have died but there are still unset nodes
+            if (heads.Count == 0 && unsetWalls > 0)
             {
-                heads.Add(GetBridgePoint());
+                heads.Add(GetBridgeNode(entrancePosition.y));
             }
         }
 
         return lowerEntranceInfo;
     }
 
+    /// <summary>
+    ///     Creates a connection starting from the given entrance position to the level above it.
+    ///     The connection is directional: dictated by the given entrance direction, or chosen
+    ///     randomly if it is <tt>null</tt>. 
+    /// </summary>
+    /// <param name="entrancePosition">
+    ///     The node that will have an upwards connection created.
+    /// </param>
+    /// <param name="entranceDirection">
+    ///     The direction that the entrance points in. Chosen randomly if <tt>null</tt>.
+    /// </param>
+    /// <returns>
+    ///     The node neighboring the entrance position, in the entrance's direction.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown if the entrance could not be created.
+    /// </exception>
     private Vector3Int AddEntrance(Vector3Int entrancePosition, Vector3Int? entranceDirection = null)
     {
         foreach (Vector3Int dir in Utilities.RandomDirections(true))
         {
+            // force the direction choice if the given direction is not null
             if (entranceDirection != null && entranceDirection != dir) {
                 continue;
             }
@@ -384,41 +420,23 @@ class LatticeGraph
             try
             {
                 if (Connect(entrancePosition, dir)) {
-                    this[entrancePosition] &= ~Walls.UP;
+                    this[entrancePosition] &= ~Walls.Up;
                     Lock(entrancePosition);
                     SetAsEmpty(entrancePosition - dir);
+
                     return entrancePosition + dir;
                 }
             } catch { /* continue */ }
         }
 
-        throw new InvalidOperationException("[AddEntrance] Could not add an entrance at " + entrancePosition.ToString());
+        throw new InvalidOperationException(
+            $"[AddEntrance] Could not add an entrance at {entrancePosition}!"
+        );
     }
 
     private (Vector3Int, Vector3Int) AddRandomStairsDown(int y)
     {
-        HashSet<(Vector3Int, Vector3Int)> foundSpots = new();
-
-        // search all tiles on the given y level for an adjacent pair of unset tiles that are
-        // co-linear with a set tile
-        foreach ((int x, int z) in Utilities.Indices2D(dims))
-        {
-            if (IsSet(x, y, z)) continue;
-            Vector3Int index = new(x, y, z);
-
-            foreach (Vector3Int axis in Utilities.planarAxes)
-            {
-                try
-                {
-                    if (!IsSet(index + axis) & IsSet(index - axis)) {
-                        foundSpots.Add((index, axis));
-                    }
-                    if (!IsSet(index - axis) & IsSet(index + axis)) {
-                        foundSpots.Add((index, -axis));
-                    }
-                } catch { /* continue */ }
-            }
-        }
+        HashSet<(Vector3Int, Vector3Int)> foundSpots = FindStairLocations(y);
 
         // randomly iterate through the indices found 
         (Vector3Int, Vector3Int)[] possibleSpots = foundSpots.ToArray();
@@ -426,12 +444,12 @@ class LatticeGraph
         {
             (Vector3Int stairsDownIndex, Vector3Int stairDir) = possibleSpots[i];
 
-            // make sure that the stairs_up tile does not lead to the edge of the dungeon
+            // make sure that the node immediately after the downward connection is in the dungeon
             Vector3Int exit = stairsDownIndex + Vector3Int.down + 2*stairDir;
-            if (!IsOutOfBounds(exit)) {
+            if (!exit.OutOfBounds(layoutDimensions - Vector3Int.one)) {
                 if(Connect(stairsDownIndex, -stairDir))
                 {
-                    this[stairsDownIndex] &= ~Walls.DOWN;
+                    this[stairsDownIndex] &= ~Walls.Down;
                     Lock(stairsDownIndex);
 
                     SetAsEmpty(stairsDownIndex + stairDir);
@@ -441,26 +459,66 @@ class LatticeGraph
             }
         }
 
-        throw new InvalidOperationException("[AddRandomStairsDown] Could not add stairs down from level " + y.ToString() + '!');
+        throw new InvalidOperationException(
+            $"[AddRandomStairsDown] Could not add stairs down from level {y}!"
+        );
     }
 
-    private void PrintLayout()
+    /// <summary>
+    ///     Searches the given y level for all nodes that can potentially have a connection down to
+    ///     the lower level.
+    /// </summary>
+    /// <param name="y">
+    ///     The level to search.
+    /// </param>
+    /// <returns>
+    ///     A set of (node, direction) pairs such that the node and its direction-neighbor are both
+    ///     unset and the node's (-direction)-neighbor is set.
+    /// </returns>
+    private HashSet<(Vector3Int, Vector3Int)> FindStairLocations(int y)
     {
-        string result = "↑ Front\n";
+        HashSet<(Vector3Int, Vector3Int)> foundSpots = new();
 
-        for (int y = dims.y-1; y >= 0; y--)
+        // 
+        foreach ((int x, int z) in Utilities.Indices2D(layoutDimensions))
         {
-            result += "Level " + y.ToString() + '\n';
-            for (int z = dims.z-1; z >= 0; z--)
+            if (this[x, y, z].IsSet()) continue;
+            Vector3Int index = new(x, y, z);
+
+            foreach (Vector3Int axis in Utilities.planarDirections)
             {
-                for (int x = 0; x < dims.x; x++) {
-                    result += this[x, y, z].ToChar();
-                }
-                result += '\n';
+                try
+                {
+                    if (!this[index + axis].IsSet() & this[index - axis].IsSet()) {
+                        foundSpots.Add((index, axis));
+                    }
+                } catch { /* continue */ }
             }
-            result += '\n';
         }
 
-        Debug.Log(result);
+        return foundSpots;
+    }
+
+    /// <summary>
+    ///     Writes to the given file an Ascii art representation of the lattice graph.
+    /// </summary>
+    private void SaveLayoutArt(string fileName)
+    {
+        string layout = "↑ Front\n\n";
+
+        for (int y = layoutDimensions.y-1; y >= 0; y--)
+        {
+            layout += $"Level {y}\n";
+            for (int z = layoutDimensions.z-1; z >= 0; z--)
+            {
+                for (int x = 0; x < layoutDimensions.x; x++) {
+                    layout += this[x, y, z].ToChar();
+                }
+                layout += '\n';
+            }
+            layout += '\n';
+        }
+
+        File.WriteAllText("Ignore/" + fileName, layout);
     }
 }
