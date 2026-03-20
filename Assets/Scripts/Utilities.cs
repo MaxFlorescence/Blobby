@@ -89,9 +89,23 @@ public static class Extensions
     /// <returns>
     ///     <tt>True</tt> iff the integer is within the given bounds (inclusive).
     /// </returns>
-    public static bool OutOfBounds(this int i, int lowerBound, int upperBound)
+    public static bool OutOfBounds(this int i, int upperBound, int lowerBound = 0)
     {
         return i < lowerBound || upperBound < i;
+    }
+
+    /// <returns>
+    ///     <tt>True</tt> iff the vector is within the given bounds (inclusive), element-wise.
+    ///     <br/>
+    ///     If the lower bound is <tt>null</tt>, it's treated as <tt>Vector3Int.zero</tt>.
+    /// </returns>
+    public static bool OutOfBounds(this Vector3Int i, Vector3Int upperBounds, Vector3Int? lowerBounds = null)
+    {
+        Vector3Int nonNullLowerBounds = (lowerBounds == null) ? Vector3Int.zero : (Vector3Int)lowerBounds;
+
+        return i.x.OutOfBounds(upperBounds.x, nonNullLowerBounds.x)
+            || i.y.OutOfBounds(upperBounds.y, nonNullLowerBounds.y)
+            || i.z.OutOfBounds(upperBounds.z, nonNullLowerBounds.z);
     }
 }
 

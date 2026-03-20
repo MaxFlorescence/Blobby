@@ -109,7 +109,7 @@ class DungeonLayoutGenerator
 
         if (fromFile)
         {
-            if (index.OutOfBounds(0, tileCount-1)) {
+            if (index.OutOfBounds(tileCount-1)) {
                 if (IsInvalid(position)) throw argumentException;
                 index = Utilities.IndexFlatOf(
                     (Vector3Int)position, layoutDimensions.x, layoutDimensions.y
@@ -121,7 +121,7 @@ class DungeonLayoutGenerator
         else
         {
             if (IsInvalid(position)) {
-                if (index.OutOfBounds(0, tileCount-1)) throw argumentException;
+                if (index.OutOfBounds(tileCount-1)) throw argumentException;
                 position = Utilities.Index3dOf(
                     index, layoutDimensions.x, layoutDimensions.y
                 );
@@ -149,9 +149,7 @@ class DungeonLayoutGenerator
         if (position == null) return true;
         Vector3Int positionNonNull = (Vector3Int)position;
 
-        return positionNonNull.x.OutOfBounds(0, layoutDimensions.x-1)
-            || positionNonNull.y.OutOfBounds(0, layoutDimensions.y-1)
-            || positionNonNull.z.OutOfBounds(0, layoutDimensions.z-1);
+        return positionNonNull.OutOfBounds(layoutDimensions - Vector3Int.one);
     }
 
     /// <param name="position">
