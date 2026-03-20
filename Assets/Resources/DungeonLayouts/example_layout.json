@@ -8,67 +8,67 @@
     },
     "layout": [
         {
-            "tileName": "dead_end",
+            "tileType": "dead_end",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "corner",
+            "tileType": "corner",
             "tileOrientation": "back"
         },
         {
-            "tileName": "corner",
+            "tileType": "corner",
             "tileOrientation": "right"
         },
         {
-            "tileName": "stairs_up",
+            "tileType": "stairs_up",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "dead_end",
+            "tileType": "dead_end",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "junction",
+            "tileType": "junction",
             "tileOrientation": "back"
         },
         {
-            "tileName": "junction",
+            "tileType": "junction",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "dead_end",
+            "tileType": "dead_end",
             "tileOrientation": "back"
         },
         {
-            "tileName": "dead_end",
+            "tileType": "dead_end",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "crossing",
+            "tileType": "crossing",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "crossing",
+            "tileType": "crossing",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "dead_end",
+            "tileType": "dead_end",
             "tileOrientation": "back"
         },
         {
-            "tileName": "dead_end",
+            "tileType": "dead_end",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "corner",
+            "tileType": "corner",
             "tileOrientation": "left"
         },
         {
-            "tileName": "corner",
+            "tileType": "corner",
             "tileOrientation": "forward"
         },
         {
-            "tileName": "dead_end",
+            "tileType": "dead_end",
             "tileOrientation": "back"
         }
     ]
