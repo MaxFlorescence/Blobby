@@ -11,6 +11,9 @@ using Random = UnityEngine.Random;
 /// </summary>
 class LatticeGraph
 {
+    // ---------------------------------------------------------------------------------------------
+    // INFORMATION
+    // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     Contains connectivity information for each node of the lattice graph.
     /// </summary>

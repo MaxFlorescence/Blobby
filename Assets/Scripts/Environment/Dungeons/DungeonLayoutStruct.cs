@@ -2,47 +2,6 @@ using System;
 using UnityEngine;
 
 /// <summary>
-///     A struct for holding information about an entity in a dungeon.
-/// </summary>
-[Serializable]
-public struct DungeonEntityStruct
-{
-    /// <summary>
-    ///     The type of entity.
-    /// </summary>
-    public string entityType;
-    /// <summary>
-    ///     The name of the entity.
-    /// </summary>
-    public string entityName;
-    /// <summary>
-    ///     The position of the entity within its tile.
-    /// </summary>
-    public string entityPosition;
-    /// <summary>
-    ///     The orientation of the entity.
-    /// </summary>
-    public string entityOrientation;
-}
-
-/// <summary>
-///     A struct for holding the information about a dungeon tile.
-/// </summary>
-[Serializable]
-public struct DungeonTileStruct
-{
-    /// <summary>
-    ///     The type of dungeon tile.
-    /// </summary>
-    public string tileType;
-    /// <summary>
-    ///     The orientation of the dungeon tile.
-    /// </summary>
-    public string tileOrientation;
-    public DungeonEntityStruct[] contents;
-}
-
-/// <summary>
 ///     A struct for holding the information about a dungeon.
 /// </summary>
 [Serializable]
@@ -64,4 +23,45 @@ public struct DungeonLayoutStruct
     ///     The list of tiles that comprise the dungeon.
     /// </summary>
     public DungeonTileStruct[] layout;
+}
+
+/// <summary>
+///     A struct for holding the information about a dungeon tile.
+/// </summary>
+[Serializable]
+public struct DungeonTileStruct
+{
+    /// <summary>
+    ///     The type of dungeon tile.
+    /// </summary>
+    public string tileType;
+    /// <summary>
+    ///     The orientation of the dungeon tile.
+    /// </summary>
+    public string tileOrientation;
+    public DungeonEntityStruct[] contents;
+}
+
+/// <summary>
+///     A struct for holding information about an entity in a dungeon.
+/// </summary>
+[Serializable]
+public struct DungeonEntityStruct
+{
+    /// <summary>
+    ///     The type of entity.
+    /// </summary>
+    public string entityType;
+    /// <summary>
+    ///     The name of the entity.
+    /// </summary>
+    public string entityName;
+    /// <summary>
+    ///     The position of the entity within its tile.
+    /// </summary>
+    public string entityPosition;
+    /// <summary>
+    ///     The orientation of the entity.
+    /// </summary>
+    public string entityOrientation;
 }
