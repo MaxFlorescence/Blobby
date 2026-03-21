@@ -97,11 +97,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f40b12eeb076e974a80cff778d758a3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  springForce: 100
-  atomScale: 0.5
   leftEye: {fileID: 738441206337862780}
   rightEye: {fileID: 2566886222492952233}
-  blobLight: {fileID: 0}
 --- !u!1 &1759620829691762407
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,7 +176,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1835094699549336145}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
   m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}

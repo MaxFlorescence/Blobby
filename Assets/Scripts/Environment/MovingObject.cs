@@ -145,7 +145,7 @@ public class MovingObject : MonoBehaviour
                 {
                     // interpolation for last point has finished
                     currentKeyPoint++;
-                    timer.SetInterval(keyPoints[currentKeyPoint].moveTime);
+                    timer.SetInterval(keyPoints.ModularGet(currentKeyPoint).moveTime);
                 } else {
                     timer.SetInterval(keyPoints[currentKeyPoint].pauseTime);
                 }
@@ -156,13 +156,13 @@ public class MovingObject : MonoBehaviour
                 // interpolate position linearly
                 Vector3 position = Vector3.Lerp(
                     keyPoints.ModularGet(currentKeyPoint - 1).position,
-                    keyPoints[currentKeyPoint].position,
+                    keyPoints.ModularGet(currentKeyPoint).position,
                     timer.Progress()
                 );
                 // interpolate direction spherically
                 Vector3 direction = Vector3.Slerp(
                     keyPoints.ModularGet(currentKeyPoint - 1).orientation, 
-                    keyPoints[currentKeyPoint].orientation,
+                    keyPoints.ModularGet(currentKeyPoint).orientation,
                     timer.Progress()
                 );
 

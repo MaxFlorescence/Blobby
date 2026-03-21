@@ -30,11 +30,11 @@ class FireLight : MonoBehaviour
     /// <summary>
     ///     The intensity for the fire light to target during the current timer interval.
     /// </summary>
-    private float targetIntensity;
+    private float targetIntensity = 1;
     /// <summary>
     ///     The intensity of the fire light at the end of the last timer interval.
     /// </summary>
-    private float lastIntensity;
+    private float lastIntensity = 1;
     private Timer timer = new(1);
 
     /// <summary>
@@ -55,6 +55,7 @@ class FireLight : MonoBehaviour
         lightComponent = GetComponent<Light>();
         origin = transform.position;
         lastPosition = origin;
+        targetIntensity = NextIntensity();
     }
 
     void Update()
