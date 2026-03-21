@@ -107,6 +107,41 @@ public static class Extensions
             || i.y.OutOfBounds(upperBounds.y, nonNullLowerBounds.y)
             || i.z.OutOfBounds(upperBounds.z, nonNullLowerBounds.z);
     }
+
+    /// <typeparam name="T">
+    ///     The type of element in the array.
+    /// </typeparam>
+    /// <param name="data">
+    ///     The array itself.
+    /// </param>
+    /// <param name="i">
+    ///     The integer index of the desired element.
+    /// </param>
+    /// <returns>
+    ///     The item of the array that corresponds to the given index modulo the array's length.
+    /// </returns>
+    public static T ModularGet<T>(this T[] data, int i)
+    {
+        return data[Utilities.ModularIndex(i, data.Length)];
+    }
+
+    /// <summary>
+    ///     Sets the element of the array at the given index modulo the array's length to be the
+    ///     given value.
+    /// </summary>
+    /// <typeparam name="T">
+    ///     The type of element in the array.
+    /// </typeparam>
+    /// <param name="data">
+    ///     The array itself.
+    /// </param>
+    /// <param name="i">
+    ///     The integer index of the desired element.
+    /// </param>
+    public static void ModularSet<T>(this T[] data, int i, T value)
+    {
+        data[Utilities.ModularIndex(i, data.Length)] = value;
+    }
 }
 
 class Utilities : MonoBehaviour
@@ -301,5 +336,17 @@ class Utilities : MonoBehaviour
     public static TextAsset LoadTextFile(string filePath)
     {
         return Resources.Load(filePath, typeof(TextAsset)) as TextAsset;
+    }
+
+    /// <param name="i"></param>
+    /// <param name="m"></param>
+    /// <returns>
+    ///     <tt>j = k * m + i</tt>, where <tt>k</tt> is an integer such that
+    ///     <tt>0 &lt;= j &lt; m</tt>.
+    /// </returns>
+    public static int ModularIndex(int i, int m)
+    {
+        i %= m;
+        return i < 0 ? i + m : i;
     }
 }
