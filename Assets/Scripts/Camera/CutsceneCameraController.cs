@@ -50,7 +50,8 @@ public class CutsceneCameraController : PriorityCamera
     public GameObject cutsceneOverlay;
     private int keyFrameCount;
     private int currentKeyFrame = -1;
-    private float cutsceneTime = 0;
+    private Timer timer = new();
+    private bool cameraIsMoving = true;
 
     void Awake()
     {
@@ -87,6 +88,8 @@ public class CutsceneCameraController : PriorityCamera
         SetPriority(2);
         
         currentKeyFrame = 0;
+        timer.SetInterval(keyFrames[0].moveTime);
+        cameraIsMoving = true;
         transform.position = keyFrames[0].position;
         transform.LookAt(keyFrames[0].position + keyFrames[0].orientation);
     }
@@ -122,24 +125,38 @@ public class CutsceneCameraController : PriorityCamera
     {
         if (currentKeyFrame < keyFrameCount && currentKeyFrame >= 0)
         {
-            if (keyFrames[currentKeyFrame].moveTime > 0 && cutsceneTime <= keyFrames[currentKeyFrame].moveTime)
+            if (timer.Update())
+            {
+                cameraIsMoving = !cameraIsMoving;
+
+                if (cameraIsMoving)
+                {
+                    // interpolation for last frame has finished
+                    currentKeyFrame++;
+                    timer.SetInterval(keyFrames[currentKeyFrame].moveTime);
+                } else {
+                    timer.SetInterval(keyFrames[currentKeyFrame].pauseTime);
+                }
+            }
+
+            if (cameraIsMoving)
             {
                 // interpolate position linearly between the last position and the target position
-                Vector3 position = Vector3.Lerp(keyFrames[currentKeyFrame - 1].position, keyFrames[currentKeyFrame].position, cutsceneTime / keyFrames[currentKeyFrame].moveTime);
+                Vector3 position = Vector3.Lerp(
+                    keyFrames[currentKeyFrame - 1].position,
+                    keyFrames[currentKeyFrame].position,
+                    timer.Progress()
+                );
                 // interpolate direction spherically between the last direction and the target direction
-                Vector3 direction = Vector3.Slerp(keyFrames[currentKeyFrame - 1].orientation, keyFrames[currentKeyFrame].orientation, cutsceneTime / keyFrames[currentKeyFrame].moveTime);
+                Vector3 direction = Vector3.Slerp(
+                    keyFrames[currentKeyFrame - 1].orientation, 
+                    keyFrames[currentKeyFrame].orientation,
+                    timer.Progress()
+                );
 
                 transform.position = position;
                 transform.LookAt(position + direction);
             }
-            else if (cutsceneTime >= keyFrames[currentKeyFrame].moveTime + keyFrames[currentKeyFrame].pauseTime)
-            {
-                // interpolation is finished
-                cutsceneTime = 0;
-                currentKeyFrame++;
-            }
-
-            cutsceneTime += Time.deltaTime;
         }
         else if (currentKeyFrame == keyFrameCount)
         {

@@ -105,6 +105,7 @@ public class DungeonTile : MonoBehaviour
         GameObject tileObject = Instantiate(tileType.GetPrefab(), tilePosition, orientation, dungeon.transform);
         DungeonTile tile = tileObject.AddComponent<DungeonTile>();
 
+        // TODO: figure out why the example loaded dungeon's map icons are smaller than normal
         tile.mapIcon = GameInfo.ActiveMiniMap.AddIcon(
             name + "-Minimap_Icon",
             tileType.GetMapSprite(),
