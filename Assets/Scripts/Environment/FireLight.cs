@@ -1,50 +1,86 @@
 using UnityEngine;
 
+/// <summary>
+///     A class for controlling the light of a fire source.
+/// </summary>
 [RequireComponent(typeof(Light))]
 class FireLight : MonoBehaviour
 {
+    /// <summary>
+    ///     The minimum and maximum intervals that the fire light's timer can last for.
+    /// </summary>
     public Vector2 intervalRange = new(0.1f, 1f);
+    /// <summary>
+    ///     The minimum and maximum intensities that the fire light can attain.
+    /// </summary>
     public Vector2 intensityRange = new(0.5f, 1f);
+    /// <summary>
+    ///     The maximum displacement from the origin that the fire light can attain.
+    /// </summary>
     public float maxDisplacement = 0.25f;
-
+    /// <summary>
+    ///     Indicates if the fire light is on or off.
+    /// </summary>
     public bool IsOn { get; set; } = true;
 
-    private Light fireLight;
-    float targetIntensity;
-    float lastIntensity;
-    float interval = 1;
-    float timer = 1;
+    /// <summary>
+    ///     The light component controlled by this fire light.
+    /// </summary>
+    private Light lightComponent;
+    /// <summary>
+    ///     The intensity for the fire light to target during the current timer interval.
+    /// </summary>
+    private float targetIntensity;
+    /// <summary>
+    ///     The intensity of the fire light at the end of the last timer interval.
+    /// </summary>
+    private float lastIntensity;
+    private Timer timer = new(1);
 
-    Vector3 targetPosition;
-    Vector3 lastPosition;
-    Vector3 origin;
+    /// <summary>
+    ///     The position to move the fire light toward during the current timer interval.
+    /// </summary>
+    private Vector3 targetPosition;
+    /// <summary>
+    ///     The position of the fire light at the end of the last timer interval.
+    /// </summary>
+    private Vector3 lastPosition;
+    /// <summary>
+    ///     The starting position of the fire light.
+    /// </summary>
+    private Vector3 origin;
 
     private void Start()
     {
-        fireLight = GetComponent<Light>();
+        lightComponent = GetComponent<Light>();
         origin = transform.position;
         lastPosition = origin;
     }
 
     void Update()
     {
-        timer += Time.deltaTime;
-
-        if (timer > interval)
+        if (timer.Update())
         {
-            lastIntensity = fireLight.intensity;
+            lastIntensity = lightComponent.intensity;
             targetIntensity = NextIntensity();
-            timer = 0;
-            interval = Random.Range(intervalRange.x, intervalRange.y);
+            timer.SetInterval(Random.Range(intervalRange.x, intervalRange.y));
 
-            lastPosition = fireLight.transform.position;
+            lastPosition = lightComponent.transform.position;
             targetPosition = NextPosition();
         }
 
-        fireLight.intensity = Mathf.Lerp(lastIntensity, targetIntensity, timer / interval);
-        fireLight.transform.position = Vector3.Lerp(lastPosition, targetPosition, timer / interval);
+        // interpolate the fire light to the next intensity and position
+        lightComponent.intensity = Mathf.Lerp(lastIntensity, targetIntensity, timer.Progress());
+        lightComponent.transform.position = Vector3.Lerp(lastPosition, targetPosition, timer.Progress());
     }
 
+    /// <summary>
+    ///     Selects a random intensity for the fire light to target during its next interval.
+    /// </summary>
+    /// <returns>
+    ///     If the light is on, then a random float in the range defined by <tt>intensityRange</tt>.
+    ///     Otherwise 0.
+    /// </returns>
     public float NextIntensity()
     {
         if (IsOn)
@@ -53,6 +89,13 @@ class FireLight : MonoBehaviour
         return 0;
     }
 
+    /// <summary>
+    ///     Selects a random position for the fire light to target during its next interval.
+    /// </summary>
+    /// <returns>
+    ///     If the light is on, then a random point at most <tt>maxDisplacement</tt> away from the
+    ///     light's <tt>origin</tt>. Otherwise the <tt>origin</tt>.
+    /// </returns>
     public Vector3 NextPosition()
     {
         if (IsOn)
