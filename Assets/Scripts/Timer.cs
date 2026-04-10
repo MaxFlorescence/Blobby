@@ -6,7 +6,7 @@ using Unity.Mathematics;
 class Timer
 {
     /// <summary>
-    ///     The interval that the timer is set to run for.
+    ///     The interval in seconds that the timer is set to run for.
     /// </summary>
     public float Interval { get; private set; }
     /// <summary>
@@ -15,7 +15,7 @@ class Timer
     public float Time { get; private set; }
 
     /// <param name="interval">
-    ///     The interval that the timer is set to run for.
+    ///     The interval in seconds that the timer is set to run for.
     /// </param>
     public Timer(float interval = 0)
     {
@@ -23,16 +23,19 @@ class Timer
     }
 
     /// <summary>
-    ///     Increments the timer's time, then resets it when it exceeds the timer's interval.
+    ///     Increments the timer's time, possibly resetting it when it exceeds the timer's interval.
     /// </summary>
     /// <param name="increment">
     ///     The amount to increment the timer's time by. If less than or equal to 0, then the
     ///     timer's time is incremented by <tt>Time.deltaTime</tt>
     /// </param>
+    /// <param name="reset">
+    ///     Resets the timer when its interval is exceeded iff set to <tt>true</tt>.
+    /// </param>
     /// <returns>
     ///     <tt>True</tt> iff the timer's time exceeded its interval.
     /// </returns>
-    public bool Update(float increment = 0)
+    public bool Update(float increment = 0, bool reset = true)
     {
         if (increment <= 0)
         {
@@ -42,11 +45,16 @@ class Timer
         
         if (Time > Interval)
         {
-            Time = 0;
+            if (reset) Time = 0;
             return true;
         }
 
         return false;
+    }
+
+    public void Reset()
+    {
+        Time = 0;
     }
 
     public void SetInterval(float interval)
