@@ -20,11 +20,6 @@ public class Squisher : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        audioSource.volume = 0.05f;
-    }
-
     /// <summary>
     ///     Play a random squish noise with a random pitch.
     /// </summary>
@@ -33,7 +28,7 @@ public class Squisher : MonoBehaviour
             audioSource.pitch = Random.Range(0.5f, 1.5f);
             int i = Random.Range(0, 8);
             
-            audioSource.PlayOneShot(clips[i]);
+            audioSource.PlayOneShot(clips[i], 0.05f);
         }
     }
 }
