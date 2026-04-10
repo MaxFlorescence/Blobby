@@ -7,7 +7,7 @@ using UnityEngine;
 ///     Only one camera can be active at a time, so which one is active should depend on the
 ///     individual camera's priority and usability.
 /// </summary>
-public abstract class PriorityCamera : Controllable
+public abstract class PriorityCamera : MonoBehaviour, Controllable
 {
     /// <summary>
     ///     The maximum priority this camera can have.
@@ -21,6 +21,8 @@ public abstract class PriorityCamera : Controllable
     private Camera cameraComponent;
 
     protected bool isMain = false;
+    
+    public bool controlled { get; set; } = false;
 
     void Awake()
     {

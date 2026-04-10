@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
-public class BlobController : Controllable
+public class BlobController : MonoBehaviour, Controllable
 {
     //----------------------------------------------------------------------------------------------
     // Input
@@ -14,6 +14,7 @@ public class BlobController : Controllable
     private bool movementInputEnabled = true;
     private float movementIntensityFactor = 10f;
     private float jumpIntensityFactor = 8f;
+    public bool controlled { get; set; } = false;
 
     //----------------------------------------------------------------------------------------------
     // Structure
