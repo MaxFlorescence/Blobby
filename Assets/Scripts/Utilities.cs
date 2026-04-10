@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
+using IEnumerator = System.Collections.IEnumerator;
 
 public static class Rotation
 {
@@ -87,6 +88,14 @@ public static class Extensions
     }
 
     /// <returns>
+    ///     <tt>True</tt> iff the float is within the given bounds (inclusive).
+    /// </returns>
+    public static bool OutOfBounds(this float i, float upperBound, float lowerBound = 0)
+    {
+        return i < lowerBound || upperBound < i;
+    }
+
+    /// <returns>
     ///     <tt>True</tt> iff the integer is within the given bounds (inclusive).
     /// </returns>
     public static bool OutOfBounds(this int i, int upperBound, int lowerBound = 0)
@@ -141,6 +150,48 @@ public static class Extensions
     public static void ModularSet<T>(this T[] data, int i, T value)
     {
         data[Utilities.ModularIndex(i, data.Length)] = value;
+    }
+
+    /// <summary>
+    ///     Plays an AudioClip, and scales the AudioSource pitch randomly between the given bounds.
+    /// </summary>
+    /// <param name="audioClip">
+    ///     The clip to play.
+    /// </param>
+    /// <param name="pitchMinimum">
+    ///     The minimum pitch that the AudioClip can play at.
+    /// </param>
+    /// <param name="pitchMaximum">
+    ///     The maximum pitch that the AudioClip can play at.
+    /// </param>
+    public static void PlayRandomPitchOneShot(this AudioSource audioSource, AudioClip audioClip, float pitchMinimum = 1f, float pitchMaximum = 1f)
+    {
+        if (audioClip == null) return;
+        
+        float originalPitch = audioSource.pitch;
+        audioSource.pitch = Random.Range(pitchMinimum, pitchMaximum);
+
+        audioSource.PlayOneShot(audioClip);
+        
+        audioSource.pitch = originalPitch;
+    }
+
+    public static void DelayedExecute(this MonoBehaviour monoBehaviour, float delay, Action action)
+    {
+        if (delay > 0)
+        {
+            monoBehaviour.StartCoroutine(DelayedExecuteHelper(monoBehaviour, delay, action));
+        }
+        else
+        {
+            action.Invoke();
+        }
+    }
+
+    private static IEnumerator DelayedExecuteHelper(MonoBehaviour monoBehaviour, float delay, Action action)
+    {
+        yield return new WaitForSeconds(delay);
+        monoBehaviour.DelayedExecute(0, action);
     }
 }
 
@@ -348,5 +399,12 @@ class Utilities : MonoBehaviour
     {
         i %= m;
         return i < 0 ? i + m : i;
+    }
+
+    public static AudioClip LoadAudioClip(string name)
+    {
+        if (name.Length == 0) return null;
+
+        return Resources.Load("Sounds/" + name, typeof(AudioClip)) as AudioClip;
     }
 }
