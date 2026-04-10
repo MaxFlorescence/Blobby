@@ -27,9 +27,9 @@ public class BlobController : MonoBehaviour, Controllable
     private int numAtoms;
     private AtomController[] atomControllers;
     /// <summary>
-    ///     Stores the blob's spring length factor to restore after overrides.
+    ///     Holds the blob's spring length factor constant.
     /// </summary>
-    private float savedSpringFactor = 1f;
+    private bool springsLocked = false;
     /// <summary>
     ///     The factor by which the blob can grow from its original size.
     /// </summary>
@@ -324,6 +324,19 @@ public class BlobController : MonoBehaviour, Controllable
             if (Input.GetKeyUp(KeyCode.LeftShift))
             {
                 SetStickyMode(false);
+            }
+
+            if (Input.GetMouseButton(0)) // left mouse shrinks
+            {
+                TrySetSpringLengths(blobShrinkingFactor);
+            }
+            else if (Input.GetMouseButton(1)) // right mouse grows
+            {
+                TrySetSpringLengths(blobGrowingFactor);
+            }
+            else
+            {
+                TrySetSpringLengths();
             }
         }
     }
@@ -628,25 +641,6 @@ public class BlobController : MonoBehaviour, Controllable
     }
 
     /// <summary>
-    ///     Force the blob's spring length factor to be <tt>factor</tt>. The current factor can be
-    ///     can be restored with <tt>RestoreSpringLengths()</tt>.
-    /// </summary>
-    public void OverrideSpringLengths(float factor)
-    {
-        savedSpringFactor = createBlob.GetSpringLengthFactor();
-        createBlob.SetSpringLengthFactor(factor);
-    }
-
-    /// <summary>
-    ///     Restore the blob's spring length factor to the value previously saved by
-    ///     <tt>OverrideSpringLengths()</tt>.
-    /// </summary>
-    public void RestoreSpringLengths()
-    {
-        createBlob.SetSpringLengthFactor(savedSpringFactor);
-    }
-
-    /// <summary>
     ///     Enable/disable gravity for the blob character.
     /// </summary>
     /// <param name="gravity">
@@ -671,23 +665,7 @@ public class BlobController : MonoBehaviour, Controllable
     /// </param>
     public void SetMovementInputEnabled(bool enabled, float delay = 0f)
     {
-        if (delay > 0)
-        {
-            StartCoroutine(DelayedSetMovementInputEnabled(enabled, delay));
-        }
-        else
-        {
-            movementInputEnabled = enabled;
-        }
-    }
-
-    /// <summary>
-    ///     Helper function for SetInputEnabled to incorporate a delay.
-    /// </summary>
-    private IEnumerator DelayedSetMovementInputEnabled(bool enabled, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        SetMovementInputEnabled(enabled);
+        this.DelayedExecute(delay, () => {movementInputEnabled = enabled;});
     }
 
     /// <summary>
@@ -814,6 +792,19 @@ public class BlobController : MonoBehaviour, Controllable
                 Unstick(i);
             }
         }
+    }
+    
+    public void LockSprings(bool enabled)
+    {
+        springsLocked = enabled;
+    }
+
+    public bool TrySetSpringLengths(float factor = 1f, bool immediately = false)
+    {
+        if (springsLocked || createBlob.GetSpringLengthFactor() == factor) return false;
+        
+        createBlob.SetSpringLengthFactor(factor, immediately);
+        return true;
     }
     
     /// <summary>

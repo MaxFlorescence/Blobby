@@ -479,7 +479,7 @@ public class CreateBlob : MonoBehaviour
     /// <param name="factor">
     ///     The new spring length factor.
     /// </param>
-    public void SetSpringLengthFactor(float factor = 1)
+    public void SetSpringLengthFactor(float factor = 1, bool immediately = false)
     {
         springLengthFactor = factor;
         for (int i = 0; i < NUM_SPRINGS; i++)
