@@ -115,7 +115,7 @@ public class BlobController : MonoBehaviour, Controllable
     //----------------------------------------------------------------------------------------------
     // Ghost mode
     //----------------------------------------------------------------------------------------------
-    private bool ghostMode = false;
+    public bool ghostMode { get; private set; } = false;
     private float ghostSpeed = 0.5f;
 
     void Awake()
@@ -437,21 +437,7 @@ public class BlobController : MonoBehaviour, Controllable
     public void ToggleGhostMode()
     {
         ghostMode = !ghostMode;
-
-        if (ghostMode) {
-            SetColliders(false);
-            SetMovementInputEnabled(false);
-            SetStickyMode(false);
-            SetGravity(false);
-            OverrideSpringLengths(1f);
-            ApplyForces(Vector3.zero, Vector3.zero, false);
-            StopMovement();
-        } else {
-            SetColliders(true);
-            SetGravity(true);
-            SetMovementInputEnabled(true, 0.5f);
-            RestoreSpringLengths();
-        }
+        SetRestrained(ghostMode);
     }
 
     /// <summary>
@@ -527,6 +513,25 @@ public class BlobController : MonoBehaviour, Controllable
         }
     }
 
+    public void SetRestrained(bool enabled, float springOverrideFactor = 1f)
+    {
+        SetMovementInputEnabled(!enabled, enabled ? 0 : 0.5f);
+        SetGravity(!enabled);
+        if (enabled)
+        {
+            SetColliders(false);
+            SetStickyMode(false);
+            StopMovement();
+            createBlob.SetSpringLengthFactor(springOverrideFactor, true);
+        }
+        else
+        {
+            SetColliders(true, 0.1f);
+        }
+        LockSprings(enabled);
+        HoldCenterAtom(enabled);
+    }
+
     /// <summary>
     ///     Set the blob character's velocity to zero.
     /// </summary>
@@ -536,6 +541,7 @@ public class BlobController : MonoBehaviour, Controllable
         {
             atom.SetVelocity(Vector3.zero);
         }
+        ApplyForces(Vector3.zero, Vector3.zero, false);
     }
 
     /// <summary>
@@ -547,14 +553,9 @@ public class BlobController : MonoBehaviour, Controllable
     public void HoldCenterAtom(bool hold)
     {
         Rigidbody centerAtomRigidbody = centerAtom.GetComponent<Rigidbody>();
-        if (hold)
-        {
-            centerAtomRigidbody.constraints = RigidbodyConstraints.FreezePosition;
-        }
-        else
-        {
-            centerAtomRigidbody.constraints = RigidbodyConstraints.None;
-        }
+        centerAtomRigidbody.constraints = hold ?
+            RigidbodyConstraints.FreezePosition :
+            RigidbodyConstraints.None;
     }
 
     /// <summary>
@@ -654,12 +655,15 @@ public class BlobController : MonoBehaviour, Controllable
     /// <param name="enable">
     ///     Enables atom colliders iff this is <tt>True</tt>.
     /// </param>
-    public void SetColliders(bool enabled)
+    public void SetColliders(bool enabled, float delay = 0)
     {
-        foreach (GameObject atom in createBlob.GetAtoms())
+        this.DelayedExecute(delay, () =>
         {
-            atom.GetComponent<AtomController>().SetCollider(enabled);
-        }
+            foreach (GameObject atom in createBlob.GetAtoms())
+            {
+                atom.GetComponent<AtomController>().SetCollider(enabled);
+            }
+        });
     }
 
     public void SetAtomsVisible(bool visible)
