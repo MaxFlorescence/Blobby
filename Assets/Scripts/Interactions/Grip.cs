@@ -14,30 +14,22 @@ public enum GripState
 /// </summary>
 public class Grip : Interactable
 {
-    // PUBLIC MEMBERS
-    /// <summary>
-    ///     The multiplier for the object's scale once it is grabbed.
-    /// </summary>
-    public float finalScaleFactor = 0.5f;
+    //----------------------------------------------------------------------------------------------
+    // Audio
+    //----------------------------------------------------------------------------------------------
+    protected AudioSource audioSource;
     /// <summary>
     ///    The sound played when the object is grabbed.
     /// </summary>
-    public AudioClip gripSound;
+    public AudioClip gripAudioClip;
     /// <summary>
-    ///    The range of possible pitches for <tt>gripSound</tt>.
+    ///    The range of possible pitches for <tt>gripAudioClip</tt>.
     /// </summary>
     public Vector2 randomPitchBounds = new(0.8f, 1.2f);
-    /// <summary>
-    ///    The factor by which a blob's motion affects the object's spin while grabbed.
-    /// </summary>
-    public float spinFactor = 0.5f;
-    /// <summary>
-    ///    The cost of carrying the object, charged to a blob's carrying capacity.
-    /// </summary>
-    public int burden = 1;
 
-    // PRIVATE MEMBERS
+    //----------------------------------------------------------------------------------------------
     // Movement
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     Minimum fraction of the remaining distance that the object moves towards the blob
     ///     during each physics update.
@@ -51,8 +43,18 @@ public class Grip : Interactable
     ///     The starting distance between the blob and the grabbed object.
     /// </summary>
     private float initialDistance = -1;
+    /// <summary>
+    ///    The factor by which the <tt>currentHolder</tt>'s motion affects the object's spin while grabbed.
+    /// </summary>
+    public float spinFactor = 0.5f;
 
+    //----------------------------------------------------------------------------------------------
     // Scaling
+    //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The multiplier for the object's scale once it is grabbed.
+    /// </summary>
+    public float finalScaleFactor = 0.5f;
     /// <summary>
     ///    The current multiplier for the object's scale, between finalScale and 1.
     /// </summary>
@@ -62,7 +64,9 @@ public class Grip : Interactable
     /// </summary>
     private Vector3 initialScale;
 
+    //----------------------------------------------------------------------------------------------
     // Cooldown
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The duration of the grabbing cooldown period.
     /// </summary>
@@ -72,7 +76,9 @@ public class Grip : Interactable
     /// </summary>
     private float cooldownScaleDuration = 0.5f;
 
+    //----------------------------------------------------------------------------------------------
     // State
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The current state of the gripped object.
     /// </summary>
@@ -80,26 +86,26 @@ public class Grip : Interactable
     /// <summary>
     ///    The blob character currently grabbing this object, or null if none.
     /// </summary>
-    private BlobController grabbedBy;
+    private Inventory currentHolder;
+    private Inventory lastHolder;
     private bool isIgnoringAtomCollisions = false;
+    /// <summary>
+    ///    The cost of carrying the object, charged to <tt>currentHolder</tt>'s carrying capacity.
+    /// </summary>
+    public int burden = 1;
 
+    //----------------------------------------------------------------------------------------------
     // Components
+    //----------------------------------------------------------------------------------------------
     private Collider[] gripColliders;
     private Rigidbody gripRigidbody;
-    protected AudioSource audioSource;
 
     protected virtual void Start()
     {
         gripColliders = GetComponentsInChildren<Collider>();
         gripRigidbody = GetComponent<Rigidbody>();
         audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.volume = 0.8f;
         initialScale = transform.localScale;
-
-        if (gripSound == null)
-        {
-            gripSound = Resources.Load("Sounds/bubbles", typeof(AudioClip)) as AudioClip;
-        }
     }
 
     /// <summary>
@@ -107,38 +113,42 @@ public class Grip : Interactable
     /// </summary>
     public void FixedUpdate()
     {
-        if (GameInfo.GameStatus != GameState.PAUSED)
+        if (GameInfo.GameStatus == GameState.PAUSED) return;
+
+        if (gripState == GripState.Grabbing)
         {
-            if (gripState == GripState.Grabbing)
-            {
-                Vector3 translation = grabbedBy.transform.position - transform.position;
-                float distance = translation.magnitude;
+            HandleGrabbingUpdate();
+        }
+        else if (gripState == GripState.Held)
+        {
+            transform.position = currentHolder.GetDisplayPosition();
+            gripRigidbody.AddTorque(spinFactor * Vector3.Cross(
+                Vector3.up, currentHolder.rigidBody.velocity
+            ));
+        }
+    }
 
-                ShrinkByDistance(distance);
+    private void HandleGrabbingUpdate()
+    {
+        Vector3 translation = currentHolder.GetDisplayPosition() - transform.position;
+        float distance = translation.magnitude;
 
-                if (distance > grabbingDistance)
-                {
-                    float move = Mathf.Max(grabbingDistance, movementFactor * distance);
-                    transform.Translate(move * translation.normalized, relativeTo: Space.World);
-                }
-                else
-                {
-                    if (grabbedBy.TryToGrab(gameObject))
-                    {
-                        gripState = GripState.Held;
-                        SetScale(finalScaleFactor);
-                    }
-                    else
-                    {
-                        Release();
-                    }
-                }
-            }
-            else if (gripState == GripState.Held)
-            {
-                transform.position = grabbedBy.transform.position;
-                gripRigidbody.AddTorque(spinFactor * Vector3.Cross(Vector3.up, grabbedBy.GetVelocity()));
-            }
+        ShrinkByDistance(distance);
+
+        if (distance > grabbingDistance)
+        { // move this toward the current holder
+            float move = Mathf.Max(grabbingDistance, movementFactor * distance);
+            transform.Translate(move * translation.normalized, Space.World);
+        }
+        else if (currentHolder.TryToAdd(gameObject) >= 0)
+        { // in range of the current holder; have it try to pick this up
+            UpdateState(GripState.Held);
+            SetScale(finalScaleFactor);
+        }
+        else
+        { // pick up failed; try to go back to the last holder, else be dropped
+            currentHolder = null;
+            if (lastHolder == null || !TryJoin(lastHolder)) GetDropped();
         }
     }
 
@@ -147,7 +157,7 @@ public class Grip : Interactable
     /// </summary>
     protected override void OnUpdate()
     {
-        if (gripState == GripState.Releasing) // && CoolingDown() // iff GripState.Releasing
+        if (gripState == GripState.Releasing)
         {
             GrowByCooldown();
         }
@@ -161,52 +171,74 @@ public class Grip : Interactable
     /// </param>
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.IsHolding(null) && blob.IsSticky() && blob.CanCarry(burden))
+        if (!blob.inventory.IsFull() && blob.IsSticky() && blob.inventory.CanFit(burden))
         {
-            GrabBy(blob);
+            TryJoin(blob.inventory);
         }
     }
 
-    protected void GrabBy(BlobController blob)
+    public bool TryJoin(Inventory inventory)
     {
-        initialDistance = (blob.transform.position - transform.position).magnitude;
-        grabbedBy = blob;
+        // transfer between inventories if necessary
+        if (!inventory.CanFit(burden) ||
+            (currentHolder != null && currentHolder.TryToRemove(gameObject) == null)) 
+        {
+            return false;
+        }
 
-        foreach (Collider collider in gripColliders) {
+        lastHolder = currentHolder;
+        currentHolder = inventory;
+        initialDistance = (currentHolder.GetDisplayPosition() - transform.position).magnitude;
+
+        foreach (Collider collider in gripColliders)
+        {
             collider.isTrigger = true;
         }
         gripRigidbody.useGravity = false;
 
-        gripState = GripState.Grabbing;
+        UpdateState(GripState.Grabbing);
 
-        audioSource.pitch = Random.Range(randomPitchBounds.x, randomPitchBounds.y);
-        audioSource.PlayOneShot(gripSound);
+        audioSource.PlayRandomPitchOneShot(gripAudioClip, randomPitchBounds);
         SetInteractionEnabled(false);
+
+        return true;
     }
 
     /// <summary>
     ///     Public interface for releasing the object.
     /// </summary>
-    public void Release()
+    public bool TryLeaveInventory(bool skipCooldown = false, Vector3? exitPosition = null, Vector3? exitImpulse = null)
     {
-        gameObject.SetLayer(Utilities.IGNORE_CAMERA_LAYER);
-        StartInteractionCooldown(maxCooldown);
+        if (currentHolder == null || currentHolder.TryToRemove(gameObject) == null) return false;
+
+        GetDropped(skipCooldown, exitPosition, exitImpulse);
+        return true;
     }
 
-    /// <summary>
-    ///    Start the releasing process, which lasts for the cooldown.
-    /// </summary>
-    protected override void OnInteractionCooldownStart()
+    public void GetDropped(bool skipCooldown = false, Vector3? exitPosition = null, Vector3? exitImpulse = null)
     {
-        grabbedBy = null;
-        IgnoreAtomCollisions(true);
+        lastHolder = currentHolder;
+        currentHolder = null;
         initialDistance = -1;
-        
-        foreach (Collider collider in gripColliders) {
+
+        IgnoreAtomCollisions(true);
+        foreach (Collider collider in gripColliders)
+        {
             collider.isTrigger = false;
         }
         gripRigidbody.useGravity = true;
-        gripState = GripState.Releasing;
+
+        UpdateState(GripState.Releasing);
+
+        if (exitPosition != null) transform.position = (Vector3)exitPosition;
+        if (exitImpulse != null) gripRigidbody.AddForce((Vector3)exitImpulse, ForceMode.Impulse);
+
+        StartInteractionCooldown(skipCooldown ? 0.1f : maxCooldown);
+    }
+
+    protected override void OnInteractionCooldownStart()
+    {
+        gameObject.SetLayer(Utilities.IGNORE_CAMERA_LAYER);
     }
 
     /// <summary>
@@ -221,14 +253,19 @@ public class Grip : Interactable
             foreach (Collider collider in gripColliders) {
                 if (collider.bounds.Intersects(atom.GetComponent<Collider>().bounds))
                 {
-                    Release();
+                    StartInteractionCooldown(maxCooldown);
                     return;
                 }
             }
         }
 
-        gameObject.SetLayer(Utilities.DEFAULT_LAYER);
-        gripState = GripState.Idle;
+        BecomeIdle();
+    }
+
+    private void BecomeIdle()
+    {
+        UpdateState(GripState.Idle);
+        SetScale(1);
         IgnoreAtomCollisions(false);
     }
 
@@ -246,8 +283,9 @@ public class Grip : Interactable
         GameObject[] atoms = GameObject.FindGameObjectsWithTag("Atom");
         foreach (GameObject atom in atoms)
         {
+            Collider atomCollider = atom.GetComponent<Collider>();
             foreach (Collider collider in gripColliders) {
-                Physics.IgnoreCollision(collider, atom.GetComponent<Collider>(), ignore);
+                Physics.IgnoreCollision(collider, atomCollider, ignore);
             }
         }
         isIgnoringAtomCollisions = ignore;
@@ -262,20 +300,12 @@ public class Grip : Interactable
     /// </param>
     private void ShrinkByDistance(float dist)
     {
-        float scale = dist * (1 - finalScaleFactor) / initialDistance + finalScaleFactor;
-        if (scale < 0)
-        {
-            scale = 0;
-        }
-        if (scale > 1)
-        {
-            scale = 1;
-        }
+        float scale = Utilities.Clamp(
+            dist * (1 - finalScaleFactor) / initialDistance + finalScaleFactor,
+            0, 1
+        );
 
-        if (currentScaleFactor > scale)
-        {
-            SetScale(scale);
-        }
+        if (currentScaleFactor > scale) SetScale(scale);
     }
 
     private void SetScale(float scale) {
@@ -289,21 +319,24 @@ public class Grip : Interactable
     /// </summary>
     private void GrowByCooldown()
     {
-        float scale = finalScaleFactor + (cooldownTime - maxCooldown) * (finalScaleFactor - 1) / cooldownScaleDuration;
-        if (scale < 0)
-        {
-            scale = 0;
-        }
-        if (scale > 1)
-        {
-            scale = 1;
-        }
+        float scale = Utilities.Clamp(
+            finalScaleFactor + (cooldownTime - maxCooldown) * (finalScaleFactor - 1) / cooldownScaleDuration,
+            0, 1
+        );
 
         if (currentScaleFactor < scale)
         {
             transform.localScale = scale * initialScale;
             currentScaleFactor = scale;
         }
+    }
+
+    private void UpdateState(GripState newState)
+    {
+        if (newState != GripState.Held)
+            gameObject.SetLayer(Utilities.DEFAULT_LAYER);
+
+        gripState = newState;
     }
 
     public override string ToString()

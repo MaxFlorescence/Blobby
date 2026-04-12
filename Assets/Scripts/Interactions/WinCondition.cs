@@ -22,7 +22,7 @@ public class WinCondition : Interactable
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.HoldingObjectWithTag("Flag"))
+        if (blob.inventory.ContainsObjectWithTag("Flag"))
         {
             fanfare.Play();
             finishMenu.hasWon = true;

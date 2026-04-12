@@ -158,18 +158,15 @@ public static class Extensions
     /// <param name="audioClip">
     ///     The clip to play.
     /// </param>
-    /// <param name="pitchMinimum">
-    ///     The minimum pitch that the AudioClip can play at.
+    /// <param name="pitchBounds">
+    ///     The minimum and maximum pitches that the AudioClip can play at.
     /// </param>
-    /// <param name="pitchMaximum">
-    ///     The maximum pitch that the AudioClip can play at.
-    /// </param>
-    public static void PlayRandomPitchOneShot(this AudioSource audioSource, AudioClip audioClip, float pitchMinimum = 1f, float pitchMaximum = 1f)
+    public static void PlayRandomPitchOneShot(this AudioSource audioSource, AudioClip audioClip, Vector2? pitchBounds = null)
     {
         if (audioClip == null) return;
         
         float originalPitch = audioSource.pitch;
-        audioSource.pitch = Random.Range(pitchMinimum, pitchMaximum);
+        audioSource.pitch = Random.Range(pitchBounds?.x ?? 1, pitchBounds?.y ?? 1);
 
         audioSource.PlayOneShot(audioClip);
         

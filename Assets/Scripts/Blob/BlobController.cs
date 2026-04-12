@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -67,24 +66,18 @@ public class BlobController : MonoBehaviour, Controllable
     /// <summary>
     ///     The list of gameObjects carried by the blob.
     /// </summary>
-    private GameObject[] inventory;
-    /// <summary>
-    ///     Which inventory object is currently selected.
-    /// </summary>
-    private int inventorySelection = 0;
+    public Inventory inventory;
     /// <summary>
     ///     How much burden the blob can carry in its inventory.
     /// </summary>
     private const int CARRYING_CAPACITY = 10;
     /// <summary>
-    ///     The current burden the blob is carrying.
+    ///     The camera providing an image of the inventory display to the UI.
     /// </summary>
-    private int currentBurden = 0;
-    /// <summary>
-    ///     The sound to play when releasing an object.
-    /// </summary>
-    private AudioClip releaseSound;
     private Camera inventoryCamera;
+    /// <summary>
+    ///     How far away the inventory camera is from the inventory display position.
+    /// </summary>
     private float inventoryCameraDistance = 2f;
 
     //----------------------------------------------------------------------------------------------
@@ -106,6 +99,18 @@ public class BlobController : MonoBehaviour, Controllable
     ///     Makes squishy noises on collisions.
     /// </summary>
     private Squisher squisher;
+    /// <summary>
+    ///     The sound to play when obtaining an object.
+    /// </summary>
+    private const string PICK_UP_SOUND = "bubbles";
+    /// <summary>
+    ///     The sound to play when releasing an object.
+    /// </summary>
+    private const string DROP_SOUND = "bubble_pop";
+    /// <summary>
+    ///     The lowest and highest pitch to play inventory sounds at.
+    /// </summary>
+    private readonly Vector2 INVENTORY_PITCH_BOUNDS = new(0.8f, 1.2f);
     
     //----------------------------------------------------------------------------------------------
     // Ghost mode
@@ -125,6 +130,9 @@ public class BlobController : MonoBehaviour, Controllable
         Destroy(sphere);
 
         audioSource = gameObject.AddComponent<AudioSource>();
+        inventory = gameObject.AddComponent<Inventory>();
+        inventory.SetCapacity(CARRYING_CAPACITY);
+        inventory.SetDisplayMode(DisplayMode.UI);
     }
 
     void Start()
@@ -141,7 +149,6 @@ public class BlobController : MonoBehaviour, Controllable
         }
         atomControllers[0].GetComponent<AtomController>().SetAsCenterAtom(true);
 
-        inventory = new GameObject[CARRYING_CAPACITY];
         inventoryCamera = transform.parent.GetComponentsInChildren<Camera>()[0];
         inventoryCamera.enabled = true;
 
@@ -162,7 +169,7 @@ public class BlobController : MonoBehaviour, Controllable
         squisher = centerAtom.AddComponent<Squisher>();
         squisher.audioSource = audioSource;
         
-        releaseSound = Resources.Load("Sounds/bubble_pop", typeof(AudioClip)) as AudioClip;
+        inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
     }
     
     /// <summary>
@@ -290,13 +297,13 @@ public class BlobController : MonoBehaviour, Controllable
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Release();
+            inventory.TryDrop();
         }
 
         float mouseScroll = Input.mouseScrollDelta.y;
         if (mouseScroll != 0)
         {
-            SelectNextNonEmptyObject(mouseScroll > 0);
+            inventory.SelectNextNonEmptyObject(mouseScroll > 0);
         }
 
         if (movementInputEnabled)
@@ -304,18 +311,6 @@ public class BlobController : MonoBehaviour, Controllable
             if (Input.GetButtonDown("Jump"))
             {
                 jumpOnNextFixedUpdate = true;
-            }
-            if (Input.GetMouseButtonDown(0)) // left mouse shrinks
-            {
-                createBlob.SetSpringLengthFactor(blobShrinkingFactor);
-            }
-            if (Input.GetMouseButtonDown(1)) // right mouse grows
-            {
-                createBlob.SetSpringLengthFactor(blobGrowingFactor);
-            }
-            if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
-            {
-                createBlob.SetSpringLengthFactor();
             }
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
@@ -346,8 +341,9 @@ public class BlobController : MonoBehaviour, Controllable
     /// </summary>
     private void MoveInventoryCamera()
     {
-        Transform targetTransform = inventory[inventorySelection] != null ?
-            inventory[inventorySelection].transform : transform;
+        GameObject inventorySelection = inventory.GetObject();
+        Transform targetTransform = inventorySelection != null ?
+            inventorySelection.transform : transform;
         inventoryCamera.transform.position = targetTransform.position + inventoryCameraDistance * Vector3.back;
         inventoryCamera.transform.LookAt(targetTransform);
     }
@@ -432,161 +428,6 @@ public class BlobController : MonoBehaviour, Controllable
             if (atom == atomStickies[i]) return i;
         }
         return -1;
-    }
-
-    /// <summary>
-    ///     Select the subsequent inventory object based on what object was previously selected.
-    /// </summary>
-    /// <param name="forward">
-    ///     If <tt>True</tt>, select the first index found by 
-    /// </param>
-    private void SelectNextNonEmptyObject(bool forward)
-    {
-        if (currentBurden == 0) 
-            return;
-
-        for (int i = 1; i < CARRYING_CAPACITY; i++)
-        {
-            int index = (CARRYING_CAPACITY + inventorySelection + (forward ? i : -i)) % CARRYING_CAPACITY;
-            if (inventory[index] != null)
-            {
-                SelectInventoryObject(index);
-                return;
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Set the blob's selected item to be the one at the given index.
-    /// </summary>
-    /// <param name="i">
-    ///     The index in the blob's inventory to select.
-    /// </param>
-    private void SelectInventoryObject(int i)
-    {
-        if (inventory[inventorySelection] != null) {
-            inventory[inventorySelection].SetLayer(Utilities.INVISIBLE_LAYER);
-        }
-        if (inventory[i] != null) {
-            inventory[i].SetLayer(Utilities.INVENTORY_UI_LAYER);
-        }
-        inventorySelection = i;
-    }
-
-    /// <summary>
-    ///     Determine if the blob has a high enough carrying capacity to add the given item to its
-    ///     inventory.
-    /// </summary>
-    /// <param name="burden">
-    ///     The burden of the item to add to the blob's inventory.
-    /// </param>
-    /// <returns>
-    ///     <tt>True</tt> iff the blob can carry the additional burden.
-    /// </returns>
-    public bool CanCarry(int burden)
-    {
-        return currentBurden + burden <= CARRYING_CAPACITY;
-    }
-
-    /// <summary>
-    ///     Tests if the blob has the given object in its inventory.
-    /// </summary>
-    /// <param name="obj">
-    ///     The object to test for.
-    /// </param>
-    /// <returns>
-    ///     <tt>True</tt> iff the blob has the object.
-    /// </returns>
-    public bool IsHolding(GameObject obj)
-    {
-        if (currentBurden == 0)
-            return obj == null;
-
-        for (int i = 0; i < CARRYING_CAPACITY; i++) {
-            if (inventory[i] == obj)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///    Return a boolean indicating if the blob character is holding an object with the specified
-    ///     tag.
-    /// </summary>
-    /// <param name="tag">
-    ///     The tag to check for.
-    /// </param>
-    /// <returns>
-    ///     <tt>true</tt> iff the held object has the tag.
-    /// </returns>
-    public bool HoldingObjectWithTag(string tag)
-    {
-        if (currentBurden == 0)
-            return false;
-
-        for (int i = 0; i < CARRYING_CAPACITY; i++) {
-            if (inventory[i] != null && inventory[i].CompareTag(tag))
-            {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-    /// <summary>
-    ///     Attempt to grab the game object and keep it held by the blob character.
-    ///     This can fail if another object is being held, if the object refuses to be grabbed,
-    ///     or if the object does not have a Grip component.
-    /// </summary>
-    /// <param name="obj">
-    ///     The GameObject that the blob character will try to grab.
-    /// </param>
-    /// <returns>
-    ///     <tt>true</tt> iff the object was successfully grabbed.
-    /// </returns>
-    public bool TryToGrab(GameObject obj)
-    {
-        int objectBurden = obj.GetComponent<Grip>().burden;
-        
-        if (CanCarry(objectBurden)) {
-            for (int i = 0; i < CARRYING_CAPACITY; i++) {
-                if (inventory[i] == null)
-                {
-                    inventory[i] = obj;
-                    obj.SetLayer(Utilities.INVENTORY_UI_LAYER);
-                    currentBurden += objectBurden;
-                    SelectInventoryObject(i);
-                    return true;
-                }
-            }
-        }
-
-        audioSource.pitch = Random.Range(0.8f, 1.2f);
-        audioSource.PlayOneShot(releaseSound);
-        return false;
-    }
-
-    /// <summary>
-    ///     Release the currently selected inventory object.
-    /// </summary>
-    public void Release()
-    {
-        if (currentBurden == 0)
-            return;
-
-        if (inventory[inventorySelection] != null)
-        {
-            inventory[inventorySelection].GetComponent<Grip>().Release();
-            currentBurden -= inventory[inventorySelection].GetComponent<Grip>().burden;
-        }
-        inventory[inventorySelection] = null;
-        SelectNextNonEmptyObject(true);
-        audioSource.pitch = Random.Range(0.8f, 1.2f);
-        audioSource.PlayOneShot(releaseSound);
     }
 
 /// <summary>
@@ -889,17 +730,11 @@ public class BlobController : MonoBehaviour, Controllable
 
     public override string ToString()
     {
-        string inventoryString = "";
-        for (int i = 0; i < CARRYING_CAPACITY; i++)
-        {
-            inventoryString += $"  {(inventorySelection == i ? ">" : " ")}{i}: {(inventory[i] == null ? "null" : inventory[i].GetComponent<Grip>())}\n";
-        }
-
         return $"BlobController: {name}\n"
         + $" ghostMode: {ghostMode}\n"
         + $" blobMaterials: {blobMaterials} ({blobMaterials.GetProperties()})\n"
         + $" stickyMode: {stickyMode}\n"
         + $" touchingSomething: {IsTouching()}\n"
-        + $" inventory: (currentBurden: {currentBurden})\n{inventoryString}";
+        + $" inventory: {inventory}";
     }
 }

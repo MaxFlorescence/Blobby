@@ -180,7 +180,7 @@ public class AtomController : MonoBehaviour
                     interactableObj.Interact(blobController);
                 }
 
-                if (!blobController.IsHolding(obj))
+                if (!blobController.inventory.Contains(obj))
                 { // don't count grabbed objects as touching
                     touching.Add(obj);
                 }
