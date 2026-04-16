@@ -98,26 +98,30 @@ public class Cannon : Interactable, Controllable
     }
 
     /// <summary>
-    ///    Rotate the cannon and check for input to fire or cancel.
+    ///     Keep the loaded blob in the ammo position, and if it enters ghost mode then eject it.
+    ///     Also handle controls for rotating the cannon and checking for input to fire or eject.
     /// </summary>
     protected override void OnUpdate()
     {
-        if (blob != null && blob.ghostMode)
+        if (blob != null)
         {
-            StartInteractionCooldown(0.5f);
-            controlled = false;
-            blob.SetControlCanRelease(true);
-            gameObject.SetLayer(Utilities.DEFAULT_LAYER);
-            blob = null;   
-        }
+            blob.Teleport(ammoPlaceholder.position);
 
-        if (blob != null) blob.Teleport(ammoPlaceholder.position);
+            if (blob.ghostMode) {
+                StartInteractionCooldown(0.5f);
+                controlled = false;
+                blob.SetControlCanRelease(true);
+                gameObject.SetLayer(Utilities.DEFAULT_LAYER);
+                blob = null;   
+            }
+        }
 
         if (!controlled) return;
         
         float verticalInput = Input.GetAxis("Vertical");
         if (verticalInput != 0) AimBarrel(verticalInput * angularSpeedFactor);
 
+        // use a cooldown timer between loading / unloading tasks
         if (!controlCooldownTimer.Update(reset: false)) return;
 
         if (Input.GetKeyDown(KeyCode.Q))
@@ -144,7 +148,7 @@ public class Cannon : Interactable, Controllable
     }
 
     /// <summary>
-    ///     Insert the interacting blob into the cannon and keep it still.
+    ///     Insert the interacting blob into the cannon and keep the cannon stable.
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
@@ -165,7 +169,7 @@ public class Cannon : Interactable, Controllable
     }
 
     /// <summary>
-    ///    Fire the ammo or blob out of the cannon in the direction the cannon is facing.
+    ///    Fire the ammo or blob out of the cannon in the direction the cannon barrel is facing.
     /// </summary>
     public void Fire()
     {
@@ -197,6 +201,20 @@ public class Cannon : Interactable, Controllable
         RemoveBlob(worldEjectPosition, cancelForce);
     }
 
+    /// <summary>
+    ///     Remove the loaded blob from the cannon and place it at the given exit position, imparted
+    ///     with the given exit force. Also stop keeping the cannon stable and reset the barrel
+    ///     angle if necessary.
+    /// </summary>
+    /// <param name="exitPosition">
+    ///     The position at which the blob will exit the cannon.
+    /// </param>
+    /// <param name="exitForce">
+    ///     The force with which the blob will exit the cannon.
+    /// </param>
+    /// <param name="resetAngle">
+    ///     If <tt>true</tt>, reset the angle of the cannon's barrel.
+    /// </param>
     private void RemoveBlob(Vector3 exitPosition, Vector3 exitForce, bool resetAngle = false)
     {
         if (resetAngle) AimBarrel();
@@ -215,11 +233,20 @@ public class Cannon : Interactable, Controllable
         AllowFreeRotation(true);
     }
 
+    /// <returns>
+    ///     The unit vector that points from the ammo position toward the muzzle position.
+    /// </returns>
     private Vector3 GetFireDirection()
     {
         return (muzzlePlaceholder.position - ammoPlaceholder.position).normalized;
     }
 
+    /// <summary>
+    ///     Adjust the position and rotation of the cannon to be upright on the ground.
+    /// </summary>
+    /// <param name="resetAngle">
+    ///     If <tt>true</tt>, reset the angle of the cannon's barrel.
+    /// </param>
     private void Reorient(bool resetAngle = false)
     {
         Vector3 aimDir = Vector3.ProjectOnPlane(
@@ -232,6 +259,13 @@ public class Cannon : Interactable, Controllable
         transform.Translate(Vector3.up * 0.1f);
     }
 
+    /// <summary>
+    ///     Rotate the cannon's barrel by the given degrees. Negative values result in upward
+    ///     rotation.
+    /// </summary>
+    /// <param name="angleDelta">
+    ///     The angle by which to rotate the barrel. Negative values result in upward rotation.
+    /// </param>
     private void AimBarrel(float angleDelta = 0)
     {
         if (angleDelta == 0) angleDelta = -angle;
@@ -243,6 +277,13 @@ public class Cannon : Interactable, Controllable
         }
     }
 
+    /// <summary>
+    ///     Update the constraints on the cannon's rigid body to limit or unlimit rotation in the X
+    ///     and Z planes.
+    /// </summary>
+    /// <param name="allow">
+    ///     Limit rotation iff this is <tt>true</tt>.
+    /// </param>
     private void AllowFreeRotation(bool allow)
     {
         cannonRigidBody.constraints = allow ?
