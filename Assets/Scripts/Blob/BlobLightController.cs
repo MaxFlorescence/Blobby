@@ -6,8 +6,8 @@ using System;
 /// </summary>
 public enum BlobLight
 {
-    InventoryIcon = 0,
-    MaterialGlow = 1
+    Inventory_Icon = 0,
+    Material_Glow = 1
 }
 
 /// <summary>

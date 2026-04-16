@@ -19,7 +19,7 @@ public class CreateBlob : MonoBehaviour
     // Parameters
     //----------------------------------------------------------------------------------------------
     /// <summary>
-    ///    TODO: id strings for multiplayer
+    ///    TODO: id strings for multiplayer?
     /// </summary>
     public const int BLOB_ID = 0;
     // TODO: can/should these be found automatically?
@@ -42,7 +42,7 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     How big each atom of the blob is.
     /// </summary>
-    private float atomScale = 0.5f;
+    private const float ATOM_SCALE = 0.5f;
     /// <summary>
     ///     Number of vertices in an icosahedron, plus 1 for the center point.
     /// </summary>
@@ -216,7 +216,7 @@ public class CreateBlob : MonoBehaviour
         atom.name = string.Format("Blob {0} Atom {1}", BLOB_ID, ID);
         atom.tag = "Atom";
 
-        atom.transform.localScale = atomScale * Vector3.one;
+        atom.transform.localScale = ATOM_SCALE * Vector3.one;
         atom.transform.position = position;
         atom.transform.SetParent(transform.parent);
 
@@ -529,6 +529,6 @@ public class CreateBlob : MonoBehaviour
         //     }
         // }
 
-        meshScale = 1f + atomScale/factor;
+        meshScale = 1f + ATOM_SCALE/factor;
     }
 }

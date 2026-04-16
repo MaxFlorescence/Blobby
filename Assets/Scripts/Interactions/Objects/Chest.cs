@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum ChestState
 {
-    Locked, Closed, OpenFull, OpenEmpty
+    Locked, Closed, Open_Full, Open_Empty
 }
 
 [RequireComponent(typeof(AudioSource))]
@@ -39,7 +39,7 @@ public class Chest : Grip
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.IsSticky() && chestState != ChestState.OpenFull)
+        if (blob.IsSticky() && chestState != ChestState.Open_Full)
         {
             base.OnInteract(blob);
         }
@@ -55,16 +55,16 @@ public class Chest : Grip
                     break;
                 case ChestState.Closed:
                     OpenCloseToggle();
-                    chestState = empty? ChestState.OpenEmpty : ChestState.OpenFull;
+                    chestState = empty? ChestState.Open_Empty : ChestState.Open_Full;
                     break;
-                case ChestState.OpenFull:
+                case ChestState.Open_Full:
                     if (blob.IsSticky()) {
                         Loot(blob);
-                        chestState = ChestState.OpenEmpty;
+                        chestState = ChestState.Open_Empty;
                         break;
                     }
-                    goto case ChestState.OpenEmpty;
-                case ChestState.OpenEmpty:
+                    goto case ChestState.Open_Empty;
+                case ChestState.Open_Empty:
                     OpenCloseToggle();
                     chestState = ChestState.Closed;
                     break;

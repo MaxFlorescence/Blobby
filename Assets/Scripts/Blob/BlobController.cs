@@ -157,8 +157,8 @@ public class BlobController : MonoBehaviour, Controllable
         inventoryCamera.enabled = true;
 
         Light[] lights = transform.parent.GetComponentsInChildren<Light>();
-        blobLightController.AddLight(BlobLight.MaterialGlow, lights[0], false);
-        blobLightController.AddLight(BlobLight.InventoryIcon, lights[1], false);
+        blobLightController.AddLight(BlobLight.Material_Glow, lights[0], false);
+        blobLightController.AddLight(BlobLight.Inventory_Icon, lights[1], false);
 
         SetBlobMaterials(BlobMaterials.Water);
 
@@ -517,6 +517,18 @@ public class BlobController : MonoBehaviour, Controllable
         }
     }
 
+    /// <summary>
+    ///     Restrain the blob to its current position, and override its spring lengths if necessary.
+    /// </summary>
+    /// <param name="enabled">
+    ///     Restrain the blob iff this is <tt>true</tt>.
+    /// </param>
+    /// <param name="springOverrideFactor">
+    ///     The spring factor to use while the blob is restrained.
+    /// </param>
+    /// <param name="delaySpringUnlock">
+    ///     The amount of time (in seconds) to delay before unlocking the blob's springs.
+    /// </param>
     public void SetRestrained(bool enabled, float springOverrideFactor = 1f, float delaySpringUnlock = 0f)
     {
         SetMovementInputEnabled(!enabled, enabled ? 0 : 0.5f);
@@ -646,6 +658,19 @@ public class BlobController : MonoBehaviour, Controllable
         springsLocked = enabled;
     }
 
+    /// <summary>
+    ///     Sets the spring lengths of the blob if they are unlocked. Otherwise does nothing.
+    /// </summary>
+    /// <param name="factor">
+    ///     The new spring length factor to use.
+    /// </param>
+    /// <param name="immediately">
+    ///     If <tt>true</tt>, force the blob's atoms to snap to their equilibrium positions
+    ///     immediately.
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the spring lengths were successfully updated.
+    /// </returns>
     public bool TrySetSpringLengths(float factor = 1f, bool immediately = false)
     {
         if (springsLocked || createBlob.GetSpringLengthFactor() == factor) return false;
@@ -689,7 +714,7 @@ public class BlobController : MonoBehaviour, Controllable
     {
         blobMaterials = newBlobMaterials;
 
-        blobLightController.SetLight(BlobLight.MaterialGlow, newBlobMaterials.HasProperty(MaterialProperties.Glowing), true);
+        blobLightController.SetLight(BlobLight.Material_Glow, newBlobMaterials.HasProperty(MaterialProperties.Glowing), true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
