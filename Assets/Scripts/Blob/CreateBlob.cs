@@ -481,6 +481,36 @@ public class CreateBlob : MonoBehaviour
     /// </param>
     public void SetSpringLengthFactor(float factor = 1, bool immediately = false)
     {
+        // For atoms that are separated from the center atom by an object, allow them to phase
+        // through temporarily. This gives the player a way to get unstuck in some situations.
+        if (springLengthFactor > factor)
+        {
+            Vector3 centerPosition = centerAtom.transform.position;
+            LayerMask layerMask = ~LayerMask.GetMask("Inventory UI", "Ignore Camera");
+
+            for (int i = 1; i < NUM_ATOMS; i++)
+            {
+                Vector3 atomPosition = blobAtoms[i].transform.position;
+                Vector3 differenceVector = centerPosition - atomPosition;
+                
+                bool hitSomething = Physics.Raycast(
+                    atomPosition,
+                    differenceVector.normalized,
+                    out RaycastHit hitInfo,
+                    differenceVector.magnitude,
+                    layerMask.value,
+                    QueryTriggerInteraction.Ignore
+                );
+
+                if (hitSomething)
+                {
+                    AtomController atomController = blobAtoms[i].GetComponent<AtomController>();
+                    atomController.SetCollider(false);
+                    this.DelayedExecute(0.5f, () => atomController.SetCollider(true));
+                }
+            }
+        }
+        
         springLengthFactor = factor;
         for (int i = 0; i < NUM_SPRINGS; i++)
         {
