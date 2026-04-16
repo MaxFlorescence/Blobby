@@ -79,6 +79,10 @@ public class BlobController : MonoBehaviour, Controllable
     ///     How far away the inventory camera is from the inventory display position.
     /// </summary>
     private float inventoryCameraDistance = 2f;
+    /// <summary>
+    ///     The player can cause the blob to drop a held object iff this is <tt>true</tt>.
+    /// </summary>
+    private bool controlCanRelease = true;
 
     //----------------------------------------------------------------------------------------------
     // Visuals
@@ -295,7 +299,7 @@ public class BlobController : MonoBehaviour, Controllable
         if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
             return;
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (controlCanRelease && Input.GetKeyDown(KeyCode.Q))
         {
             inventory.TryDrop();
         }
@@ -513,7 +517,7 @@ public class BlobController : MonoBehaviour, Controllable
         }
     }
 
-    public void SetRestrained(bool enabled, float springOverrideFactor = 1f)
+    public void SetRestrained(bool enabled, float springOverrideFactor = 1f, float delaySpringUnlock = 0f)
     {
         SetMovementInputEnabled(!enabled, enabled ? 0 : 0.5f);
         SetGravity(!enabled);
@@ -523,12 +527,13 @@ public class BlobController : MonoBehaviour, Controllable
             SetStickyMode(false);
             StopMovement();
             createBlob.SetSpringLengthFactor(springOverrideFactor, true);
+            LockSprings(true);
         }
         else
         {
             SetColliders(true, 0.1f);
+            this.DelayedExecute(delaySpringUnlock, () => LockSprings(false));
         }
-        LockSprings(enabled);
         HoldCenterAtom(enabled);
     }
 
@@ -714,6 +719,14 @@ public class BlobController : MonoBehaviour, Controllable
     }
 
     /// <summary>
+    ///     Enables/disables the blob's ability to release held objects from its inventory.
+    /// </summary>
+    public void SetControlCanRelease(bool canRelease)
+    {
+        controlCanRelease = canRelease;
+    }
+
+    /// <summary>
     ///     Sets the state of one of the blob's lights back to its default.
     /// </summary>
     /// <param name="blobLight">
@@ -738,6 +751,7 @@ public class BlobController : MonoBehaviour, Controllable
         + $" ghostMode: {ghostMode}\n"
         + $" blobMaterials: {blobMaterials} ({blobMaterials.GetProperties()})\n"
         + $" stickyMode: {stickyMode}\n"
+        + $" springFactor: {createBlob.GetSpringLengthFactor()}\n"
         + $" touchingSomething: {IsTouching()}\n"
         + $" inventory: {inventory}";
     }

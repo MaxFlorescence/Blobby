@@ -488,6 +488,17 @@ public class CreateBlob : MonoBehaviour
             springJoints[i].spring = factor * springForce;
         }
 
+        // TODO?
+        // if (immediately)
+        // {
+        //     for (int i = 0; i < NUM_SPRINGS; i++)
+        //     {
+        //         if (springJoints[i].connectedBody != centerAtom.GetComponent<Rigidbody>()) continue;
+                
+        //         springJoints[i].gameObject.transform.position = springJoints[i].connectedAnchor + centerAtom.transform.position;
+        //     }
+        // }
+
         meshScale = 1f + atomScale/factor;
     }
 }
