@@ -315,14 +315,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bd9e78a546433e42889e471b7a6f57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  finalScaleFactor: 0.33
-  gripSound: {fileID: 0}
+  gripAudioClip: {fileID: 0}
   randomPitchBounds: {x: 0.8, y: 1.2}
   spinFactor: 0.1
+  finalScaleFactor: 0.33
   burden: 6
   chestState: 1
   contents: {fileID: 5098124715001449125}
-  lootedBurden: 3
+  contentsBurden: 3
 --- !u!82 &2409640578900595915
 AudioSource:
   m_ObjectHideFlags: 0

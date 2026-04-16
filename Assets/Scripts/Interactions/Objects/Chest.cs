@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+///     The different states that a chest can be in.
+/// </summary>
 public enum ChestState
 {
     Locked, Closed, Open_Full, Open_Empty
@@ -13,25 +16,63 @@ public enum ChestState
 /// </summary>
 public class Chest : Grip
 {
+    // ---------------------------------------------------------------------------------------------
+    // Opening & Closing
+    // ---------------------------------------------------------------------------------------------
     public ChestState chestState = ChestState.Closed;
-    public GameObject contents;
-    public int lootedBurden = 1;
-
+    /// <summary>
+    ///     Animates the chest opening and closing.
+    /// </summary>
     private Animator animator;
-    private AudioClip chestOpen, chestClose, chestLoot;
+    /// <summary>
+    ///     The audio clip to play when the chest opens.
+    /// </summary>
+    private AudioClip chestOpen;
+    private const string CHEST_OPEN_SOUND = "creak_open";
+    /// <summary>
+    ///     The audio clip to play when the chest closes.
+    /// </summary>
+    private AudioClip chestClose;
+    private const string CHEST_CLOSE_SOUND = "creak_close";
+    /// <summary>
+    ///     <tt>True</tt> iff the chest is open.
+    /// </summary>
     private bool opened = false;
+
+    // ---------------------------------------------------------------------------------------------
+    // Contents
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The contents to show/hide depending on the chest's fullness state.
+    /// </summary>
+    public GameObject contents;
+    /// <summary>
+    ///     The burden of the chest's contents.
+    /// </summary>
+    public int contentsBurden = 1;
+    /// <summary>
+    ///     The audio clip to play when the chest gets looted.
+    /// </summary>
+    private AudioClip chestLoot;
+    private const string CHEST_LOOT_SOUND = "coins";
+    /// <summary>
+    ///     <tt>True</tt> iff the chest is empty.
+    /// </summary>
     private bool empty = false;
-    private Light treasureLight;
+    /// <summary>
+    ///     The light source that illuminates the chest's contents.
+    /// </summary>
+    private Light contentsLight;
 
     protected override void Start()
     {
         base.Start();
         animator = GetComponent<Animator>();
-        chestOpen = Resources.Load("Sounds/creak_open", typeof(AudioClip)) as AudioClip;
-        chestClose = Resources.Load("Sounds/creak_close", typeof(AudioClip)) as AudioClip;
-        chestLoot = Resources.Load("Sounds/coins", typeof(AudioClip)) as AudioClip;
+        chestOpen = Utilities.LoadAudioClip(CHEST_OPEN_SOUND);
+        chestClose = Utilities.LoadAudioClip(CHEST_CLOSE_SOUND);
+        chestLoot = Utilities.LoadAudioClip(CHEST_LOOT_SOUND);
 
-        treasureLight = contents.GetComponentInChildren<Light>();
+        contentsLight = contents.GetComponentInChildren<Light>();
     }
 
     /// <summary>
@@ -48,7 +89,7 @@ public class Chest : Grip
             switch(chestState)
             {
                 case ChestState.Locked:
-                    if (true /*blob has the key*/ )
+                    if (true) // TODO: implement chest locking
                     {
                         chestState = ChestState.Closed;
                     }
@@ -83,16 +124,22 @@ public class Chest : Grip
         audioSource.PlayOneShot(chestLoot, 0.5f);
         empty = true;
         contents.SetActive(false);
-        burden = lootedBurden;
+        burden -= contentsBurden;
 
         // TODO: incorporate with actual inventory system.
         int goldAmount = Random.Range(1, 100);
         GameInfo.AlertSystem.Send(string.Format("Obtained {0} gold", goldAmount));
     }
 
+    /// <summary>
+    ///     Illuminates or un-illuminates the chest's contents.
+    /// </summary>
+    /// <param name="shine">
+    ///     If <tt>true</tt>, the chest's contents will be illuminated.
+    /// </param>
     public void SetShine(bool shine)
     {
-        treasureLight.enabled = shine;
+        contentsLight.enabled = shine;
     }
 
     /// <summary>
