@@ -22,9 +22,8 @@ public class Fire : Interactable
     /// <summary>
     ///     The point light controlled by <tt>fireLight</tt>.
     /// </summary>
-    public Light pointLight;
     private FireLight fireLight;
-    public ParticleSystem fireParticles;
+    private ParticleSystem fireParticles;
 
     // ---------------------------------------------------------------------------------------------
     // MATERIAL
@@ -49,7 +48,9 @@ public class Fire : Interactable
 
     void Start()
     {
-        fireLight = pointLight.GetComponent<FireLight>();
+        fireLight = GetComponentsInChildren<FireLight>()[0];
+        fireParticles = GetComponentsInChildren<ParticleSystem>()[0];
+        
         audioSource = GetComponent<AudioSource>();
         fireIgnite = Resources.Load("Sounds/fire_ignite", typeof(AudioClip)) as AudioClip;
         fireSizzle = Resources.Load("Sounds/fire_sizzle", typeof(AudioClip)) as AudioClip;

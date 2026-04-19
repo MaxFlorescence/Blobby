@@ -164,8 +164,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebbf9abfdc0f1ef4d8484abd4bf1d4d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  intervalRange: {x: 0.25, y: 0.75}
   intensityRange: {x: 0.5, y: 1.5}
+  intervalRange: {x: 0.25, y: 0.75}
   maxDisplacement: 0
 --- !u!1 &6701958404739744575
 GameObject:
@@ -5047,10 +5047,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44a61059e23ab6e4aa75e4e0637d40ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flames: {fileID: 2519954484114659732}
-  particles: {fileID: 6831127208759384029}
-  pointLight: {fileID: 3915307704466435893}
   fadeTime: 5
+  pointLight: {fileID: 3915307704466435893}
+  fireParticles: {fileID: 6831127208759384029}
+  flames: {fileID: 2519954484114659732}
 --- !u!136 &1622035569899842195
 CapsuleCollider:
   m_ObjectHideFlags: 0
