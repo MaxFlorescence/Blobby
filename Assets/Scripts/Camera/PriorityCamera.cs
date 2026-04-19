@@ -13,14 +13,15 @@ public abstract class PriorityCamera : MonoBehaviour, Controllable
     ///     The maximum priority this camera can have.
     /// </summary>
     private int maxPriority = 0;
-
     /// <summary>
     ///     The camera's current priority.
     /// </summary>
     private int priority = 0;
-    private Camera cameraComponent;
-
+    /// <summary>
+    ///     Is this camera the main camera?
+    /// </summary>
     protected bool isMain = false;
+    private Camera cameraComponent;
     
     public bool controlled { get; set; } = false;
 

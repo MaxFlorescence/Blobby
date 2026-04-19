@@ -37,7 +37,7 @@ public enum MaterialProperties
     Transitions_With_Heat = 0b_0000_0000_0010_0000,
     Transitions_With_Cold = 0b_0000_0000_0100_0000,
     Conductive            = 0b_0000_0000_1000_0000,
-    Magnetic             = 0b_0000_0001_0000_0000,
+    Magnetic              = 0b_0000_0001_0000_0000,
     Slippery              = 0b_0000_0010_0000_0000,
     Sticky                = 0b_0000_0100_0000_0000,
     Sweet                 = 0b_0000_1000_0000_0000,

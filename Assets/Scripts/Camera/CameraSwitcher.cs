@@ -9,9 +9,22 @@ using UnityEngine.Rendering;
 /// </summary>
 public class CameraSwitcher : MonoBehaviour
 {
+    // ---------------------------------------------------------------------------------------------
+    // CAMERAS
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The list of cameras to switch between.
+    /// </summary>
     private PriorityCamera[] cameras;
     private int cameraCount;
     private int activeCameraIndex = -1;
+    /// <summary>
+    ///     A tag that cameras can have to prevent them from being included in the camera switching.
+    /// </summary>
+    
+    // ---------------------------------------------------------------------------------------------
+    // PARAMETERS
+    // ---------------------------------------------------------------------------------------------
     private const string IGNORE_CAMERA_TAG = "Independent Camera";
 
     /// <summary>

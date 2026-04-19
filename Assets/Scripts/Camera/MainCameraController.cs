@@ -5,6 +5,9 @@ using UnityEngine;
 /// </summary>
 public class MainCameraController : PriorityCamera
 {
+    // ---------------------------------------------------------------------------------------------
+    // TRACKING
+    // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     The ideal position of the camera.
     /// </summary>
@@ -18,6 +21,14 @@ public class MainCameraController : PriorityCamera
     /// </summary>
     private Transform trackedTransform = null;
     /// <summary>
+    ///     At what distance to begin the raycast check for the camera's line of sight.
+    /// </summary>
+    private float beginRaycastDistance = 0f;
+    
+    // ---------------------------------------------------------------------------------------------
+    // SMOOTHING
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
     ///     The position that the camera was at in the last frame.
     /// </summary>
     private Vector3 lastPosition;
@@ -25,10 +36,6 @@ public class MainCameraController : PriorityCamera
     ///     Custom epsilon to determine if the last position is close to the current position.
     /// </summary>
     private const float EPSILON = 1E-2f;
-    /// <summary>
-    ///     At what distance to begin the raycast check for the camera's line of sight.
-    /// </summary>
-    private float beginRaycastDistance = 0f;
 
     void Awake()
     {

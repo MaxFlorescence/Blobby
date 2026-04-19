@@ -6,27 +6,25 @@ using UnityEngine;
 [RequireComponent(typeof(Light))]
 class FireLight : MonoBehaviour
 {
-    /// <summary>
-    ///     The minimum and maximum intervals that the fire light's timer can last for.
-    /// </summary>
-    public Vector2 intervalRange = new(0.1f, 1f);
-    /// <summary>
-    ///     The minimum and maximum intensities that the fire light can attain.
-    /// </summary>
-    public Vector2 intensityRange = new(0.5f, 1f);
-    /// <summary>
-    ///     The maximum displacement from the origin that the fire light can attain.
-    /// </summary>
-    public float maxDisplacement = 0.25f;
+    // ---------------------------------------------------------------------------------------------
+    // LIGHT
+    // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     Indicates if the fire light is on or off.
     /// </summary>
     public bool IsOn { get; set; } = true;
-
     /// <summary>
     ///     The light component controlled by this fire light.
     /// </summary>
     private Light lightComponent;
+
+    // ---------------------------------------------------------------------------------------------
+    // INTENSITY
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The minimum and maximum intensities that the fire light can attain.
+    /// </summary>
+    public Vector2 intensityRange = new(0.5f, 1f);
     /// <summary>
     ///     The intensity for the fire light to target during the current timer interval.
     /// </summary>
@@ -35,8 +33,23 @@ class FireLight : MonoBehaviour
     ///     The intensity of the fire light at the end of the last timer interval.
     /// </summary>
     private float lastIntensity = 1;
+
+    // ---------------------------------------------------------------------------------------------
+    // INTERVAL
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The minimum and maximum intervals that the fire light's timer can last for.
+    /// </summary>
+    public Vector2 intervalRange = new(0.1f, 1f);
     private Timer timer = new(1);
 
+    // ---------------------------------------------------------------------------------------------
+    // DISPLACEMENT
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The maximum displacement from the origin that the fire light can attain.
+    /// </summary>
+    public float maxDisplacement = 0.25f;
     /// <summary>
     ///     The position to move the fire light toward during the current timer interval.
     /// </summary>

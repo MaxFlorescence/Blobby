@@ -8,7 +8,7 @@ using UnityEngine;
 public class Cannon : Interactable, Controllable
 {
     //----------------------------------------------------------------------------------------------
-    // Components
+    // COMPONENTS
     //----------------------------------------------------------------------------------------------
     private Rigidbody cannonRigidBody;
     public Transform barrelTransform;
@@ -19,7 +19,7 @@ public class Cannon : Interactable, Controllable
     private Timer controlCooldownTimer;
 
     //----------------------------------------------------------------------------------------------
-    // Aiming
+    // AIMING
     //----------------------------------------------------------------------------------------------
     public bool controlled { get; set; } = false;
     /// <summary>
@@ -36,7 +36,7 @@ public class Cannon : Interactable, Controllable
     private float angularSpeedFactor = 0.5f;
 
     //----------------------------------------------------------------------------------------------
-    // Loading
+    // LOADING
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The position at which ammo sits in the barrel.
@@ -60,7 +60,7 @@ public class Cannon : Interactable, Controllable
     private const float LOADED_BLOB_SIZE_FACTOR = 0.3f;
 
     //----------------------------------------------------------------------------------------------
-    // Firing  
+    // FIRING  
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The location of the barrel's muzzle.

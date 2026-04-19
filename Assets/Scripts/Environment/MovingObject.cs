@@ -40,6 +40,9 @@ public struct ObjectKeyPoint
 /// </summary>
 public class MovingObject : MonoBehaviour
 {
+    // ---------------------------------------------------------------------------------------------
+    // PARAMETERS
+    // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     Iff <tt>true</tt>, the object's movement will repeat from the first key point after
     ///     the last key point is finished.
@@ -50,15 +53,10 @@ public class MovingObject : MonoBehaviour
     ///     transform's parent to being world-based.
     /// </summary>
     public bool localCoordinates = false;
-    /// <summary>
-    ///     The list of key points for the object to move through. Each key point defines a
-    ///     position, orientation, the amount of time it takes to move to the key point, and the
-    ///     amount of time to pause for before starting the next key point.
-    /// </summary>
-    public ObjectKeyPoint[] keyPoints;
 
-    private int currentKeyPoint;
-    private Timer timer = new();
+    // ---------------------------------------------------------------------------------------------
+    // STATE
+    // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     Indicates if the object is in a moving time interval.
     /// </summary>
@@ -67,6 +65,18 @@ public class MovingObject : MonoBehaviour
     ///     Indicates if the object is progressing through its key points.
     /// </summary>
     private bool playing = true;
+    
+    // ---------------------------------------------------------------------------------------------
+    // PROGRESSION
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The list of key points for the object to move through. Each key point defines a
+    ///     position, orientation, the amount of time it takes to move to the key point, and the
+    ///     amount of time to pause for before starting the next key point.
+    /// </summary>
+    public ObjectKeyPoint[] keyPoints;
+    private int currentKeyPoint;
+    private Timer timer = new();
 
     void Start()
     {

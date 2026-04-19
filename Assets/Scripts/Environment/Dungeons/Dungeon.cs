@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 public class Dungeon : MonoBehaviour
 {
     // ---------------------------------------------------------------------------------------------
-    // Characteristics
+    // PARAMETERS
     // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     The actual size of each tile of the dungeon.
@@ -31,9 +31,13 @@ public class Dungeon : MonoBehaviour
     ///     The positions of the stairs up and stairs down tiles for each dungeon level.
     /// </summary>
     private Vector3Int[,] stairPositions;
+    /// <summary>
+    ///     This dungeon's tile that represents empty space.
+    /// </summary>
+    private DungeonTile emptyTile;
     
     // ---------------------------------------------------------------------------------------------
-    // Occlusion
+    // OCCLUSION
     // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     The blocker prefab is a collection of black planes that blocks the player's line of
@@ -49,10 +53,6 @@ public class Dungeon : MonoBehaviour
     /// </summary>
     private GameObject lowerBlocker;
 
-    /// <summary>
-    ///     This dungeon's tile that represents empty space.
-    /// </summary>
-    private DungeonTile emptyTile;
 
     void Awake()
     {

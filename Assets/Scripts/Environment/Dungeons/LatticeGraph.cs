@@ -12,12 +12,8 @@ using Random = UnityEngine.Random;
 class LatticeGraph
 {
     // ---------------------------------------------------------------------------------------------
-    // INFORMATION
+    // PARAMETERS
     // ---------------------------------------------------------------------------------------------
-    /// <summary>
-    ///     Contains connectivity information for each node of the lattice graph.
-    /// </summary>
-    private Walls[,,] walls;
     /// <summary>
     ///     The x,y,z sizes of the lattice graph's dimensions.
     /// </summary>
@@ -37,6 +33,13 @@ class LatticeGraph
     /// </summary>
     private readonly float RECONNECT_CHANCE;
 
+    // ---------------------------------------------------------------------------------------------
+    // ACCESS
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     Contains connectivity information for each node of the lattice graph.
+    /// </summary>
+    private Walls[,,] walls;
     /// <returns>
     ///     The connectivity information for the node at the given (x, y, z) position.
     /// </returns>

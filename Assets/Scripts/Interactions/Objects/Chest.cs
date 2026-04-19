@@ -17,7 +17,7 @@ public enum ChestState
 public class Chest : Grip
 {
     // ---------------------------------------------------------------------------------------------
-    // Opening & Closing
+    // OPENING & CLOSING
     // ---------------------------------------------------------------------------------------------
     public ChestState chestState = ChestState.Closed;
     /// <summary>
@@ -40,7 +40,7 @@ public class Chest : Grip
     private bool opened = false;
 
     // ---------------------------------------------------------------------------------------------
-    // Contents
+    // CONTENTS
     // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     The contents to show/hide depending on the chest's fullness state.

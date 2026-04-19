@@ -20,7 +20,7 @@ class DungeonLayoutGenerator
     private readonly bool fromFile;
     
     // ---------------------------------------------------------------------------------------------
-    // INFORMATION
+    // PARAMETERS
     // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     Equals the product of each of the layout dimensions.

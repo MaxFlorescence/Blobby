@@ -11,15 +11,15 @@ using UnityEngine;
 public class AtomController : MonoBehaviour
 {
     //----------------------------------------------------------------------------------------------
-    // PUBLIC MEMBERS
+    // COMPONENTS
     //----------------------------------------------------------------------------------------------
     public BlobController blobController;
-
-    //----------------------------------------------------------------------------------------------
-    // PRIVATE MEMBERS
-    //----------------------------------------------------------------------------------------------
     private Rigidbody atomRigidBody;
     private Collider atomCollider;
+
+    //----------------------------------------------------------------------------------------------
+    // MOVEMENT
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     Typical force vector to apply every fixed update.
     /// </summary>
@@ -35,7 +35,7 @@ public class AtomController : MonoBehaviour
     private HashSet<GameObject> touching = new HashSet<GameObject>();
 
     //----------------------------------------------------------------------------------------------
-    // Sticking
+    // STICKING
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     Dynamically created joint to allow this atom to be stuck to an object.
@@ -51,7 +51,7 @@ public class AtomController : MonoBehaviour
     private const float BREAK_FORCE = 500;
 
     //----------------------------------------------------------------------------------------------
-    // Particles
+    // PARTICLES
     //----------------------------------------------------------------------------------------------
     private ParticleSystem drips;
     private ParticleSystem.EmissionModule dripsEmission;
@@ -61,7 +61,7 @@ public class AtomController : MonoBehaviour
     private bool centerAtom = false;
 
     //----------------------------------------------------------------------------------------------
-    // Debug Mode
+    // DEBUG MODE
     //----------------------------------------------------------------------------------------------
     private MeshRenderer atomMeshRenderer;
     private Material[] atomMaterials;

@@ -6,7 +6,7 @@ using UnityEngine;
 public class BlobController : MonoBehaviour, Controllable
 {
     //----------------------------------------------------------------------------------------------
-    // Input
+    // INPUT
     //----------------------------------------------------------------------------------------------
     private Vector3 jumpDirection = Vector3.up;
     private bool jumpOnNextFixedUpdate = false;
@@ -16,7 +16,7 @@ public class BlobController : MonoBehaviour, Controllable
     public bool controlled { get; set; } = false;
 
     //----------------------------------------------------------------------------------------------
-    // Structure
+    // STRUCTURE
     //----------------------------------------------------------------------------------------------
     private CreateBlob createBlob;
     /// <summary>
@@ -39,7 +39,7 @@ public class BlobController : MonoBehaviour, Controllable
     private float blobShrinkingFactor = 0.5f;
 
     //----------------------------------------------------------------------------------------------
-    // Sticking
+    // STICKING
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     How many atoms can be sticky at once.
@@ -61,7 +61,7 @@ public class BlobController : MonoBehaviour, Controllable
     private float stickyMovementModifier = 1.2f;
 
     //----------------------------------------------------------------------------------------------
-    // Inventory
+    // INVENTORY
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The list of gameObjects carried by the blob.
@@ -85,7 +85,7 @@ public class BlobController : MonoBehaviour, Controllable
     private bool controlCanRelease = true;
 
     //----------------------------------------------------------------------------------------------
-    // Visuals
+    // VISUALS
     //----------------------------------------------------------------------------------------------
     private MeshRenderer blobMesh;
     private BlobMaterials blobMaterials;
@@ -96,7 +96,7 @@ public class BlobController : MonoBehaviour, Controllable
     private BlobLightController blobLightController = new();
 
     //----------------------------------------------------------------------------------------------
-    // Audio
+    // AUDIO
     //----------------------------------------------------------------------------------------------
     private AudioSource audioSource;
     /// <summary>
@@ -117,7 +117,7 @@ public class BlobController : MonoBehaviour, Controllable
     private readonly Vector2 INVENTORY_PITCH_BOUNDS = new(0.8f, 1.2f);
     
     //----------------------------------------------------------------------------------------------
-    // Ghost mode
+    // GHOST MODE
     //----------------------------------------------------------------------------------------------
     public bool ghostMode { get; private set; } = false;
     private float ghostSpeed = 0.5f;

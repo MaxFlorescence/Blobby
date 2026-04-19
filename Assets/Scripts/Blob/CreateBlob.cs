@@ -16,7 +16,7 @@ using UnityEngine.Assertions;
 public class CreateBlob : MonoBehaviour
 {
     //----------------------------------------------------------------------------------------------
-    // Parameters
+    // PARAMETERS
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///    TODO: id strings for multiplayer?
@@ -27,7 +27,7 @@ public class CreateBlob : MonoBehaviour
     public GameObject rightEye;
 
     //----------------------------------------------------------------------------------------------
-    // Spawning
+    // SPAWNING
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     Initial position of the blob.
@@ -35,7 +35,7 @@ public class CreateBlob : MonoBehaviour
     private Vector3 spawnPoint;
 
     //----------------------------------------------------------------------------------------------
-    // Atoms
+    // ATOMS
     //----------------------------------------------------------------------------------------------
     private GameObject[] blobAtoms;
     private Rigidbody[] atomRigidbodies;
@@ -62,7 +62,7 @@ public class CreateBlob : MonoBehaviour
     private GameObject centerAtom;
 
     //----------------------------------------------------------------------------------------------
-    // Springs
+    // SPRINGS
     //----------------------------------------------------------------------------------------------
     private SpringJoint[] springJoints;
     /// <summary>
@@ -89,7 +89,7 @@ public class CreateBlob : MonoBehaviour
     private Vector3[] connectedAnchors;
 
     //----------------------------------------------------------------------------------------------
-    // Mesh
+    // MESH
     //----------------------------------------------------------------------------------------------
     private Mesh blobMesh;
     /// <summary>

@@ -15,10 +15,17 @@ public enum BlobLight
 /// </summary>
 public class BlobLightController
 {
+    // ---------------------------------------------------------------------------------------------
+    // BLOB LIGHTS
+    // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     The number of types of lights in the <tt>BlobLight</tt> enum.
     /// </summary>
     private readonly int TYPE_COUNT = Enum.GetNames(typeof(BlobLight)).Length;
+
+    // ---------------------------------------------------------------------------------------------
+    // DATA
+    // ---------------------------------------------------------------------------------------------
     private Light[] lights;
     /// <summary>
     ///     The default state of each light type.
