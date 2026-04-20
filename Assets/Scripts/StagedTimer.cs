@@ -18,7 +18,7 @@ public struct StageState
 
     public override readonly string ToString()
     {
-        return $"StageState(stage = {stage}, stageName = {stageName}, progress = {progress:F3}, rolledOver = {rolledOver})";
+        return $"StageState(stage = {stage}, stageName = \"{stageName}\", progress = {progress:F3}, rolledOver = {rolledOver})";
     }
 }
 
@@ -36,7 +36,7 @@ public class StagedTimer : Timer
     /// </summary>
     private readonly float[] subintervals;
     private readonly int subintervalCount;
-    
+
     /// <summary>
     ///     Names to use to refer to each of the timer's subintervals.
     /// </summary>
@@ -64,7 +64,8 @@ public class StagedTimer : Timer
 
         if (stageNames != null)
             Assert.AreEqual(subintervalCount, stageNames.Length);
-        this.stageNames = stageNames;
+        this.stageNames = new string[subintervalCount + 1];
+        this.stageNames[subintervalCount] = "Completed";
 
         subintervalsCumulative = new float[subintervalCount + 1];
         lastStage = subintervalCount;
@@ -73,6 +74,7 @@ public class StagedTimer : Timer
         for (int i = 1; i < subintervalCount + 1; i++)
         {
             subintervalsCumulative[i] = subintervalsCumulative[i-1] + subintervals[i-1];
+            this.stageNames[i-1] = stageNames[i-1];
         }
 
         SetInterval(subintervalsCumulative[subintervalCount]);
