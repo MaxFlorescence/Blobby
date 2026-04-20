@@ -1,14 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-///     An interface for objects that can be interacted with by the blob character.
+///     An abstract class for objects that can be interacted with by the blob character.
 /// </summary>
 public abstract class Interactable : MonoBehaviour
 {
     /// <summary>
     ///     Time remaining on the interaction cooldown timer.
     /// </summary>
-    protected float cooldownTime = 0f;
+    protected Timer cooldownTimer = new();
     /// <summary>
     ///    Interaction is disabled during the cooldown.
     /// </summary>
@@ -20,23 +20,15 @@ public abstract class Interactable : MonoBehaviour
     /// </summary>
     public void Update()
     {
-        if (GameInfo.GameStatus != GameState.PAUSED)
+        if (GameInfo.GameStatus == GameState.PAUSED) return;
+        
+        if (cooldownTimer.Update(mode: TimerMode.Pulse))
         {
-            if (cooldownTime > 0)
-            {
-                cooldownTime -= Time.deltaTime;
-                if (cooldownTime <= 0)
-                {
-                    interactionEnabled = true;
-                    cooldownTime = 0f;
-                    if (usingCooldownCallbacks) {
-                        OnInteractionCooldownEnd();
-                    }
-                }
-            }
-
-            OnUpdate();  
+            interactionEnabled = true;
+            if (usingCooldownCallbacks) OnInteractionCooldownEnd();
         }
+
+        OnUpdate();
     }
 
     /// <summary>
@@ -90,7 +82,7 @@ public abstract class Interactable : MonoBehaviour
     protected void StartInteractionCooldown(float duration, bool useCallbacks = true)
     {
         interactionEnabled = false;
-        cooldownTime = duration;
+        cooldownTimer.Reset(duration);
         usingCooldownCallbacks = useCallbacks;
 
         if (usingCooldownCallbacks) {
@@ -106,7 +98,7 @@ public abstract class Interactable : MonoBehaviour
     /// </returns>
     public bool CoolingDown()
     {
-        return cooldownTime > 0;
+        return cooldownTimer.Running;
     }
 
     /// <summary>

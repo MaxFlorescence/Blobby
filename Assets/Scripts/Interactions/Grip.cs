@@ -346,7 +346,7 @@ public class Grip : Interactable
     private void GrowByCooldown()
     {
         float scale = Utilities.Clamp(
-            finalScaleFactor + (cooldownTime - maxCooldown) * (finalScaleFactor - 1) / cooldownScaleDuration,
+            finalScaleFactor + (1 - finalScaleFactor) * cooldownTimer.Time / cooldownScaleDuration,
             0, 1
         );
 
