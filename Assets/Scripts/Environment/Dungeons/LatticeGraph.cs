@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 ///     A class for creating 3D graphs where each node is at a lattice point for use in generating
 ///     dungeon layouts.
 /// </summary>
-class LatticeGraph
+public class LatticeGraph
 {
     // ---------------------------------------------------------------------------------------------
     // PARAMETERS
