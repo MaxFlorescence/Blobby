@@ -8,14 +8,16 @@ public class AlertSystem : MonoBehaviour
     private static readonly Color DEFAULT_COLOR = Color.white.WithAlpha(0);
 
     public float fadeInTime = 0.25f;
+    private const string FADING_IN = "Fading in";
     public float displayTime = 3f;
+    private const string DISPLAYING = "Displaying";
     public float fadeOutTime = 1f;
+    private const string FADING_OUT = "Fading out";
 
     private int alertBoxCount;
-    private float totalTime;
     private Queue<(string, Color)> alertQueue = new();
     private TMP_Text[] alertBoxes;
-    private float[] timers;
+    private StagedTimer[] timers;
     private int headIndex = 0;
     private Vector3 screenPosition;
     private Vector3 alertBoxHeightOffset;
@@ -23,16 +25,17 @@ public class AlertSystem : MonoBehaviour
     void Awake()
     {
         GameInfo.AlertSystem = this;
-        totalTime = displayTime + fadeInTime + fadeOutTime;
+        float[] timerIntervals = new float[] {fadeInTime, displayTime, fadeOutTime};
+        string[] stageNames = new string[] {FADING_IN, DISPLAYING, FADING_OUT};
 
         alertBoxes = GetComponentsInChildren<TMP_Text>();
         alertBoxCount = alertBoxes.Length;
-        timers = new float[alertBoxCount];
+        timers = new StagedTimer[alertBoxCount];
 
         for (int i = 0; i < alertBoxCount; i++) {
             alertBoxes[i].color = DEFAULT_COLOR;
             alertBoxes[i].text = "";
-            timers[i] = 0f;
+            timers[i] = new(timerIntervals, stageNames);
         }
 
         alertBoxHeightOffset = new(0 ,alertBoxes[0].rectTransform.rect.height, 0);
@@ -47,10 +50,10 @@ public class AlertSystem : MonoBehaviour
 
     public void TryPostNext()
     {
-        if (timers[headIndex] == 0 && alertQueue.Count > 0) {
+        if (timers[headIndex].Complete() && alertQueue.Count > 0) {
             (string content, Color color) = alertQueue.Dequeue();
 
-            timers[headIndex] = totalTime;
+            timers[headIndex].Reset();
             alertBoxes[headIndex].text = content;
             alertBoxes[headIndex].color = color;
             headIndex = (headIndex + 1) % alertBoxCount;
@@ -71,18 +74,15 @@ public class AlertSystem : MonoBehaviour
 
     private float AlphaFromTime(int i)
     {
-        if (timers[i] <= fadeOutTime)
+        StageState timerState = timers[i].GetState();
+
+        return timerState.stageName switch
         {
-            return timers[i] / fadeOutTime;
-        }
-        else if (timers[i] <= fadeOutTime + displayTime)
-        {
-            return 1f;
-        }
-        else
-        {
-            return 1f - (timers[i] - fadeOutTime - displayTime) / fadeInTime;
-        }
+            FADING_IN => timerState.progress,
+            DISPLAYING  => 1,
+            FADING_OUT => 1 - timerState.progress,
+            _ => 0
+        };
     }
 
     void Update()
@@ -90,16 +90,12 @@ public class AlertSystem : MonoBehaviour
         TryPostNext();
 
         for (int i = 0; i < alertBoxCount; i++) {
-            if (timers[i] > 0)
+            if (timers[i].Update(mode: TimerMode.Toggle))
             {
+                alertBoxes[i].text = "";
+                alertBoxes[i].color = DEFAULT_COLOR;
+            } else {
                 alertBoxes[i].color = alertBoxes[i].color.WithAlpha(AlphaFromTime(i));
-                timers[i] -= Time.deltaTime;
-                if (timers[i] <= 0)
-                {
-                    timers[i] = 0f;
-                    alertBoxes[i].text = "";
-                    alertBoxes[i].color = DEFAULT_COLOR;
-                }
             }
         }
     }
