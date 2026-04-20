@@ -15,6 +15,11 @@ public struct StageState
     ///     <tt>True</tt> iff the previous update caused the StagedTimer to move to its next stage.
     /// </summary>
     public bool rolledOver;
+
+    public override readonly string ToString()
+    {
+        return $"StageState(stage = {stage}, stageName = {stageName}, progress = {progress:F3}, rolledOver = {rolledOver})";
+    }
 }
 
 /// <summary>
@@ -108,5 +113,10 @@ public class StagedTimer : Timer
         state.stageName = stageNames == null ? state.stage.ToString() : stageNames[state.stage];
 
         return state;
+    }
+
+    public override string ToString()
+    {
+        return $"StagedTimer(Interval = {Interval:F3}, Time = {Time:F3}, subintervalCount = {subintervalCount}, state = {GetState()})";
     }
 }
