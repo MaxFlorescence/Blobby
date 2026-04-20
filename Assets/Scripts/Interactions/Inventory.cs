@@ -72,8 +72,8 @@ public class Inventory : MonoBehaviour
         string addSoundResource = "", string removeSoundResource = "",
         Vector2? audioPitchBounds = null, float volume = 1f)
     {
-        addAudioClip = Utilities.LoadAudioClip(addSoundResource);
-        removeAudioClip = Utilities.LoadAudioClip(removeSoundResource);
+        addAudioClip = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + addSoundResource);
+        removeAudioClip = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + removeSoundResource);
 
         this.audioPitchBounds = audioPitchBounds;
 

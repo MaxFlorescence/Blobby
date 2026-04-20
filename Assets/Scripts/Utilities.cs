@@ -194,6 +194,16 @@ public static class Extensions
 
 class Utilities : MonoBehaviour
 {
+    public static readonly string SOUNDS_PATH = "Sounds/";
+    public static readonly string BLOB_MATERIALS_PATH = "Materials/Blob Materials/";
+    public static readonly string BASIC_MATERIALS_PATH = "Materials/Basic Materials/";
+    public static readonly string MISSING_MATERIAL_PATH = BASIC_MATERIALS_PATH + "MISSING";
+    public static readonly string OBJECT_MATERIALS_PATH = "Materials/Object Materials/";
+    public static readonly string DUNGEON_MATERIALS_PATH = "Materials/Dungeon Materials/";
+    public static readonly string MINIMAP_ICONS_PATH = "Images/Minimap Icons/";
+    public static readonly string DUNGEON_CORRIDORS_PATH = "Dungeon Prefabs/Corridors/";
+    public static readonly string DUNGEON_LAYOUTS_PATH = "Dungeon Layouts/";
+
     public static int DEFAULT_LAYER { get; private set; }
     public static int INVISIBLE_LAYER { get; private set; }
     public static int INVENTORY_UI_LAYER { get; private set; }
@@ -381,11 +391,6 @@ class Utilities : MonoBehaviour
         return ret + (ret < 0 ? 3 : 2);
     }
 
-    public static TextAsset LoadTextFile(string filePath)
-    {
-        return Resources.Load(filePath, typeof(TextAsset)) as TextAsset;
-    }
-
     /// <param name="i"></param>
     /// <param name="m"></param>
     /// <returns>
@@ -396,12 +401,5 @@ class Utilities : MonoBehaviour
     {
         i %= m;
         return i < 0 ? i + m : i;
-    }
-
-    public static AudioClip LoadAudioClip(string name)
-    {
-        if (name.Length == 0) return null;
-
-        return Resources.Load("Sounds/" + name, typeof(AudioClip)) as AudioClip;
     }
 }

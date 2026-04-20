@@ -25,7 +25,7 @@ public class MiniMap : MonoBehaviour
         mapScreenPosition = (worldCorners[0] + worldCorners[2]) / 2;
         mapScreenPosition.y = Screen.height - mapScreenPosition.y;
 
-        MAP_ICON_MATERIAL = Resources.Load("Materials/Basic Materials/Minimap Icon", typeof(Material)) as Material;
+        MAP_ICON_MATERIAL = Resources.Load<Material>(Utilities.BASIC_MATERIALS_PATH + "Minimap Icon");
         MAP_ICON_MATERIAL.SetVector("_Center", mapScreenPosition);
         MAP_ICON_MATERIAL.SetFloat("_Radius", MapPosition(0.48f, 0.48f).Min(true));
     }

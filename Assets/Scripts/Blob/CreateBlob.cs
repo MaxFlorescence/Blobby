@@ -55,7 +55,7 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     The physics material for the blob's atoms. Extremely high friction and bounciness.
     /// </summary>
-    private const string JELLY_PHYSIC_MATERIAL = "Materials/Blob Materials/JellyPhysic";
+    private readonly string JELLY_PHYSIC_MATERIAL = Utilities.BLOB_MATERIALS_PATH + "JellyPhysic";
     /// <summary>
     ///     Quick reference for <tt>blobAtoms[0]</tt>.
     /// </summary>
@@ -246,7 +246,7 @@ public class CreateBlob : MonoBehaviour
     /// </summary>
     private void AddPhysicMaterials()
     {
-        PhysicMaterial jellyPhysic = Resources.Load(JELLY_PHYSIC_MATERIAL, typeof(PhysicMaterial)) as PhysicMaterial;
+        PhysicMaterial jellyPhysic = Resources.Load<PhysicMaterial>(JELLY_PHYSIC_MATERIAL);
 
         for (int i = 0; i < blobAtoms.Length; i++)
         {

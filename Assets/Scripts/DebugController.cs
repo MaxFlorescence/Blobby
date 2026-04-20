@@ -25,6 +25,8 @@ class DebugController : MonoBehaviour
                 GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Water);
             else if (Input.GetKeyDown(KeyCode.Alpha2))
                 GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Lava);
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
+                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Honey);
         }
     }
 

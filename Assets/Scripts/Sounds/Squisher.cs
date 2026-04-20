@@ -16,7 +16,7 @@ public class Squisher : MonoBehaviour
         clips = new AudioClip[CLIP_COUNT];
 
         for (int i = 0; i < CLIP_COUNT; i++) {
-            clips[i] = Resources.Load("Sounds/squish_" + i.ToString(), typeof(AudioClip)) as AudioClip;
+            clips[i] = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + $"squish_{i}");
         }
     }
 

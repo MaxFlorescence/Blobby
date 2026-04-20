@@ -56,88 +56,89 @@ public static class BlobMaterialExtensions
     {
         {BlobMaterials.Water, LoadMaterials(
             MaterialProperties.Watery,
-            "Blob Materials/WaterJelly"
+            Utilities.BLOB_MATERIALS_PATH + "WaterJelly"
         )},
         {BlobMaterials.Ice, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Icy,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Lava,  LoadMaterials(
             MaterialProperties.Firey | MaterialProperties.Transitions_With_Cold,
-            "Blob Materials/LavaJelly", "Basic Materials/Flame"
+            Utilities.BLOB_MATERIALS_PATH + "LavaJelly",
+            Utilities.OBJECT_MATERIALS_PATH + "Flame"
         )},
         {BlobMaterials.Rock,  LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Solid | MaterialProperties.Heavy
             | MaterialProperties.Transitions_With_Heat,
-            "Blob Materials/LavaJelly", "Basic Materials/Flame"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Acid, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Watery | MaterialProperties.Can_Dissolve,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
         {BlobMaterials.Frozen_Acid, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Icy,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Oil, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Oily,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
         {BlobMaterials.Burning_Oil, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Firey | MaterialProperties.Slippery
             | MaterialProperties.Transitions_With_Cold,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Honey, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Viscous | MaterialProperties.Sweet
             | MaterialProperties.Transitions_With_Cold | MaterialProperties.Can_Extinguish
             | MaterialProperties.Transitions_With_Heat,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
         {BlobMaterials.Burning_Honey, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Viscous | MaterialProperties.Firey
             | MaterialProperties.Transitions_With_Cold,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
         {BlobMaterials.Crystal_Honey, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Viscous | MaterialProperties.Sweet | MaterialProperties.Solid
             | MaterialProperties.Transitions_With_Heat,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Soda, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Watery | MaterialProperties.Sweet | MaterialProperties.Light,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
         {BlobMaterials.Frozen_Soda, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Icy | MaterialProperties.Light,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Liquid_Nitrogen, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Can_Extinguish | MaterialProperties.Can_Freeze
             | MaterialProperties.Light,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Ferrofluid, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Oily | MaterialProperties.Magnetic | MaterialProperties.Conductive,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
 
         {BlobMaterials.Rubber, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Solid | MaterialProperties.Bouncy
             | MaterialProperties.Transitions_With_Heat,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
         {BlobMaterials.Burning_Rubber, LoadMaterials( // TODO: add body/drop materials
             MaterialProperties.Solid | MaterialProperties.Bouncy | MaterialProperties.Firey
             | MaterialProperties.Transitions_With_Cold,
-            "Blob Materials/WaterJelly"
+            Utilities.MISSING_MATERIAL_PATH
         )},
     };
 
@@ -157,12 +158,12 @@ public static class BlobMaterialExtensions
     /// </returns>
     private static (Material, Material, MaterialProperties) LoadMaterials(MaterialProperties properties, string bodyName, string dropName = null)
     {
-        Material body =  Resources.Load("Materials/" + bodyName, typeof(Material)) as Material;
+        Material body =  Resources.Load<Material>(bodyName);
         Material drop = body;
 
         if (dropName != null)
         {
-            drop =  Resources.Load("Materials/" + dropName, typeof(Material)) as Material;
+            drop =  Resources.Load<Material>(dropName);
         }
 
         return (body, drop, properties);

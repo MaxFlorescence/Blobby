@@ -39,8 +39,8 @@ public static class TileTypeExtensions
     /// </returns>
     public static (GameObject, Sprite) LoadCorridorAssets(string tileName)
     {
-        GameObject prefab = Resources.Load("DungeonPrefabs/Corridors/" + tileName, typeof(GameObject)) as GameObject;
-        Sprite sprite = Resources.Load("Images/Minimap Icons/" + tileName, typeof(Sprite)) as Sprite;
+        GameObject prefab = Resources.Load<GameObject>(Utilities.DUNGEON_CORRIDORS_PATH + tileName);
+        Sprite sprite = Resources.Load<Sprite>(Utilities.MINIMAP_ICONS_PATH + tileName);
 
         return (prefab, sprite);
     }

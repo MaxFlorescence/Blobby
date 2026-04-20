@@ -68,9 +68,9 @@ public class Chest : Grip
     {
         base.Start();
         animator = GetComponent<Animator>();
-        chestOpen = Utilities.LoadAudioClip(CHEST_OPEN_SOUND);
-        chestClose = Utilities.LoadAudioClip(CHEST_CLOSE_SOUND);
-        chestLoot = Utilities.LoadAudioClip(CHEST_LOOT_SOUND);
+        chestOpen = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + CHEST_OPEN_SOUND);
+        chestClose = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + CHEST_CLOSE_SOUND);
+        chestLoot = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + CHEST_LOOT_SOUND);
 
         contentsLight = contents.GetComponentInChildren<Light>();
     }

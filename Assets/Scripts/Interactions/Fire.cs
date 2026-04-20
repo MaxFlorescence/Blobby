@@ -50,10 +50,10 @@ public class Fire : Interactable
     {
         fireLight = GetComponentsInChildren<FireLight>()[0];
         fireParticles = GetComponentsInChildren<ParticleSystem>()[0];
-        
+
         audioSource = GetComponent<AudioSource>();
-        fireIgnite = Resources.Load("Sounds/fire_ignite", typeof(AudioClip)) as AudioClip;
-        fireSizzle = Resources.Load("Sounds/fire_sizzle", typeof(AudioClip)) as AudioClip;
+        fireIgnite = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + "fire_ignite");
+        fireSizzle = Resources.Load<AudioClip>(Utilities.SOUNDS_PATH + "fire_sizzle");
 
         fireRenderers = flames.GetComponentsInChildren<Renderer>().ToArray();
         timer = new(fadeTime);
