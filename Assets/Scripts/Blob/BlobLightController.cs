@@ -6,7 +6,13 @@ using System;
 /// </summary>
 public enum BlobLight
 {
+    /// <summary>
+    ///     A light that illuminates inventory objects.
+    /// </summary>
     Inventory_Icon = 0,
+    /// <summary>
+    ///     A light that corresponds to a blob material.
+    /// </summary>
     Material_Glow = 1
 }
 

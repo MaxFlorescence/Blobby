@@ -34,7 +34,7 @@ public static class Rotation
             "back" => Back,
             "left" => Left,
             "down" => Down,
-            _ => throw new FormatException('\"' + rotation + "\" does not represent an available rotation!"),
+            _ => throw new FormatException($"\"{rotation}\" does not represent an available rotation!"),
         };
     }
 }

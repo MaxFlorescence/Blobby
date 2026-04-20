@@ -20,9 +20,9 @@ public class FinishMenu : Menu
     protected override void OnShow() {
         if (hasWon) {
             winText.SetActive(true);
-            GameInfo.FinishStatus = FinishState.WON;
+            GameInfo.FinishStatus = FinishState.Won;
         } else {
-            GameInfo.FinishStatus = FinishState.LOST;
+            GameInfo.FinishStatus = FinishState.Lost;
             failBackground.SetActive(true);
         }
     }

@@ -296,7 +296,7 @@ public class BlobController : MonoBehaviour, Controllable
     {
         MoveInventoryCamera();
 
-        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.PAUSED)
+        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.Paused)
             return;
 
         if (controlCanRelease && Input.GetKeyDown(KeyCode.Q))

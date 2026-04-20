@@ -1,17 +1,17 @@
-using UnityEngine;
-using UnityEngine.UIElements;
-
 /// <summary>
-///     States for controlling the gripped object.
+///     The different states that the game can be in.
 /// </summary>
 public enum GameState
 {
-    PAUSED, PLAYING, UNSTARTED
+    Paused, Playing, Unstarted
 }
 
+/// <summary>
+///     The different states that the game can finish in.
+/// </summary>
 public enum FinishState
 {
-    WON, LOST, UNFINISHED
+    Won, Lost, Unfinished
 }
 
 public static class GameInfo
@@ -26,8 +26,8 @@ public static class GameInfo
     // Game State
     public static bool DebugMode { get; set; } = false;
     public static bool StartCutscene { get; set; } = false;
-    public static GameState GameStatus { get; set; } = GameState.UNSTARTED;
-    public static FinishState FinishStatus { get; set; } = FinishState.UNFINISHED;
+    public static GameState GameStatus { get; set; } = GameState.Unstarted;
+    public static FinishState FinishStatus { get; set; } = FinishState.Unfinished;
     public static bool PauseAudio { get; set; } = false;
     public static bool ControlledCameraIsMain { get; set; } = false;
 

@@ -1,8 +1,25 @@
 using Unity.Mathematics;
 
+/// <summary>
+///     Options for controlling a timer's behavior upon exceeding its interval.
+/// </summary>
 public enum TimerMode
 {
-    Repeat, Pulse, Toggle
+    /// <summary>
+    ///     On the update that the timer exceeded its interval, and only on that update, restart and
+    ///     return true.
+    /// </summary>
+    Repeat,
+    /// <summary>
+    ///     On the update that the timer exceeded its interval, and only on that update, return
+    ///     true.
+    /// </summary>
+    Pulse,
+    /// <summary>
+    ///     On the update that the timer exceeded its interval, and on all subsequent updates
+    ///     (unless restarted), return true.
+    /// </summary>
+    Toggle
 }
 
 /// <summary>

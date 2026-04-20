@@ -5,7 +5,22 @@ using UnityEngine;
 /// </summary>
 public enum GripState
 {
-    Idle, Grabbing, Held, Releasing
+    /// <summary>
+    ///     The grip object is not being held by any inventory and is not in transit.
+    /// </summary>
+    Idle,
+    /// <summary>
+    ///     The grip object is in transit from being idle to being held.
+    /// </summary>
+    Grabbing,
+    /// <summary>
+    ///     The grip object is held by an inventory.
+    /// </summary>
+    Held,
+    /// <summary>
+    ///     The grip object is in transit from being held to being idle.
+    /// </summary>
+    Releasing
 }
 
 [RequireComponent(typeof(Rigidbody))]
@@ -109,7 +124,7 @@ public class Grip : Interactable
     /// </summary>
     public void FixedUpdate()
     {
-        if (GameInfo.GameStatus == GameState.PAUSED) return;
+        if (GameInfo.GameStatus == GameState.Paused) return;
 
         if (gripState == GripState.Grabbing)
         {

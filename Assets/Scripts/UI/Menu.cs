@@ -32,7 +32,7 @@ public class Menu : MonoBehaviour
 
     public void HideMenu() {
         menuActive = false;
-        GameInfo.GameStatus = GameState.PLAYING;
+        GameInfo.GameStatus = GameState.Playing;
         GameInfo.PauseAudio = false;
 
         Time.timeScale = 1;
@@ -47,10 +47,10 @@ public class Menu : MonoBehaviour
     virtual protected void OnHide() {}
 
     public void ShowMenu() {
-        if (GameInfo.GameStatus != GameState.PAUSED)
+        if (GameInfo.GameStatus != GameState.Paused)
         {
             menuActive = true;
-            GameInfo.GameStatus = GameState.PAUSED;
+            GameInfo.GameStatus = GameState.Paused;
             if (menuPausesAudio) GameInfo.PauseAudio = true;
             
 
@@ -67,7 +67,7 @@ public class Menu : MonoBehaviour
     protected void QuitToMain()
     {
         HideMenu();
-        GameInfo.GameStatus = GameState.UNSTARTED;
+        GameInfo.GameStatus = GameState.Unstarted;
         UnityEngine.SceneManagement.SceneManager.LoadScene(GameInfo.MAIN_MENU);
     }
 

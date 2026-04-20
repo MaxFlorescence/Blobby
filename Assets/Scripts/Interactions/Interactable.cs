@@ -20,7 +20,7 @@ public abstract class Interactable : MonoBehaviour
     /// </summary>
     public void Update()
     {
-        if (GameInfo.GameStatus == GameState.PAUSED) return;
+        if (GameInfo.GameStatus == GameState.Paused) return;
         
         if (cooldownTimer.Update(mode: TimerMode.Pulse))
         {
