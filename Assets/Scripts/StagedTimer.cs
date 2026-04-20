@@ -1,9 +1,12 @@
+using UnityEngine.Assertions;
+
 public struct StageState
 {
     /// <summary>
     ///     The stage the StagedTimer is currently in.
     /// </summary>
     public int stage;
+    public string stageName;
     /// <summary>
     ///     The progression of the StagedTime through its current stage.
     /// </summary>
@@ -28,6 +31,12 @@ public class StagedTimer : Timer
     /// </summary>
     private readonly float[] subintervals;
     private readonly int subintervalCount;
+    
+    /// <summary>
+    ///     Names to use to refer to each of the timer's subintervals.
+    /// </summary>
+    private readonly string[] stageNames;
+    
     private int lastStage;
 
     /// <param name="subintervals">
@@ -40,11 +49,18 @@ public class StagedTimer : Timer
     ///         Timestep: 0123456789
     ///     </code>
     /// </param>
-    public StagedTimer(params float[] subintervals)
+    /// <param name="stageNames">
+    ///     Optional names by which to refer to each stage.
+    /// </param>
+    public StagedTimer(float[] subintervals, string[] stageNames = null)
     {
         this.subintervals = subintervals;
-
         subintervalCount = subintervals.Length;
+
+        if (stageNames != null)
+            Assert.AreEqual(subintervalCount, stageNames.Length);
+        this.stageNames = stageNames;
+
         subintervalsCumulative = new float[subintervalCount + 1];
         lastStage = subintervalCount;
 
@@ -61,7 +77,7 @@ public class StagedTimer : Timer
     {
         bool baseResult = base.Update(increment, mode);
 
-        StageState state = GetStage();
+        StageState state = GetState();
         lastStage = state.stage;
 
         return baseResult;
@@ -71,7 +87,7 @@ public class StagedTimer : Timer
     ///     Returns the progress through stages that the timer currently has as a
     ///     <tt>StageState</tt> object.
     /// </returns>
-    public StageState GetStage()
+    public StageState GetState()
     {
         StageState state = new() {
             stage = subintervalCount,
@@ -89,6 +105,7 @@ public class StagedTimer : Timer
         }
 
         state.rolledOver = state.stage != lastStage;
+        state.stageName = stageNames == null ? state.stage.ToString() : stageNames[state.stage];
 
         return state;
     }
