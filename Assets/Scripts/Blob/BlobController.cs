@@ -136,7 +136,7 @@ public class BlobController : MonoBehaviour, Controllable
         audioSource = gameObject.AddComponent<AudioSource>();
         inventory = gameObject.AddComponent<Inventory>();
         inventory.SetCapacity(CARRYING_CAPACITY);
-        inventory.SetDisplayMode(DisplayMode.UI);
+        inventory.SetDisplayMode(DisplayMode.UI_Only);
     }
 
     void Start()
