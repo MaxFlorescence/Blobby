@@ -122,7 +122,7 @@ public class Cannon : Interactable, Controllable
         if (verticalInput != 0) AimBarrel(verticalInput * angularSpeedFactor);
 
         // use a cooldown timer between loading / unloading tasks
-        if (!controlCooldownTimer.Update(reset: false)) return;
+        if (!controlCooldownTimer.Update(mode: TimerMode.Toggle)) return;
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
