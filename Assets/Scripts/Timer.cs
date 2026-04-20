@@ -144,4 +144,17 @@ public class Timer
     {
         return 1 - Progress();
     }
+
+    /// <returns>
+    ///     <tt>True</tt> iff the timer is complete.
+    /// </returns>
+    public bool Complete()
+    {
+        return Time >= Interval;
+    }
+
+    public override string ToString()
+    {
+        return $"Timer(Interval = {Interval:F3}, Time = {Time:F3})";
+    }
 }
