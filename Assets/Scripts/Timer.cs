@@ -78,7 +78,7 @@ public class Timer
     ///     <br/>
     ///     <tt>mode = TimerMode.Toggle</tt> ...and on all subsequent updates (unless restarted), return true.
     /// </returns>
-    public bool Update(float increment = 0, TimerMode mode = TimerMode.Repeat)
+    public virtual bool Update(float increment = 0, TimerMode mode = TimerMode.Repeat)
     {
         bool wasRunning = Running;
 
