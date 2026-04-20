@@ -15,7 +15,7 @@ public enum GripState
 public class Grip : Interactable
 {
     //----------------------------------------------------------------------------------------------
-    // Audio
+    // AUDIO
     //----------------------------------------------------------------------------------------------
     protected AudioSource audioSource;
     /// <summary>
@@ -28,8 +28,10 @@ public class Grip : Interactable
     public Vector2 randomPitchBounds = new(0.8f, 1.2f);
 
     //----------------------------------------------------------------------------------------------
-    // Movement
+    // MOVEMENT
     //----------------------------------------------------------------------------------------------
+    private Collider[] gripColliders;
+    private Rigidbody gripRigidbody;
     /// <summary>
     ///     Minimum fraction of the remaining distance that the object moves towards the blob
     ///     during each physics update.
@@ -49,7 +51,7 @@ public class Grip : Interactable
     public float spinFactor = 0.5f;
 
     //----------------------------------------------------------------------------------------------
-    // Scaling
+    // SCALING
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The multiplier for the object's scale once it is grabbed.
@@ -65,7 +67,7 @@ public class Grip : Interactable
     private Vector3 initialScale;
 
     //----------------------------------------------------------------------------------------------
-    // Cooldown
+    // COOLDOWN
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The duration of the grabbing cooldown period.
@@ -77,7 +79,7 @@ public class Grip : Interactable
     private float cooldownScaleDuration = 0.5f;
 
     //----------------------------------------------------------------------------------------------
-    // State
+    // STATE
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     The current state of the gripped object.
@@ -93,12 +95,6 @@ public class Grip : Interactable
     ///    The cost of carrying the object, charged to <tt>currentHolder</tt>'s carrying capacity.
     /// </summary>
     public int burden = 1;
-
-    //----------------------------------------------------------------------------------------------
-    // Components
-    //----------------------------------------------------------------------------------------------
-    private Collider[] gripColliders;
-    private Rigidbody gripRigidbody;
 
     protected virtual void Start()
     {
@@ -128,6 +124,9 @@ public class Grip : Interactable
         }
     }
 
+    /// <summary>
+    ///     Performs update tasks required by grip objects in the <tt>GripState.Grabbing</tt> state.
+    /// </summary>
     private void HandleGrabbingUpdate()
     {
         Vector3 translation = currentHolder.GetDisplayPosition() - transform.position;
@@ -177,6 +176,14 @@ public class Grip : Interactable
         }
     }
 
+    /// <summary>
+    ///     Attempt to transfer this grip object into the given inventory, removing it from
+    ///     its current inventory if necessary.
+    /// </summary>
+    /// <param name="inventory">
+    ///     The inventory to add this grip object to.
+    /// </param>
+    /// <returns></returns>
     public bool TryJoin(Inventory inventory)
     {
         // transfer between inventories if necessary
@@ -205,8 +212,19 @@ public class Grip : Interactable
     }
 
     /// <summary>
-    ///     Public interface for releasing the object.
+    ///     Attempt to drop this grip object from its current inventory at the given position and
+    ///     with the given impulse.
     /// </summary>
+    /// <param name="skipCooldown">
+    ///     If <tt>true</tt>, skips the interaction cooldown usually applied after this object is
+    ///     interacted with.
+    /// </param>
+    /// <param name="exitPosition">
+    ///     The world position at which to begin this object's releasing process.
+    /// </param>
+    /// <param name="exitImpulse">
+    ///     The impulse to apply to this object when its releasing process begins.
+    /// </param>
     public bool TryLeaveInventory(bool skipCooldown = false, Vector3? exitPosition = null, Vector3? exitImpulse = null)
     {
         if (currentHolder == null || currentHolder.TryToRemove(gameObject) == null) return false;
@@ -215,7 +233,21 @@ public class Grip : Interactable
         return true;
     }
 
-    public void GetDropped(bool skipCooldown = false, Vector3? exitPosition = null, Vector3? exitImpulse = null)
+    /// <summary>
+    ///     Turns this grip object back into an independent object, moving it to the given position
+    ///     and imparting the given impulse to it.
+    /// </summary>
+    /// <param name="skipCooldown">
+    ///     If <tt>true</tt>, skips the interaction cooldown usually applied after this object is
+    ///     interacted with.
+    /// </param>
+    /// <param name="exitPosition">
+    ///     The world position at which to begin this object's releasing process.
+    /// </param>
+    /// <param name="exitImpulse">
+    ///     The impulse to apply to this object when its releasing process begins.
+    /// </param>
+    private void GetDropped(bool skipCooldown = false, Vector3? exitPosition = null, Vector3? exitImpulse = null)
     {
         lastHolder = currentHolder;
         currentHolder = null;
@@ -242,7 +274,8 @@ public class Grip : Interactable
     }
 
     /// <summary>
-    ///     Transition between Releasing and Idle states.
+    ///     Transition between Releasing and Idle states if this object is not intersecting a blob.
+    ///     Otherwise restart the cooldown.
     /// </summary>
     protected override void OnInteractionCooldownEnd()
     {
@@ -260,13 +293,6 @@ public class Grip : Interactable
         }
 
         BecomeIdle();
-    }
-
-    private void BecomeIdle()
-    {
-        UpdateState(GripState.Idle);
-        SetScale(1);
-        IgnoreAtomCollisions(false);
     }
 
     /// <summary>
@@ -329,6 +355,13 @@ public class Grip : Interactable
             transform.localScale = scale * initialScale;
             currentScaleFactor = scale;
         }
+    }
+
+    private void BecomeIdle()
+    {
+        UpdateState(GripState.Idle);
+        SetScale(1);
+        IgnoreAtomCollisions(false);
     }
 
     private void UpdateState(GripState newState)
