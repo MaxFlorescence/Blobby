@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.Assertions;
 
 public struct StageState
@@ -30,17 +31,17 @@ public class StagedTimer : Timer
     /// <summary>
     ///     A cumulative span of <tt>subintervals</tt>.
     /// </summary>
-    private readonly float[] subintervalsCumulative;
+    private float[] subintervalsCumulative;
     /// <summary>
     ///     The sub-intervals that the timer's main interval is split into.
     /// </summary>
-    private readonly float[] subintervals;
+    private float[] subintervals;
     private readonly int subintervalCount;
 
     /// <summary>
     ///     Names to use to refer to each of the timer's subintervals.
     /// </summary>
-    private readonly string[] stageNames;
+    private string[] stageNames;
     
     private int lastStage;
 
@@ -59,25 +60,37 @@ public class StagedTimer : Timer
     /// </param>
     public StagedTimer(float[] subintervals, string[] stageNames = null)
     {
-        this.subintervals = subintervals;
         subintervalCount = subintervals.Length;
+        SetIntervals(subintervals, stageNames);
+    }
 
+    public override void SetInterval(float interval)
+    {
+        throw new InvalidOperationException("Cannot manually set the main interval of a StagedTimer!");   
+    }
+
+    public void SetIntervals(float[] subintervals, string[] stageNames = null)
+    {
+        Assert.AreEqual(subintervalCount, subintervals.Length);
         if (stageNames != null)
             Assert.AreEqual(subintervalCount, stageNames.Length);
-        this.stageNames = new string[subintervalCount + 1];
-        this.stageNames[subintervalCount] = "Completed";
-
-        subintervalsCumulative = new float[subintervalCount + 1];
-        lastStage = subintervalCount;
+        
+        this.subintervals = subintervals;
+        subintervalsCumulative ??= new float[subintervalCount + 1];
+        this.stageNames ??= new string[subintervalCount + 1];
 
         subintervalsCumulative[0] = 0;
+        this.stageNames[subintervalCount] = "Completed";
+
         for (int i = 1; i < subintervalCount + 1; i++)
         {
             subintervalsCumulative[i] = subintervalsCumulative[i-1] + subintervals[i-1];
-            this.stageNames[i-1] = stageNames[i-1];
+            this.stageNames[i-1] = stageNames?[i-1] ?? $"Stage {i-1}";
         }
 
-        SetInterval(subintervalsCumulative[subintervalCount]);
+        lastStage = subintervalCount;
+
+        GoSetInterval(subintervalsCumulative[subintervalCount]);
     }
 
     public override bool Update(float increment = 0, TimerMode mode = TimerMode.Repeat)

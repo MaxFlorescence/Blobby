@@ -30,22 +30,22 @@ public class Timer
     /// <summary>
     ///     The interval in seconds that the timer is set to run for.
     /// </summary>
-    public float Interval { get; private set; }
+    public float Interval { get; protected set; }
     /// <summary>
     ///     The current time on the timer.
     /// </summary>
-    public float Time { get; private set; } = 0;
+    public float Time { get; protected set; } = 0;
     /// <summary>
     ///     <tt>True</tt> iff the timer's time has not exceeded its set interval.
     /// </summary>
-    public bool Running { get; private set; } = false;
+    public bool Running { get; protected set; } = false;
 
     /// <param name="interval">
     ///     The interval in seconds that the timer is set to run for.
     /// </param>
     public Timer(float interval = 0)
     {
-        SetInterval(interval);
+        GoSetInterval(interval);
     }
 
     /// <summary>
@@ -114,7 +114,12 @@ public class Timer
         Running = true;
     }
 
-    public void SetInterval(float interval)
+    public virtual void SetInterval(float interval)
+    {
+        GoSetInterval(interval);
+    }
+    
+    protected void GoSetInterval(float interval)
     {
         Interval = math.max(0, interval);
 
