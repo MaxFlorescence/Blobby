@@ -8,6 +8,9 @@ using UnityEngine;
 [Serializable, Inspectable]
 public struct ObjectKeyPoint
 {
+    public static readonly string MOVING = "Moving";
+    public static readonly string PAUSED = "Paused";
+
     /// <summary>
     ///     The position of the object at this key point.
     /// </summary>
@@ -32,6 +35,26 @@ public struct ObjectKeyPoint
         this.orientation = orientation.normalized;
         this.moveTime = moveTime;
         this.pauseTime = pauseTime;
+    }
+
+    public override string ToString()
+    {
+        return $"ObjectKeyPoint(position = {position}, orientation = {orientation}, moveTime = {moveTime}, pauseTime = {pauseTime})";
+    } 
+}
+
+public static class ObjectKeyPointExtensions
+{
+    private static readonly string[] STAGES = {ObjectKeyPoint.MOVING, ObjectKeyPoint.PAUSED};
+    
+    /// <returns>
+    ///     A two-stage StagedTimer corresponding to the ObjectKeyPoint's moveTime and
+    ///     pauseTime values. The two stages will be named using <tt>ObjectKeyPoint.MOVING</tt> and
+    ///     <tt>ObjectKeyPoint.PAUSED</tt>.
+    /// </returns>
+    public static StagedTimer MakeTimer(this ObjectKeyPoint point)
+    {
+        return new(new float[] {point.moveTime, point.pauseTime}, STAGES);
     }
 }
 
@@ -58,10 +81,6 @@ public class MovingObject : MonoBehaviour
     // STATE
     // ---------------------------------------------------------------------------------------------
     /// <summary>
-    ///     Indicates if the object is in a moving time interval.
-    /// </summary>
-    private bool objectIsMoving;
-    /// <summary>
     ///     Indicates if the object is progressing through its key points.
     /// </summary>
     private bool playing = true;
@@ -75,18 +94,25 @@ public class MovingObject : MonoBehaviour
     ///     amount of time to pause for before starting the next key point.
     /// </summary>
     public ObjectKeyPoint[] keyPoints;
+    /// <summary>
+    ///     The list of StagedTimers corresponding to the object key points.
+    /// </summary>
+    private StagedTimer[] keyPointTimers;
     private int currentKeyPoint;
-    private Timer timer = new();
 
     void Start()
     {
-        if (localCoordinates)
+        keyPointTimers = new StagedTimer[keyPoints.Length];
+
+        for (int i = 0; i < keyPoints.Length; i++)
         {
-            // ensure coordinates are world-based
-            for (int i = 0; i < keyPoints.Length; i++)
+            if (localCoordinates)
             {
+                // ensure coordinates are world-based and timers are initialized
                 keyPoints[i].position = transform.parent.TransformPoint(keyPoints[i].position);
             }
+
+            keyPointTimers[i] = keyPoints[i].MakeTimer();
         }
 
         if (keyPoints.Length == 0)
@@ -103,8 +129,7 @@ public class MovingObject : MonoBehaviour
     {
         // skip move time for first key point
         currentKeyPoint = 0;
-        objectIsMoving = false;
-        timer.SetInterval(keyPoints[0].pauseTime);
+        keyPointTimers[0].GoToStage(ObjectKeyPoint.PAUSED);
         transform.position = keyPoints[0].position;
         transform.LookAt(keyPoints[0].position + keyPoints[0].orientation);
 
@@ -140,45 +165,30 @@ public class MovingObject : MonoBehaviour
     {
         if (!playing) return;
 
-        if (loop && currentKeyPoint >= keyPoints.Length)
-        {
-            currentKeyPoint = 0;
+        if (keyPointTimers[currentKeyPoint].Update()) {
+            currentKeyPoint++;
+            if (loop && currentKeyPoint >= keyPoints.Length) currentKeyPoint = 0;
         }
 
-        if (currentKeyPoint < keyPoints.Length)
+        StageState timerState = keyPointTimers[currentKeyPoint].State;
+
+        if (timerState.stageName == ObjectKeyPoint.MOVING)
         {
-            if (timer.Update())
-            {
-                objectIsMoving = !objectIsMoving;
+            // interpolate position linearly
+            Vector3 position = Vector3.Lerp(
+                keyPoints.ModularGet(currentKeyPoint - 1).position,
+                keyPoints.ModularGet(currentKeyPoint).position,
+                timerState.progress
+            );
+            // interpolate direction spherically
+            Vector3 direction = Vector3.Slerp(
+                keyPoints.ModularGet(currentKeyPoint - 1).orientation, 
+                keyPoints.ModularGet(currentKeyPoint).orientation,
+                timerState.progress
+            );
 
-                if (objectIsMoving)
-                {
-                    // interpolation for last point has finished
-                    currentKeyPoint++;
-                    timer.SetInterval(keyPoints.ModularGet(currentKeyPoint).moveTime);
-                } else {
-                    timer.SetInterval(keyPoints[currentKeyPoint].pauseTime);
-                }
-            }
-
-            if (objectIsMoving)
-            {
-                // interpolate position linearly
-                Vector3 position = Vector3.Lerp(
-                    keyPoints.ModularGet(currentKeyPoint - 1).position,
-                    keyPoints.ModularGet(currentKeyPoint).position,
-                    timer.Progress()
-                );
-                // interpolate direction spherically
-                Vector3 direction = Vector3.Slerp(
-                    keyPoints.ModularGet(currentKeyPoint - 1).orientation, 
-                    keyPoints.ModularGet(currentKeyPoint).orientation,
-                    timer.Progress()
-                );
-
-                transform.position = position;
-                transform.LookAt(position + direction);
-            }
+            transform.position = position;
+            transform.LookAt(position + direction);
         }
     }
 }

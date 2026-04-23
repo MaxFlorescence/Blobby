@@ -35,7 +35,8 @@ public class StagedTimer : Timer
     /// <summary>
     ///     The sub-intervals that the timer's main interval is split into.
     /// </summary>
-    private float[] subintervals;
+    public float[] Subintervals { get; private set; }
+
     private readonly int subintervalCount;
 
     /// <summary>
@@ -43,7 +44,10 @@ public class StagedTimer : Timer
     /// </summary>
     private string[] stageNames;
     
-    private int lastStage;
+    /// <summary>
+    ///     The current state of the StagedTimer.
+    /// </summary>
+    public StageState State;
 
     /// <param name="subintervals">
     ///     The sub-intervals that the timer's main interval is split into. For example:
@@ -74,8 +78,11 @@ public class StagedTimer : Timer
         Assert.AreEqual(subintervalCount, subintervals.Length);
         if (stageNames != null)
             Assert.AreEqual(subintervalCount, stageNames.Length);
+
+        foreach (float subinterval in subintervals)
+            Assert.IsTrue(subinterval > 0);
         
-        this.subintervals = subintervals;
+        Subintervals = subintervals;
         subintervalsCumulative ??= new float[subintervalCount + 1];
         this.stageNames ??= new string[subintervalCount + 1];
 
@@ -88,7 +95,12 @@ public class StagedTimer : Timer
             this.stageNames[i-1] = stageNames?[i-1] ?? $"Stage {i-1}";
         }
 
-        lastStage = subintervalCount;
+        State = new() {
+            stage = 0,
+            stageName = stageNames[0],
+            progress = 0,
+            rolledOver = false
+        };
 
         GoSetInterval(subintervalsCumulative[subintervalCount]);
     }
@@ -97,41 +109,67 @@ public class StagedTimer : Timer
     {
         bool baseResult = base.Update(increment, mode);
 
-        StageState state = GetState();
-        lastStage = state.stage;
+        UpdateState(baseResult, mode);
 
         return baseResult;
     }
 
-    /// <returns>
-    ///     Returns the progress through stages that the timer currently has as a
-    ///     <tt>StageState</tt> object.
-    /// </returns>
-    public StageState GetState()
+    /// <summary>
+    ///     Updates the timer's <tt>StageState</tt> incrementally. This assumes each update's time
+    ///     increment is short enough to not roll over through more than one state at a time.
+    /// </summary>
+    private void UpdateState(bool baseResult, TimerMode mode)
     {
-        StageState state = new() {
-            stage = subintervalCount,
-            progress = 0
-        };
-
-        for (int i = 0; i < subintervalCount; i++)
+        if (baseResult && mode == TimerMode.Repeat)
         {
-            if (Time < subintervalsCumulative[i+1])
-            {
-                state.stage = i;
-                state.progress = (Time - subintervalsCumulative[i]) / subintervals[i];
-                break;
-            }
+            State.stage = 0;
+            State.rolledOver = true;
+        }
+        else if (State.stage < subintervalCount-1 && Time >= subintervalsCumulative[State.stage + 1]) {
+            State.stage++;
+            State.rolledOver = true;
         }
 
-        state.rolledOver = state.stage != lastStage;
-        state.stageName = stageNames == null ? state.stage.ToString() : stageNames[state.stage];
+        State.progress = (Time - subintervalsCumulative[State.stage]) / Subintervals[State.stage];
+        State.stageName = stageNames[State.stage];
+    }
 
-        return state;
+    /// <returns>
+    ///     The sub-intervals of the timer's main interval that corresponds to the given stage.
+    ///     <br/>    
+    ///     If no stage matches the given stage name, returns 0.
+    /// </returns>
+    public float GetSubinterval(string stageName)
+    {
+        int index = Array.IndexOf(stageNames, stageName);
+        return index < 0 ? 0 : Subintervals[index];
+    }
+
+    /// <summary>
+    ///     Moves the timer's time to the start of the stage with the given stage name. If no such
+    ///     stage exists, do nothing.
+    /// </summary>
+    /// <param name="stageName">
+    ///     The name of the stage to move the timer to.
+    /// </param>
+    public void GoToStage(string stageName)
+    {
+        int stage = Array.IndexOf(stageNames, stageName);
+        if (stage >= 0) GoToStage(stage);
+    }
+
+    /// <summary>
+    ///     Moves the timer's time to the start of the given stage. If the stage index is out of
+    ///     bounds, do nothing.
+    /// </summary>
+    public void GoToStage(int stage)
+    {
+        if (stage >= 0 && stage < subintervalCount)
+            Time = subintervalsCumulative[stage];
     }
 
     public override string ToString()
     {
-        return $"StagedTimer(Interval = {Interval:F3}, Time = {Time:F3}, subintervalCount = {subintervalCount}, state = {GetState()})";
+        return $"StagedTimer(Interval = {Interval:F3}, Time = {Time:F3}, subintervalCount = {subintervalCount}, state = {State})";
     }
 }
