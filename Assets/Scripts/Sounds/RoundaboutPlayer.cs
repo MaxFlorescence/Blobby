@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+///     A class for playing end-game music.
+/// </summary>
 public class RoundaboutPlayer : MonoBehaviour
 {
     private AudioSource audioSource = null;

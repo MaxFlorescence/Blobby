@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+///     A class for playing the squishy noises that a blob makes.
+/// </summary>
 public class Squisher : MonoBehaviour
 {
     /// <summary>
