@@ -11,7 +11,7 @@ public class FinishMenu : Menu
     // ---------------------------------------------------------------------------------------------
     public bool hasWon = false;
     /// <summary>
-    ///     The scene to play upon clicking the "Restard Level" button.
+    ///     The scene to play upon clicking the "Restart Level" button.
     /// </summary>
     public string playScene = GameInfo.DEMO_LEVEL;
 
@@ -52,8 +52,14 @@ public class FinishMenu : Menu
 
         if (Input.GetKey(KeyCode.F))
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1)) ShowMenu(false);
-            else if (Input.GetKeyDown(KeyCode.Alpha2)) ShowMenu(true);
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                ShowMenu(false);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                ShowMenu(true);
+            }
         }
     }
 

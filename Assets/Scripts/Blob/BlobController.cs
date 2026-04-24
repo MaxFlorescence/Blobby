@@ -310,9 +310,18 @@ public class BlobController : MonoBehaviour, Controllable
             if (Input.GetKeyUp(KeyCode.LeftShift)) SetStickyMode(false);
 
             // left mouse shrinks, right mouse grows
-            if (Input.GetMouseButton(0)) TrySetSpringLengths(blobShrinkingFactor);
-            else if (Input.GetMouseButton(1)) TrySetSpringLengths(blobGrowingFactor);
-            else TrySetSpringLengths();
+            if (Input.GetMouseButton(0))
+            {
+                TrySetSpringLengths(blobShrinkingFactor);
+            }
+            else if (Input.GetMouseButton(1))
+            {
+                TrySetSpringLengths(blobGrowingFactor);
+            }
+            else
+            {
+                TrySetSpringLengths();
+            }
         }
 
         if (!GameInfo.DebugMode) return;
@@ -321,9 +330,18 @@ public class BlobController : MonoBehaviour, Controllable
 
         if (Input.GetKey(KeyCode.M))
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1)) SetBlobMaterials(BlobMaterials.Water);
-            else if (Input.GetKeyDown(KeyCode.Alpha2)) SetBlobMaterials(BlobMaterials.Lava);
-            else if (Input.GetKeyDown(KeyCode.Alpha3)) SetBlobMaterials(BlobMaterials.Honey);
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                SetBlobMaterials(BlobMaterials.Water);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                SetBlobMaterials(BlobMaterials.Lava);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                SetBlobMaterials(BlobMaterials.Honey);
+            }
         }
     }
 
