@@ -5,10 +5,10 @@ using UnityEngine;
 /// </summary>
 public class CheatMenu : Menu
 {
-    protected override void OnStart()
-    {
-        key = "t";
-    }
+    // protected override void OnStart()
+    // {
+    //     key = "t";
+    // }
 
     private void Teleport(Vector3 to) {
         GameInfo.ControlledBlob.Teleport(to);
