@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+///     A class defining the menu for teleporting around the demo level.
+/// </summary>
 public class CheatMenu : Menu
 {
     protected override void OnStart()

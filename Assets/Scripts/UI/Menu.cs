@@ -28,7 +28,11 @@ public class Menu : MonoBehaviour
                 ShowMenu();
             }
         }
+
+        OnUpdate();
     }
+
+    virtual protected void OnUpdate() {}
 
     public void HideMenu() {
         menuActive = false;
