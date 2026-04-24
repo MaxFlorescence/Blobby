@@ -296,47 +296,34 @@ public class BlobController : MonoBehaviour, Controllable
     {
         MoveInventoryCamera();
 
-        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.Paused)
-            return;
+        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.Paused) return;
 
-        if (controlCanRelease && Input.GetKeyDown(KeyCode.Q))
-        {
-            inventory.TryDrop();
-        }
+        if (controlCanRelease && Input.GetKeyDown(KeyCode.Q)) inventory.TryDrop();
 
         float mouseScroll = Input.mouseScrollDelta.y;
-        if (mouseScroll != 0)
-        {
-            inventory.SelectNextNonEmptyObject(mouseScroll > 0);
-        }
+        if (mouseScroll != 0) inventory.SelectNextNonEmptyObject(mouseScroll > 0);
 
         if (movementInputEnabled)
         {
-            if (Input.GetButtonDown("Jump"))
-            {
-                jumpOnNextFixedUpdate = true;
-            }
-            if (Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                SetStickyMode(true);
-            }
-            if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                SetStickyMode(false);
-            }
+            if (Input.GetButtonDown("Jump")) jumpOnNextFixedUpdate = true;
+            if (Input.GetKeyDown(KeyCode.LeftShift)) SetStickyMode(true);
+            if (Input.GetKeyUp(KeyCode.LeftShift)) SetStickyMode(false);
 
-            if (Input.GetMouseButton(0)) // left mouse shrinks
-            {
-                TrySetSpringLengths(blobShrinkingFactor);
-            }
-            else if (Input.GetMouseButton(1)) // right mouse grows
-            {
-                TrySetSpringLengths(blobGrowingFactor);
-            }
-            else
-            {
-                TrySetSpringLengths();
-            }
+            // left mouse shrinks, right mouse grows
+            if (Input.GetMouseButton(0)) TrySetSpringLengths(blobShrinkingFactor);
+            else if (Input.GetMouseButton(1)) TrySetSpringLengths(blobGrowingFactor);
+            else TrySetSpringLengths();
+        }
+
+        if (!GameInfo.DebugMode) return;
+        
+        if (Input.GetKeyDown(KeyCode.G)) ToggleGhostMode();
+
+        if (Input.GetKey(KeyCode.M))
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1)) SetBlobMaterials(BlobMaterials.Water);
+            else if (Input.GetKeyDown(KeyCode.Alpha2)) SetBlobMaterials(BlobMaterials.Lava);
+            else if (Input.GetKeyDown(KeyCode.Alpha3)) SetBlobMaterials(BlobMaterials.Honey);
         }
     }
 
@@ -438,7 +425,7 @@ public class BlobController : MonoBehaviour, Controllable
 ///     Enables/disables ghost mode for the blob. Ghost mode disables gravity and enables flying
 ///     and clipping.
 /// </summary>
-    public void ToggleGhostMode()
+    private void ToggleGhostMode()
     {
         ghostMode = !ghostMode;
         SetRestrained(ghostMode);

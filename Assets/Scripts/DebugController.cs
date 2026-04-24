@@ -13,21 +13,6 @@ class DebugController : MonoBehaviour
             Toggle();
             GameInfo.AlertSystem.Send("Debug mode is " + (GameInfo.DebugMode ? "on" : "off"));
         }
-
-        if (!GameInfo.DebugMode) return;
-        
-        if (Input.GetKeyDown(KeyCode.G))
-            GameInfo.ControlledBlob.ToggleGhostMode();
-
-        if (Input.GetKey(KeyCode.M))
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Water);
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Lava);
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-                GameInfo.ControlledBlob.SetBlobMaterials(BlobMaterials.Honey);
-        }
     }
 
     private void UpdateDebugInfo()
