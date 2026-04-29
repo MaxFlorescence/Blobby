@@ -1,9 +1,11 @@
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
-
+/// <summary>
+///     A class defining the pause menu of the game.
+/// </summary>
 public class PauseMenu : Menu
 {
+    /// <summary>
+    ///     The scene that should play when the resume button is clicked.
+    /// </summary>
     public string playScene = GameInfo.DEMO_LEVEL;
 
     protected override void OnStart()

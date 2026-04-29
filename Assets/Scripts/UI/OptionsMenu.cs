@@ -61,6 +61,9 @@ public class OptionsMenu : Menu
         }
     }
 
+    /// <summary>
+    ///     Hide this menu and show the previous menu.
+    /// </summary>
     private void ReturnToPreviousMenu()
     {
         HideMenu();
