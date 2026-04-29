@@ -190,6 +190,11 @@ public static class Extensions
         yield return new WaitForSeconds(delay);
         monoBehaviour.DelayedExecute(0, action);
     }
+
+    public static T Clone<T>(this T cloneMe) where T : struct
+    {
+        return cloneMe;
+    }
 }
 
 class Utilities : MonoBehaviour
@@ -401,5 +406,11 @@ class Utilities : MonoBehaviour
     {
         i %= m;
         return i < 0 ? i + m : i;
+    }
+
+    public static void LoadOptions()
+    {
+        TextAsset optionsFile = Resources.Load<TextAsset>("options");
+        GameInfo.options = JsonUtility.FromJson<OptionsStruct>(optionsFile.text);
     }
 }

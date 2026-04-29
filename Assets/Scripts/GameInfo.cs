@@ -21,7 +21,8 @@ public static class GameInfo
     public static readonly string DEMO_LEVEL = "Demo Level";
 
     // Settings
-    public static float MouseSensitivity { get; set; } = 1;
+    public static OptionsStruct options;
+    public static OptionsMenu OptionsMenu { get; set; }
 
     // Game State
     public static bool DebugMode { get; set; } = false;
@@ -35,6 +36,7 @@ public static class GameInfo
     public static PriorityCamera ControlledCamera { get; set; } = null;
     public static MiniMap ActiveMiniMap { get; set; } = null;
     public static Dungeon CurrentDungeon { get; set; } = null;
+    public static ConfirmationDialogMenu ConfirmationDialogMenu { get; set; } = null;
 
     public static BlobController ControlledBlob { get; private set; } = null;
     public static void SetControlledBlob(BlobController blob)
