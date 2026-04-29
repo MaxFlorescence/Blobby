@@ -1,6 +1,4 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 ///     A class defining the main menu of the game.
