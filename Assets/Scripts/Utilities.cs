@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 using IEnumerator = System.Collections.IEnumerator;
+using System.IO;
 
 public static class Rotation
 {
@@ -208,6 +209,7 @@ class Utilities : MonoBehaviour
     public static readonly string MINIMAP_ICONS_PATH = "Images/Minimap Icons/";
     public static readonly string DUNGEON_CORRIDORS_PATH = "Dungeon Prefabs/Corridors/";
     public static readonly string DUNGEON_LAYOUTS_PATH = "Dungeon Layouts/";
+    public static readonly string DEFAULT_DATA_PATH = "Default Data/";
 
     public static int DEFAULT_LAYER { get; private set; }
     public static int INVISIBLE_LAYER { get; private set; }
@@ -408,9 +410,27 @@ class Utilities : MonoBehaviour
         return i < 0 ? i + m : i;
     }
 
-    public static void LoadOptions()
+    public static T LoadPersistentOrDefaultData<T>(string filename)
     {
-        TextAsset optionsFile = Resources.Load<TextAsset>("options");
-        GameInfo.options = JsonUtility.FromJson<OptionsStruct>(optionsFile.text);
+        string dataPath = Path.Combine(Application.persistentDataPath, $"{filename}.json");
+
+        string dataString;
+        try
+        {
+            dataString = File.ReadAllText(dataPath);
+        }
+        catch (FileNotFoundException)
+        {
+            dataString = Resources.Load<TextAsset>(DEFAULT_DATA_PATH + filename).text;
+        }
+
+        return JsonUtility.FromJson<T>(dataString);
+    }
+
+    public static void SavePersistentData<T>(T data, string filename)
+    {
+        string dataPath = Path.Combine(Application.persistentDataPath, $"{filename}.json");
+        string dataString = JsonUtility.ToJson(data);
+        File.WriteAllText(dataPath, dataString);
     }
 }
