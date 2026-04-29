@@ -1,6 +1,9 @@
 using System;
 using UnityEngine.Assertions;
 
+/// <summary>
+///     A struct that describes the state of a StageTimer.
+/// </summary>
 public struct StageState
 {
     /// <summary>
