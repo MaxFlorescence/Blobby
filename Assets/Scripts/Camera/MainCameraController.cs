@@ -69,7 +69,7 @@ public class MainCameraController : PriorityCamera
 
             // rotate about axis perpendicular to mouse movement by angle proportional to mouse speed
             Vector3 axis = 10 * (transform.up * deltaX - transform.right * deltaY);
-            float angle = axis.magnitude * GameInfo.MouseSensitivity * Time.deltaTime * Mathf.Rad2Deg;
+            float angle = axis.magnitude * GameInfo.options.mouseSensitivity * Time.deltaTime * Mathf.Rad2Deg;
 
             targetOffset = Quaternion.AngleAxis(angle, axis) * targetOffset;
 

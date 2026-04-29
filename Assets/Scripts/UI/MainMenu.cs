@@ -17,28 +17,8 @@ public class MainMenu : Menu
     /// </summary>
     public bool startCutsceneOnPlay = true;
 
-/// <summary>
-///     The slider for the mouse sensitivity option.
-/// </summary>
-    public Slider mouseSlider;
-/// <summary>
-///     The text displaying the current mouse sensitivity option.
-/// </summary>
-    public TextMeshProUGUI mouseInfoText;
-
     private void Start() {
-        mouseSlider.value = GameInfo.MouseSensitivity;
-
         ShowMenu();
-    }
-
-    public void MouseSensitivitySlider() {
-        GameInfo.MouseSensitivity = mouseSlider.value;
-        SetMouseTMPInfo();
-    }
-
-    private void SetMouseTMPInfo() {
-        mouseInfoText.SetText("Mouse Sensitivity: " + (int)(100*mouseSlider.value) + "%");
     }
 
     public void PlayButton() {
@@ -46,6 +26,12 @@ public class MainMenu : Menu
         GameInfo.GameStatus = GameState.Playing;
         GameInfo.FinishStatus = FinishState.Unfinished;
         UnityEngine.SceneManagement.SceneManager.LoadScene(playScene);
+    }
+
+    public void OptionsButton()
+    {
+        HideMenu();
+        GameInfo.OptionsMenu.ShowMenu(this);
     }
 
     public void QuitButton() {
