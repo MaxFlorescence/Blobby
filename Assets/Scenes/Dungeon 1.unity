@@ -515,7 +515,6 @@ GameObject:
   - component: {fileID: 160506120}
   - component: {fileID: 160506119}
   - component: {fileID: 160506122}
-  - component: {fileID: 160506123}
   m_Layer: 0
   m_Name: Utilities
   m_TagString: Untagged
@@ -600,19 +599,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dde056ba176db74f8d673726ea8309c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &160506123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 160506118}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ba553fc37a236147934f7a94b0d7ac8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debugWindow: {fileID: 1477484527}
 --- !u!1 &171806179
 GameObject:
   m_ObjectHideFlags: 0
@@ -3001,8 +2987,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerIcon: {fileID: 1692248504}
-  tileCanvas: {fileID: 117555627}
   mapBorder: {fileID: 1544958725}
+  tileCanvas: {fileID: 117555627}
 --- !u!1001 &1192038471
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3956,6 +3942,7 @@ GameObject:
   - component: {fileID: 1477484529}
   - component: {fileID: 1477484528}
   - component: {fileID: 1477484527}
+  - component: {fileID: 1477484530}
   m_Layer: 5
   m_Name: Debug Window
   m_TagString: Untagged
@@ -4079,6 +4066,18 @@ RectTransform:
   m_AnchoredPosition: {x: 10, y: 10}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1477484530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1477484526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ba553fc37a236147934f7a94b0d7ac8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1544232422
 PrefabInstance:
   m_ObjectHideFlags: 0

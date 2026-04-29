@@ -1,29 +1,36 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+///     A class that controls the debug mode of the game.
+/// </summary>
+[RequireComponent(typeof(TextMeshProUGUI))]
 class DebugController : MonoBehaviour
 {
-    public TMP_Text debugWindow;
+    /// <summary>
+    ///     The UI element containing all the debug information that is displayed to the player.
+    /// </summary>
+    private TextMeshProUGUI debugInfo;
 
-    void Update()
+    public void Start()
     {
-        UpdateDebugInfo();
+        debugInfo = GetComponent<TextMeshProUGUI>();
+    }
+
+    public void Update()
+    {
+        debugInfo.SetText(MakeDebugText());
 
         if (Input.GetKeyDown(KeyCode.Slash)) {
-            Toggle();
+            GameInfo.DebugMode = !GameInfo.DebugMode;
             GameInfo.AlertSystem.Send("Debug mode is " + (GameInfo.DebugMode ? "on" : "off"));
         }
     }
 
-    private void UpdateDebugInfo()
+    private string MakeDebugText()
     {
-        debugWindow.text = GameInfo.DebugMode ? "<mspace=0.75em>" + GameInfo.ControlledBlob.ToString() : "";
-    }
+        if (!GameInfo.DebugMode) return "";
 
-    public void Toggle()
-    {
-        GameInfo.DebugMode = !GameInfo.DebugMode;
-
-        GameInfo.ControlledBlob.SetAtomsVisible(GameInfo.DebugMode);
+        return $"<mspace=0.75em>{GameInfo.ControlledBlob}";
     }
 }

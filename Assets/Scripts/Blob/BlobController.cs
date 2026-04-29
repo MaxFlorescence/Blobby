@@ -94,6 +94,7 @@ public class BlobController : MonoBehaviour, Controllable
     ///     Light sources attached to the blob, paired with flags indicating their default states.
     /// </summary>
     private BlobLightController blobLightController = new();
+    public bool AtomsVisible { get; private set; } = false;
 
     //----------------------------------------------------------------------------------------------
     // AUDIO
@@ -323,6 +324,8 @@ public class BlobController : MonoBehaviour, Controllable
                 TrySetSpringLengths();
             }
         }
+
+        SetAtomsVisible(GameInfo.DebugMode);
 
         if (!GameInfo.DebugMode) return;
         
@@ -701,8 +704,11 @@ public class BlobController : MonoBehaviour, Controllable
         });
     }
 
-    public void SetAtomsVisible(bool visible)
+    private void SetAtomsVisible(bool visible)
     {
+        if (AtomsVisible == visible) return;
+        AtomsVisible = visible;
+
         foreach (GameObject atom in createBlob.GetAtoms())
         {
             atom.GetComponent<AtomController>().SetVisible(visible);
