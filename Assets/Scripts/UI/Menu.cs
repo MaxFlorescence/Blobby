@@ -6,6 +6,7 @@ public class Menu : MonoBehaviour
     protected bool menuActive = false;
     protected string key = null;
     protected bool menuPausesAudio = true;
+    protected bool isSubmenu = false;
 
     void Start()
     {
@@ -35,37 +36,37 @@ public class Menu : MonoBehaviour
     virtual protected void OnUpdate() {}
 
     public void HideMenu() {
+        if (!isSubmenu)
+        {
+            GameInfo.GameStatus = GameState.Playing;
+            GameInfo.PauseAudio = false;
+            Time.timeScale = 1;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
         menuActive = false;
-        GameInfo.GameStatus = GameState.Playing;
-        GameInfo.PauseAudio = false;
-
-        Time.timeScale = 1;
         graphics.SetActive(false);
-
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
         OnHide();
     }
 
     virtual protected void OnHide() {}
 
     public void ShowMenu() {
-        if (GameInfo.GameStatus != GameState.Paused)
+        if (!isSubmenu)
         {
-            menuActive = true;
+            if (GameInfo.GameStatus == GameState.Paused) return;
+            
             GameInfo.GameStatus = GameState.Paused;
             if (menuPausesAudio) GameInfo.PauseAudio = true;
-            
-
             Time.timeScale = 0;
-            graphics.SetActive(true);
-
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-
-            OnShow();
         }
+
+        menuActive = true;
+        graphics.SetActive(true);
+        OnShow();
     }
 
     protected void QuitToMain()
