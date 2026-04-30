@@ -164,7 +164,7 @@ class DungeonLayoutGenerator
         string tileOrientation = fileTiles[index].tileOrientation;
 
         Enum.TryParse(tileName, true, out DungeonTileType tileType);
-        return (tileName, tileType, Rotation.Parse(tileOrientation));
+        return (tileName, tileType, CardinalRotation.Parse(tileOrientation));
     }
     
     /// <param name="position">

@@ -2,43 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 using IEnumerator = System.Collections.IEnumerator;
 using System.IO;
-
-public static class Rotation
-{
-    public static readonly Quaternion Up = Quaternion.Euler(-90, 0, 0);
-    public static readonly Quaternion Forward = Quaternion.identity;
-    public static readonly Quaternion Right = Quaternion.Euler(0, 90, 0);
-    public static readonly Quaternion Back = Quaternion.Euler(0, 180, 0);
-    public static readonly Quaternion Left = Quaternion.Euler(0, -90, 0);
-    public static readonly Quaternion Down = Quaternion.Euler(90, 0, 0);
-    private static readonly Quaternion[] Orientations =
-    {
-        Left, Down, Back, Forward, Up, Right
-    };
-
-    public static Quaternion Parse(Vector3Int direction)
-    {
-        return Orientations[Utilities.IntOfDirection(direction)];
-    }
-
-    public static Quaternion Parse(string rotation)
-    {
-        return rotation.ToLower() switch
-        {
-            "up" => Up,
-            "forward" => Forward,
-            "right" => Right,
-            "back" => Back,
-            "left" => Left,
-            "down" => Down,
-            _ => throw new FormatException($"\"{rotation}\" does not represent an available rotation!"),
-        };
-    }
-}
+using Unity.Mathematics;
 
 public static class Extensions
 {

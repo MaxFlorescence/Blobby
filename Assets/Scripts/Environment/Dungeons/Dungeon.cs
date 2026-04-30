@@ -266,7 +266,7 @@ public class Dungeon : MonoBehaviour
             upperBlocker.SetActive(true);
             upperBlocker.transform.SetPositionAndRotation(
                 PositionOf(centerPos) + 10*Vector3Int.up,
-                Quaternion.Euler(flip) * Rotation.Parse(stairsDir)
+                Quaternion.Euler(flip) * CardinalRotation.Parse(stairsDir)
             );
         } else
         {
@@ -288,7 +288,7 @@ public class Dungeon : MonoBehaviour
             lowerBlocker.SetActive(true);
             lowerBlocker.transform.SetPositionAndRotation(
                 PositionOf(centerPos),
-                Rotation.Parse(stairsDir)
+                CardinalRotation.Parse(stairsDir)
             );
         } else
         {
