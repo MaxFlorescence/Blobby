@@ -21,6 +21,9 @@ public enum DisplayMode
     Visible
 }
 
+/// <summary>
+///     A class for managing the contents of an inventory.
+/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class Inventory : MonoBehaviour
 {

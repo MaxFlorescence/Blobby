@@ -8,12 +8,11 @@ public enum ChestState
     Locked, Closed, Open_Full, Open_Empty
 }
 
-[RequireComponent(typeof(AudioSource))]
-[RequireComponent(typeof(Animator))]
-
 /// <summary>
 ///     Controls effects of chest interactions.
 /// </summary>
+[RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(Animator))]
 public class Chest : Grip
 {
     // ---------------------------------------------------------------------------------------------
