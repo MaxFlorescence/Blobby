@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -272,20 +274,14 @@ public class BlobController : MonoBehaviour, IControllable
         {
             for (int i = 0; i < STICKY_COUNT; i++)
             {
-                if (atomStickies[i] != null)
-                {
-                    return true;
-                }
+                if (atomStickies[i] != null) return true;
             }
         }
 
         foreach (AtomController atom in atomControllers)
-            {
-                if (atom.IsTouching(obj))
-                {
-                    return true;
-                }
-            }
+        {
+            if (atom.IsTouching(obj)) return true;
+        }
 
         return false;
     }
@@ -640,6 +636,18 @@ public class BlobController : MonoBehaviour, IControllable
         return blobMaterials.HasProperty(materialProperties);
     }
 
+    private HashSet<GameObject> TouchingObjects()
+    {
+        HashSet<GameObject> touchingUnion = new();
+
+        foreach (AtomController atom in atomControllers)
+        {
+            touchingUnion.AddAll(atom.touching);
+        }
+
+        return touchingUnion;
+    }
+
     //----------------------------------------------------------------------------------------------
     // Setters
     //----------------------------------------------------------------------------------------------
@@ -697,9 +705,9 @@ public class BlobController : MonoBehaviour, IControllable
     {
         this.DelayedExecute(delay, () =>
         {
-            foreach (GameObject atom in createBlob.GetAtoms())
+            foreach (AtomController atom in atomControllers)
             {
-                atom.GetComponent<AtomController>().SetCollider(enabled);
+                atom.SetCollider(enabled);
             }
         });
     }
@@ -709,9 +717,9 @@ public class BlobController : MonoBehaviour, IControllable
         if (AtomsVisible == visible) return;
         AtomsVisible = visible;
 
-        foreach (GameObject atom in createBlob.GetAtoms())
+        foreach (AtomController atom in atomControllers)
         {
-            atom.GetComponent<AtomController>().SetVisible(visible);
+            atom.SetVisible(visible);
         }
     }
 
@@ -730,9 +738,9 @@ public class BlobController : MonoBehaviour, IControllable
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
         Material dropMaterial = newBlobMaterials.Drops();
-        foreach (GameObject atom in createBlob.GetAtoms())
+        foreach (AtomController atom in atomControllers)
         {
-            atom.GetComponent<AtomController>().SetDropletMaterial(dropMaterial);
+            atom.SetDropletMaterial(dropMaterial);
         }
     }
 

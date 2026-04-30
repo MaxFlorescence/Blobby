@@ -196,6 +196,11 @@ public static class Extensions
     {
         return cloneMe;
     }
+
+    public static IEnumerable<T> GetEachComponent<T>(this GameObject[] objects)
+    {
+        foreach (GameObject o in objects) yield return o.GetComponent<T>();
+    }
 }
 
 class Utilities : MonoBehaviour

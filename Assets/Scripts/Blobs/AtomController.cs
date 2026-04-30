@@ -32,7 +32,7 @@ public class AtomController : MonoBehaviour
     ///     Set of objects that this atom is currently colliding with. Movement input only registers 
     ///     if this is non-empty.
     /// </summary>
-    private HashSet<GameObject> touching = new HashSet<GameObject>();
+    public HashSet<GameObject> touching = new HashSet<GameObject>();
 
     //----------------------------------------------------------------------------------------------
     // STICKING
@@ -175,16 +175,16 @@ public class AtomController : MonoBehaviour
             // touching them. This prevents players from skipping sections by moving along the boundaries.
             if (NotBounds(obj) && !touching.Contains(obj))
             {
-                if (obj.TryGetComponent<Interactable>(out var interactableObj))
-                {
-                    interactableObj.Interact(blobController);
-                }
-
-                if (!blobController.inventory.Contains(obj))
+                if (!blobController.inventory.Contains(obj) && atomCollider.enabled)
                 { // don't count grabbed objects as touching
                     touching.Add(obj);
                 }
 
+                if (obj.TryGetComponent<Interactable>(out var interactableObj))
+                {
+                    interactableObj.Interact(blobController);
+                }
+                
                 if (interactableObj == null || interactableObj.GetInteractionEnabled())
                 {
                     blobController.TrySticking(gameObject, obj);
@@ -359,8 +359,6 @@ public class AtomController : MonoBehaviour
     {
         atomCollider.enabled = enabled;
 
-        if (!enabled) {
-            touching.Clear(); 
-        }
+        if (!enabled) touching.Clear();
     }
 }
