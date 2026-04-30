@@ -635,7 +635,7 @@ public class BlobController : MonoBehaviour, Controllable
     /// <returns>
     ///     <tt>True</tt> iff the blob has the material properties.
     /// </returns>
-    public bool BlobMaterialsHas(MaterialProperties materialProperties)
+    public bool BlobMaterialsHas(BlobMaterialProperties materialProperties)
     {
         return blobMaterials.HasProperty(materialProperties);
     }
@@ -725,7 +725,7 @@ public class BlobController : MonoBehaviour, Controllable
     {
         blobMaterials = newBlobMaterials;
 
-        blobLightController.SetLight(BlobLight.Material_Glow, newBlobMaterials.HasProperty(MaterialProperties.Glowing), true);
+        blobLightController.SetLight(BlobLight.Material_Glow, newBlobMaterials.HasProperty(BlobMaterialProperties.Glowing), true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
