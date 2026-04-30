@@ -1,7 +1,7 @@
 /// <summary>
 ///     A layer between the input manager and the game object that allows control to be toggled.
 /// </summary>
-public interface Controllable
+public interface IControllable
 {
     /// <summary>
     ///     Is this object controlled?

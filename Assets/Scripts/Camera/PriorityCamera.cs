@@ -7,7 +7,7 @@ using UnityEngine;
 ///     Only one camera can be active at a time, so which one is active should depend on the
 ///     individual camera's priority and usability.
 /// </summary>
-public abstract class PriorityCamera : MonoBehaviour, Controllable
+public abstract class PriorityCamera : MonoBehaviour, IControllable
 {
     /// <summary>
     ///     The maximum priority this camera can have.

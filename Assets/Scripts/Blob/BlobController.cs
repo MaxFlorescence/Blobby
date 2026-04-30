@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
-public class BlobController : MonoBehaviour, Controllable
+public class BlobController : MonoBehaviour, IControllable
 {
     //----------------------------------------------------------------------------------------------
     // INPUT

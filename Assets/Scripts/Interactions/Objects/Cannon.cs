@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 ///     A class for controlling the actions of a cannon object.
 /// </summary>
-public class Cannon : Interactable, Controllable
+public class Cannon : Interactable, IControllable
 {
     //----------------------------------------------------------------------------------------------
     // COMPONENTS
