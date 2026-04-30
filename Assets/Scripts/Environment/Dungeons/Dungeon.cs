@@ -120,7 +120,7 @@ public class Dungeon : MonoBehaviour
         stairPositions = new Vector3Int[layoutDimensions.y, 2];
         tileLayout = new DungeonTile[layoutDimensions.x, layoutDimensions.y, layoutDimensions.z];
 
-        foreach ((int index, Vector3Int position) in Utilities.Enumerate(Utilities.Indices3D(layoutDimensions)))
+        foreach ((int index, Vector3Int position) in Utilities.Enumerate(layoutDimensions.Indices3D()))
         {
             if (generator.IsEmpty(index, position))
             {
@@ -139,7 +139,7 @@ public class Dungeon : MonoBehaviour
 
             tileLayout[position.x, position.y, position.z] = tile;
 
-            foreach (Vector3Int direction in Utilities.cardinalDirections)
+            foreach (Vector3Int direction in Vector3IntExtensions.Directions())
             {
                 Vector3Int neighbor = direction + position;
 
@@ -249,6 +249,7 @@ public class Dungeon : MonoBehaviour
     private void SetActiveNearStairs(int levelIndex, bool active)
     {
         Vector3Int centerPos, stairsDir;
+        Vector3Int adjacentBounds = new(3, 0, 3);
 
         // Upper level
         if (levelIndex < layoutDimensions.y-1)
@@ -257,10 +258,12 @@ public class Dungeon : MonoBehaviour
             Vector3Int flip = 180*stairsDir;
             centerPos = stairPositions[levelIndex+1, 1] + stairsDir;
 
-            foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
+            foreach (Vector2Int index in adjacentBounds.Indices2D())
             {
                 try {
-                    tileLayout[centerPos.x + x-1, levelIndex+1 , centerPos.z + z-1].SetVisible(active, false);
+                    tileLayout[
+                        centerPos.x + index.x-1, levelIndex+1 , centerPos.z + index.y-1
+                    ].SetVisible(active, false);
                 } catch { /* continue */ }
             }
             upperBlocker.SetActive(true);
@@ -279,10 +282,12 @@ public class Dungeon : MonoBehaviour
             stairsDir = stairPositions[levelIndex-1, 0] - stairPositions[levelIndex, 1] + Vector3Int.up;
             centerPos = stairPositions[levelIndex-1, 0] + stairsDir;
 
-            foreach ((int x, int z) in Utilities.Indices2D(new Vector3Int(3, 0, 3)))
+            foreach (Vector2Int index in adjacentBounds.Indices2D())
             {
                 try {
-                    tileLayout[centerPos.x + x-1, levelIndex-1, centerPos.z + z-1].SetVisible(active, false);
+                    tileLayout[
+                        centerPos.x + index.x-1, levelIndex-1, centerPos.z + index.y-1
+                    ].SetVisible(active, false);
                 } catch { /* continue */ }
             }
             lowerBlocker.SetActive(true);
@@ -309,17 +314,17 @@ public class Dungeon : MonoBehaviour
         levelIndex = Utilities.Clamp(levelIndex, 0, layoutDimensions.y - 1);
 
         if (activeLevelIndex >= 0) {
-            foreach ((int x, int z) in Utilities.Indices2D(layoutDimensions))
+            foreach (Vector2Int index in layoutDimensions.Indices2D())
             {
-                tileLayout[x, activeLevelIndex, z].SetVisible(false);
+                tileLayout[index.x, activeLevelIndex, index.y].SetVisible(false);
             }
             SetActiveNearStairs(activeLevelIndex, false);
         }
 
         activeLevelIndex = levelIndex;
-        foreach ((int x, int z) in Utilities.Indices2D(layoutDimensions))
+        foreach (Vector2Int index in layoutDimensions.Indices2D())
         {
-            tileLayout[x, activeLevelIndex, z].SetVisible(true);
+            tileLayout[index.x, activeLevelIndex, index.y].SetVisible(true);
         }
         SetActiveNearStairs(activeLevelIndex, true);
     }

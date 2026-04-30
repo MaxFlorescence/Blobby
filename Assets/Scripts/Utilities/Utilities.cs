@@ -34,18 +34,6 @@ public static class Extensions
         return removeWhitespace.Replace(s, "");
     }
 
-    public static float Min(this Vector3 vector, bool nonzero = false)
-    {
-        float min = float.PositiveInfinity;
-
-        if (!nonzero || vector.x > 0) min = Mathf.Min(min, vector.x);
-        if (!nonzero || vector.y > 0) min = Mathf.Min(min, vector.y);
-        if (!nonzero || vector.z > 0) min = Mathf.Min(min, vector.z);
-        if (min == float.PositiveInfinity) min = 0;
-
-        return min;
-    }
-
     public static void SetLayer(this GameObject obj, LayerMask layer)
     {
         obj.layer = layer;
@@ -69,20 +57,6 @@ public static class Extensions
     public static bool OutOfBounds(this int i, int upperBound, int lowerBound = 0)
     {
         return i < lowerBound || upperBound < i;
-    }
-
-    /// <returns>
-    ///     <tt>True</tt> iff the vector is within the given bounds (inclusive), element-wise.
-    ///     <br/>
-    ///     If the lower bound is <tt>null</tt>, it's treated as <tt>Vector3Int.zero</tt>.
-    /// </returns>
-    public static bool OutOfBounds(this Vector3Int i, Vector3Int upperBounds, Vector3Int? lowerBounds = null)
-    {
-        Vector3Int nonNullLowerBounds = (lowerBounds == null) ? Vector3Int.zero : (Vector3Int)lowerBounds;
-
-        return i.x.OutOfBounds(upperBounds.x, nonNullLowerBounds.x)
-            || i.y.OutOfBounds(upperBounds.y, nonNullLowerBounds.y)
-            || i.z.OutOfBounds(upperBounds.z, nonNullLowerBounds.z);
     }
 
     /// <typeparam name="T">
@@ -169,26 +143,20 @@ public static class Extensions
         return math.abs(actual - expected) < epsilon;
     }
 
-    public static IEnumerable<int> GetEnumerator(this Vector3Int vector)
-    {
-        yield return vector.x;
-        yield return vector.y;
-        yield return vector.z;
-        yield break;
-    }
-
-    public static IEnumerable<float> GetEnumerator(this Vector3 vector)
-    {
-        yield return vector.x;
-        yield return vector.y;
-        yield return vector.z;
-        yield break;
-    }
-
     public static int? RoundIfClose(this float number, float epsilon = 1e-3f)
     {
         int rounded = Mathf.RoundToInt(number);
         return number.Approx(rounded, epsilon) ? rounded : null;
+    }
+
+    public static IEnumerable<T> Shuffled<T>(this T[] array)
+    {
+        foreach (int i in Utilities.ArgShuffle(array))
+        {
+            yield return array[i];
+        }
+
+        yield break;
     }
 }
 
@@ -210,32 +178,6 @@ class Utilities : MonoBehaviour
     public static int INVENTORY_UI_LAYER { get; private set; }
     public static int IGNORE_CAMERA_LAYER { get; private set; }
 
-    public static readonly Vector3Int[] cardinalDirections = new Vector3Int[]
-    {
-        Vector3Int.forward,
-        Vector3Int.right,
-        Vector3Int.back,
-        Vector3Int.left,
-        Vector3Int.up,
-        Vector3Int.down
-    };
-    public static readonly Vector3Int[] planarDirections = new Vector3Int[]
-    {
-        Vector3Int.forward,
-        Vector3Int.right,
-        Vector3Int.back,
-        Vector3Int.left
-    };
-
-    public static readonly Vector3Int[] cardinalAxes = new Vector3Int[]
-    {
-        Vector3Int.right, Vector3Int.up, Vector3Int.forward
-    };
-
-    public static readonly Vector3Int[] planarAxes = new Vector3Int[]
-    {
-        Vector3Int.right, Vector3Int.forward
-    };
 
     void Awake()
     {
@@ -285,33 +227,6 @@ class Utilities : MonoBehaviour
         return n;
     }
 
-    public static IEnumerable<Vector3Int> RandomDirections(bool planar)
-    {
-        Vector3Int[] dirs = planar ? planarDirections : cardinalDirections;
-        
-        foreach (int i in ArgShuffle(dirs))
-        {
-            yield return dirs[i];
-        }
-
-        yield break;
-    }
-
-    public static IEnumerable<Vector3Int> Indices3D(Vector3Int dims)
-    {
-        for (int x = 0; x < dims.x; x++)
-        {
-            for (int y = 0; y < dims.y; y++)
-            {
-                for (int z = 0; z < dims.z; z++)
-                {
-                    yield return new(x, y, z);
-                }
-            }
-        }
-        yield break;
-    }
-
     public static IEnumerable<(int, T)> Enumerate<T>(IEnumerable<T> enumerable)
     {
         int i = 0;
@@ -321,23 +236,6 @@ class Utilities : MonoBehaviour
             i++;
         }
         yield break;
-    }
-
-    /// <summary>
-    ///     Calculates the flattened index of the given position <tt>(x, y, z)</tt>.
-    /// </summary>
-    /// <param name="xMax">
-    ///     The maximum value (+1) of the 3D indices' x component.
-    /// </param>
-    /// <param name="yMax">
-    ///     The maximum value (+1) of the 3D indices' y component.
-    /// </param>
-    /// <returns>
-    ///     <tt>flatIndex = z + yMax*(y + xMax*x)</tt>
-    /// </returns>
-    public static int IndexFlatOf(Vector3Int indices, int xMax, int yMax)
-    {
-        return indices.z + yMax * (indices.y + xMax * indices.x);
     }
 
     /// <summary>
@@ -368,18 +266,6 @@ class Utilities : MonoBehaviour
         position.z = index % yMax;
 
         return position;
-    }
-
-    public static IEnumerable<(int, int)> Indices2D(Vector3Int dims)
-    {
-        for (int x = 0; x < dims.x; x++)
-        {
-            for (int z = 0; z < dims.z; z++)
-            {
-                yield return (x, z);
-            }
-        }
-        yield break;
     }
 
     /// <param name="i"></param>

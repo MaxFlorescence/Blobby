@@ -111,8 +111,8 @@ class DungeonLayoutGenerator
         {
             if (index.OutOfBounds(tileCount-1)) {
                 if (IsInvalid(position)) throw argumentException;
-                index = Utilities.IndexFlatOf(
-                    (Vector3Int)position, layoutDimensions.x, layoutDimensions.y
+                index = ((Vector3Int)position).ToFlatIndex(
+                    layoutDimensions.x, layoutDimensions.y
                 );
             }
 

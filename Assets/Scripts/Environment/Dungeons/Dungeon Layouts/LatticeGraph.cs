@@ -131,7 +131,7 @@ public class LatticeGraph
     private void SetAsEmpty(Vector3Int node)
     {
         Lock(node, true);
-        foreach (Vector3Int dir in Utilities.planarDirections)
+        foreach (Vector3Int dir in Vector3IntExtensions.Directions(true))
         {
             Vector3Int neighbor = node + dir;
             try {
@@ -215,7 +215,7 @@ public class LatticeGraph
         int remaining = planarOnly ? 4 : 6;
         Vector3Int? rejectedDir = null;
 
-        foreach (Vector3Int dir in Utilities.RandomDirections(planarOnly))
+        foreach (Vector3Int dir in Vector3IntExtensions.Directions(planarOnly).Shuffled())
         {
             Vector3Int to = fromNode + dir;
             bool noLoops = true;
@@ -285,12 +285,12 @@ public class LatticeGraph
     /// </returns>
     public Vector3Int? FindBridgeNode(int y, bool planarOnly = true)
     {
-        foreach((int x, int z) in Utilities.Indices2D(layoutDimensions)) {
-            if (this[x, y, z].IsSet()) continue;
+        foreach(Vector2Int index in layoutDimensions.Indices2D()) {
+            if (this[index.x, y, index.y].IsSet()) continue;
 
-            foreach (Vector3Int direction in Utilities.RandomDirections(planarOnly))
+            foreach (Vector3Int direction in Vector3IntExtensions.Directions(planarOnly).Shuffled())
             {
-                Vector3Int bridge = direction + new Vector3Int(x, y, z);
+                Vector3Int bridge = direction + new Vector3Int(index.x, y, index.y);
                 if (!bridge.OutOfBounds(layoutDimensions - Vector3Int.one)
                     && this[bridge].IsSet() && !this[bridge].IsLocked())
                 {
@@ -416,7 +416,7 @@ public class LatticeGraph
     /// </exception>
     private Vector3Int AddEntrance(Vector3Int entrancePosition, Vector3Int? entranceDirection = null)
     {
-        foreach (Vector3Int dir in Utilities.RandomDirections(true))
+        foreach (Vector3Int dir in Vector3IntExtensions.Directions(true).Shuffled())
         {
             // force the direction choice if the given direction is not null
             if (entranceDirection != null && entranceDirection != dir) {
@@ -486,12 +486,12 @@ public class LatticeGraph
         HashSet<(Vector3Int, Vector3Int)> foundSpots = new();
 
         // 
-        foreach ((int x, int z) in Utilities.Indices2D(layoutDimensions))
+        foreach (Vector2Int index2D in layoutDimensions.Indices2D())
         {
-            if (this[x, y, z].IsSet()) continue;
-            Vector3Int index = new(x, y, z);
+            if (this[index2D.x, y, index2D.y].IsSet()) continue;
+            Vector3Int index = new(index2D.x, y, index2D.y);
 
-            foreach (Vector3Int axis in Utilities.planarDirections)
+            foreach (Vector3Int axis in Vector3IntExtensions.Directions(true))
             {
                 try
                 {
