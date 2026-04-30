@@ -58,7 +58,7 @@ public class Dungeon : MonoBehaviour
     {
         GameInfo.CurrentDungeon = this;
 
-        blockerPrefab = TileTypeExtensions.LoadCorridorAssets("Blocker").Item1;
+        blockerPrefab = TileTypeExtensions.LoadCorridorAssets("Blocker").prefab;
         emptyTile = gameObject.AddComponent<DungeonTile>();
         
         upperBlocker = Instantiate(blockerPrefab);
