@@ -120,7 +120,7 @@ public class Dungeon : MonoBehaviour
         stairPositions = new Vector3Int[layoutDimensions.y, 2];
         tileLayout = new DungeonTile[layoutDimensions.x, layoutDimensions.y, layoutDimensions.z];
 
-        foreach ((int index, Vector3Int position) in Utilities.EnumerateIndices3D(layoutDimensions))
+        foreach ((int index, Vector3Int position) in Utilities.Enumerate(Utilities.Indices3D(layoutDimensions)))
         {
             if (generator.IsEmpty(index, position))
             {
