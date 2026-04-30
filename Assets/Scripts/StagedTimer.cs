@@ -2,31 +2,6 @@ using System;
 using UnityEngine.Assertions;
 
 /// <summary>
-///     A struct that describes the state of a StageTimer.
-/// </summary>
-public struct StageState
-{
-    /// <summary>
-    ///     The stage the StagedTimer is currently in.
-    /// </summary>
-    public int stage;
-    public string stageName;
-    /// <summary>
-    ///     The progression of the StagedTime through its current stage.
-    /// </summary>
-    public float progress;
-    /// <summary>
-    ///     <tt>True</tt> iff the previous update caused the StagedTimer to move to its next stage.
-    /// </summary>
-    public bool rolledOver;
-
-    public override readonly string ToString()
-    {
-        return $"StageState(stage = {stage}, stageName = \"{stageName}\", progress = {progress:F3}, rolledOver = {rolledOver})";
-    }
-}
-
-/// <summary>
 ///     A class for setting and querying a timer with stages.
 /// </summary>
 public class StagedTimer : Timer
@@ -50,7 +25,7 @@ public class StagedTimer : Timer
     /// <summary>
     ///     The current state of the StagedTimer.
     /// </summary>
-    public StageState State;
+    public StagedTimerState State;
 
     /// <param name="subintervals">
     ///     The sub-intervals that the timer's main interval is split into. For example:
