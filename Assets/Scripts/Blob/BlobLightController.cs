@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 
 /// <summary>
 ///     The different types of blob lights that exist.
@@ -22,14 +21,6 @@ public enum BlobLight
 public class BlobLightController
 {
     // ---------------------------------------------------------------------------------------------
-    // BLOB LIGHTS
-    // ---------------------------------------------------------------------------------------------
-    /// <summary>
-    ///     The number of types of lights in the <tt>BlobLight</tt> enum.
-    /// </summary>
-    private readonly int TYPE_COUNT = Enum.GetNames(typeof(BlobLight)).Length;
-
-    // ---------------------------------------------------------------------------------------------
     // DATA
     // ---------------------------------------------------------------------------------------------
     private Light[] lights;
@@ -40,8 +31,9 @@ public class BlobLightController
 
     public BlobLightController()
     {
-        defaultStates = new bool[TYPE_COUNT];
-        lights = new Light[TYPE_COUNT];
+        int typeCount = Utilities.CountNames<BlobLight>();
+        defaultStates = new bool[typeCount];
+        lights = new Light[typeCount];
     }
 
     /// <summary>
@@ -73,10 +65,7 @@ public class BlobLightController
 
         lights[index].enabled = (bool)enable;
 
-        if (save)
-        {
-            defaultStates[index] = (bool)enable;
-        }
+        if (save) defaultStates[index] = (bool)enable;
     }
 
     /// <summary>

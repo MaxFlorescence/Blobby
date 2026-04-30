@@ -433,4 +433,9 @@ class Utilities : MonoBehaviour
         string dataString = JsonUtility.ToJson(data);
         File.WriteAllText(dataPath, dataString);
     }
+
+    public static int CountNames<T>() where T : Enum
+    {
+        return Enum.GetNames(typeof(T)).Length;
+    }
 }
