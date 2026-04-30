@@ -197,9 +197,31 @@ public static class Extensions
         return cloneMe;
     }
 
-    public static IEnumerable<T> GetEachComponent<T>(this GameObject[] objects)
+    public static bool Approx(this float actual, float expected, float epsilon = 1e-3f)
     {
-        foreach (GameObject o in objects) yield return o.GetComponent<T>();
+        return math.abs(actual - expected) < epsilon;
+    }
+
+    public static IEnumerable<int> GetEnumerator(this Vector3Int vector)
+    {
+        yield return vector.x;
+        yield return vector.y;
+        yield return vector.z;
+        yield break;
+    }
+
+    public static IEnumerable<float> GetEnumerator(this Vector3 vector)
+    {
+        yield return vector.x;
+        yield return vector.y;
+        yield return vector.z;
+        yield break;
+    }
+
+    public static int? RoundIfClose(this float number, float epsilon = 1e-3f)
+    {
+        int rounded = Mathf.RoundToInt(number);
+        return number.Approx(rounded, epsilon) ? rounded : null;
     }
 }
 
@@ -391,25 +413,6 @@ class Utilities : MonoBehaviour
             }
         }
         yield break;
-    }
-
-    /// <param name="direction">
-    ///     The direction to map.
-    /// </param>
-    /// <returns><code>
-    ///     Vector3.left    => 0
-    ///     Vector3.down    => 1
-    ///     Vector3.back    => 2
-    ///     Vector3.forward => 3
-    ///     Vector3.up      => 4
-    ///     Vector3.right   => 5
-    /// </code></returns>
-    public static int IntOfDirection(Vector3Int direction)
-    {
-        Assert.IsTrue(cardinalDirections.Contains(direction));
-
-        int ret = 3*direction.x + 2*direction.y + direction.z;
-        return ret + (ret < 0 ? 3 : 2);
     }
 
     /// <param name="i"></param>

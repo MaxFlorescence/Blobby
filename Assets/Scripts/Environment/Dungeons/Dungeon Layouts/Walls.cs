@@ -48,12 +48,14 @@ public enum Walls
 public static class WallsExtensions
 {
     /// <summary>
-    ///     Maps each <tt>Vector3Int</tt> direction's integer to the individual wall that it points
-    ///     toward.
+    ///     Maps each <tt>Vector3Int</tt> direction to the individual wall that it points toward.
     /// </summary>
-    private static readonly Walls[] wallsInOrder = {
-        Walls.Left, Walls.Down, Walls.Back, Walls.Forward, Walls.Up, Walls.Right
-    };
+    private static readonly DirectionMap<Walls> wallsMap = new(
+        upValue:      Walls.Up,      downValue:  Walls.Down,
+        leftValue:    Walls.Left,    rightValue: Walls.Right,
+        forwardValue: Walls.Forward, backValue:  Walls.Back,
+        defaultValue: Walls.Zero
+    );
 
     /// <param name="direction">
     ///     The direction to map to a wall.
@@ -61,8 +63,7 @@ public static class WallsExtensions
     /// <returns>
     ///     The individual wall that the given direction points toward.
     /// </returns>
-    public static Walls GetWall(this Vector3Int direction)
-        => wallsInOrder[Utilities.IntOfDirection(direction)];
+    public static Walls GetWall(this Vector3Int direction) => wallsMap[direction];
 
     /// <summary>
     ///     Mapping from Wall configurations to dungeon tile type and orientation.

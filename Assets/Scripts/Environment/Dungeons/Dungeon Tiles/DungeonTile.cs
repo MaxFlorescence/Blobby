@@ -57,7 +57,7 @@ public class DungeonTile : MonoBehaviour
     /// <summary>
     ///     References to the immediate neighbors of this tile.
     /// </summary>
-    private DungeonTile[] neighbors = new DungeonTile[6] { null, null, null, null, null, null };
+    private DirectionMap<DungeonTile> neighbors = new(null, null, null, null, null, null, null);
     /// <summary>
     ///     This tile's type.
     /// </summary>
@@ -108,7 +108,7 @@ public class DungeonTile : MonoBehaviour
     private void GoSetNeighbor(DungeonTile neighbor, Vector3Int direction) {
         if (type == DungeonTileType.Empty) return;
 
-        neighbors[Utilities.IntOfDirection(direction)] = neighbor;
+        neighbors[direction] = neighbor;
     }
 
     /// <param name="direction">
@@ -121,7 +121,7 @@ public class DungeonTile : MonoBehaviour
     {
         if (type == DungeonTileType.Empty) return null;
 
-        return neighbors[Utilities.IntOfDirection(direction)];
+        return neighbors[direction];
     }
 
     /// <summary>
