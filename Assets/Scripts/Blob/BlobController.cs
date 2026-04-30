@@ -88,7 +88,7 @@ public class BlobController : MonoBehaviour, IControllable
     // VISUALS
     //----------------------------------------------------------------------------------------------
     private MeshRenderer blobMesh;
-    private BlobMaterials blobMaterials;
+    private BlobMaterial blobMaterials;
     public Mesh dropletMesh { get; private set; }
     /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
@@ -161,7 +161,7 @@ public class BlobController : MonoBehaviour, IControllable
         blobLightController.AddLight(BlobLight.Material_Glow, lights[0], false);
         blobLightController.AddLight(BlobLight.Inventory_Icon, lights[1], false);
 
-        SetBlobMaterials(BlobMaterials.Water);
+        SetBlobMaterials(BlobMaterial.Water);
 
         SetupSounds();
     }
@@ -335,15 +335,15 @@ public class BlobController : MonoBehaviour, IControllable
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                SetBlobMaterials(BlobMaterials.Water);
+                SetBlobMaterials(BlobMaterial.Water);
             }
             else if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                SetBlobMaterials(BlobMaterials.Lava);
+                SetBlobMaterials(BlobMaterial.Lava);
             }
             else if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                SetBlobMaterials(BlobMaterials.Honey);
+                SetBlobMaterials(BlobMaterial.Honey);
             }
         }
     }
@@ -721,7 +721,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <param name="newBlobMaterials">
     ///     The blob materials to set.
     /// </param>
-    public void SetBlobMaterials(BlobMaterials newBlobMaterials)
+    public void SetBlobMaterials(BlobMaterial newBlobMaterials)
     {
         blobMaterials = newBlobMaterials;
 

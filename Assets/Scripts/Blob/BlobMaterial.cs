@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 ///     The different materials that a blob can be made of.
 /// </summary>
-public enum BlobMaterials
+public enum BlobMaterial
 {
     Water, Ice,
     Lava, Rock,
@@ -47,147 +47,120 @@ public enum BlobMaterialProperties
     Bouncy                = 0b_1000_0000_0000_0000
 }
 
-public static class BlobMaterialsExtensions
+public static class BlobMaterialExtensions
 {
     /// <summary>
-    ///     Dictionary associating each blob material to its body/drop material and its properties.
+    ///     Dictionary associating each blob material to its data.
     /// </summary>
-    private static readonly Dictionary<BlobMaterials, (Material, Material, BlobMaterialProperties)> map = new()
+    private static readonly Dictionary<BlobMaterial, BlobMaterialDataStruct> MaterialToData = new()
     {
-        {BlobMaterials.Water, LoadMaterials(
+        {BlobMaterial.Water, new BlobMaterialDataStruct(
             BlobMaterialProperties.Watery,
             Utilities.BLOB_MATERIALS_PATH + "WaterJelly"
         )},
-        {BlobMaterials.Ice, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Ice, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Icy,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Lava,  LoadMaterials(
+        {BlobMaterial.Lava,  new BlobMaterialDataStruct(
             BlobMaterialProperties.Firey,
             Utilities.BLOB_MATERIALS_PATH + "LavaJelly",
             Utilities.OBJECT_MATERIALS_PATH + "Flame"
         )},
-        {BlobMaterials.Rock,  LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Rock,  new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Heavy
             | BlobMaterialProperties.Transitions_With_Heat,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Acid, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Watery | BlobMaterialProperties.Can_Dissolve,
             Utilities.MISSING_MATERIAL_PATH
         )},
-        {BlobMaterials.Frozen_Acid, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Frozen_Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Icy,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Oil, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Oily,
             Utilities.MISSING_MATERIAL_PATH
         )},
-        {BlobMaterials.Burning_Oil, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Burning_Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Firey | BlobMaterialProperties.Slippery,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Honey, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Sweet
             | BlobMaterialProperties.Transitions_With_Cold | BlobMaterialProperties.Can_Extinguish
             | BlobMaterialProperties.Transitions_With_Heat,
             Utilities.MISSING_MATERIAL_PATH
         )},
-        {BlobMaterials.Burning_Honey, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Burning_Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Firey,
             Utilities.MISSING_MATERIAL_PATH
         )},
-        {BlobMaterials.Crystal_Honey, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Crystal_Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Sweet | BlobMaterialProperties.Solid
             | BlobMaterialProperties.Transitions_With_Heat,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Soda, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Soda, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Watery | BlobMaterialProperties.Sweet | BlobMaterialProperties.Light,
             Utilities.MISSING_MATERIAL_PATH
         )},
-        {BlobMaterials.Frozen_Soda, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Frozen_Soda, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Icy | BlobMaterialProperties.Light,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Liquid_Nitrogen, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Liquid_Nitrogen, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Can_Freeze
             | BlobMaterialProperties.Light,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Ferrofluid, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Ferrofluid, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Oily | BlobMaterialProperties.Magnetic | BlobMaterialProperties.Conductive,
             Utilities.MISSING_MATERIAL_PATH
         )},
 
-        {BlobMaterials.Rubber, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy
             | BlobMaterialProperties.Transitions_With_Heat,
             Utilities.MISSING_MATERIAL_PATH
         )},
-        {BlobMaterials.Burning_Rubber, LoadMaterials( // TODO: add body/drop materials
+        {BlobMaterial.Burning_Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy | BlobMaterialProperties.Firey,
             Utilities.MISSING_MATERIAL_PATH
         )},
     };
 
-    /// <summary>
-    ///     Loads the named material properties.
-    /// </summary>
-    /// <param name="bodyName">
-    ///     The name of the body material to load.
-    /// </param>
-    /// <param name="dropName">
-    ///     The name of the droplet material to load. If <tt>null</tt>, this is set to match the
-    ///     body material.
-    /// </param>
-    /// <returns>
-    ///     <tt>(Material, Material, MaterialProperties)</tt> (body material, drop material,
-    ///     material properties).
-    /// </returns>
-    private static (Material, Material, BlobMaterialProperties) LoadMaterials(BlobMaterialProperties properties, string bodyName, string dropName = null)
-    {
-        Material body =  Resources.Load<Material>(bodyName);
-        Material drop = body;
-
-        if (dropName != null)
-        {
-            drop =  Resources.Load<Material>(dropName);
-        }
-
-        return (body, drop, properties);
-    }
-
     /// <returns>
     ///     The body material associated with the given blob material.
     /// </returns>
-    public static Material Body(this BlobMaterials blobMaterial)
+    public static Material Body(this BlobMaterial blobMaterial)
     {
-        return map[blobMaterial].Item1;
+        return MaterialToData[blobMaterial].bodyMaterial;
     }
 
     /// <returns>
     ///     The droplet material associated with the given blob material.
     /// </returns>
-    public static Material Drops(this BlobMaterials blobMaterial)
+    public static Material Drops(this BlobMaterial blobMaterial)
     {
-        return map[blobMaterial].Item2;
+        return MaterialToData[blobMaterial].dropletMaterial;
     }
 
     /// <returns>
     ///     The property flags associated with the given blob material.
     /// </returns>
-    public static BlobMaterialProperties GetProperties(this BlobMaterials blobMaterial)
+    public static BlobMaterialProperties GetProperties(this BlobMaterial blobMaterial)
     {
-        return map[blobMaterial].Item3;
+        return MaterialToData[blobMaterial].properties;
     }
 
     /// <summary>
@@ -202,30 +175,24 @@ public static class BlobMaterialsExtensions
     /// <returns>
     ///     <tt>True</tt> iff the blob material has all of the requested properties.
     /// </returns>
-    public static bool HasProperty(this BlobMaterials blobMaterial, BlobMaterialProperties properties)
+    public static bool HasProperty(this BlobMaterial blobMaterial, BlobMaterialProperties properties)
     {
-        return (map[blobMaterial].Item3 & properties) > 0;
+        return (MaterialToData[blobMaterial].properties & properties) > 0;
     }
 
     /// <summary>
     ///     Associations between pairs of blob materials indicating transitions based on
-    ///     temperature. Each element is of the form <tt>(warmerMaterial, colderMaterial)</tt>.
-    ///     <para/>
-    ///     The <tt>warmerMaterial</tt> has the <tt>MaterialProperties.Transitions_With_Cold</tt>
-    ///     property and can transition to the <tt>colderMaterial</tt>.
-    ///     <para/>
-    ///     The <tt>colderMaterial</tt> has the <tt>MaterialProperties.Transitions_With_Heat</tt>
-    ///     property and can transition to the <tt>warmerMaterial</tt>.
+    ///     temperature.
     /// </summary>
-    private static readonly (BlobMaterials, BlobMaterials)[] TemperatureTransitions = {
-        (BlobMaterials.Water,          BlobMaterials.Ice),
-        (BlobMaterials.Lava,           BlobMaterials.Rock),
-        (BlobMaterials.Acid,           BlobMaterials.Frozen_Acid),
-        (BlobMaterials.Burning_Oil,    BlobMaterials.Oil),
-        (BlobMaterials.Honey,          BlobMaterials.Crystal_Honey),
-        (BlobMaterials.Burning_Honey,  BlobMaterials.Honey),
-        (BlobMaterials.Soda,           BlobMaterials.Frozen_Soda),
-        (BlobMaterials.Burning_Rubber, BlobMaterials.Rubber)
+    private static readonly BlobMaterialTemperaturePair[] TemperatureTransitions = {
+        new(BlobMaterial.Water,          BlobMaterial.Ice),
+        new(BlobMaterial.Lava,           BlobMaterial.Rock),
+        new(BlobMaterial.Acid,           BlobMaterial.Frozen_Acid),
+        new(BlobMaterial.Burning_Oil,    BlobMaterial.Oil),
+        new(BlobMaterial.Honey,          BlobMaterial.Crystal_Honey),
+        new(BlobMaterial.Burning_Honey,  BlobMaterial.Honey),
+        new(BlobMaterial.Soda,           BlobMaterial.Frozen_Soda),
+        new(BlobMaterial.Burning_Rubber, BlobMaterial.Rubber)
     };
 
     /// <summary>
@@ -234,7 +201,7 @@ public static class BlobMaterialsExtensions
     /// </summary>
     /// <param name="transitionProperty">
     ///     Ideally one of <tt>MaterialProperties.Transitions_With_Heat</tt> or
-    ///     <tt>MaterialProperties.Transitions_With_Cold</tt>. If otherwise, no transition will be
+    ///     <tt>MaterialProperties.Transitions_With_Cold</tt>. Otherwise, no transition will be
     ///     made.
     /// </param>
     /// <returns>
@@ -243,22 +210,23 @@ public static class BlobMaterialsExtensions
     ///     <tt>MaterialProperties.Transitions_With_Cold</tt>. Otherwise, returns the initial
     ///     material.
     /// </returns>
-    public static BlobMaterials TransistionsTo(this BlobMaterials initialMaterial, BlobMaterialProperties transitionProperty)
+    public static BlobMaterial TransistionsTo(this BlobMaterial initialMaterial, BlobMaterialProperties transitionProperty)
     {
         bool forwardTransition = true;
         if (transitionProperty == BlobMaterialProperties.Transitions_With_Heat)
         {
             forwardTransition = false;
-        } else if (transitionProperty != BlobMaterialProperties.Transitions_With_Cold)
+        }
+        else if (transitionProperty != BlobMaterialProperties.Transitions_With_Cold)
         {
             return initialMaterial;
         }
 
-        foreach ((BlobMaterials, BlobMaterials) transition in TemperatureTransitions)
+        foreach (BlobMaterialTemperaturePair transition in TemperatureTransitions)
         {
-            if ((forwardTransition ? transition.Item1 : transition.Item2) == initialMaterial)
+            if ((forwardTransition ? transition.warmerMaterial : transition.colderMaterial) == initialMaterial)
             {
-                return forwardTransition ? transition.Item2 : transition.Item1;
+                return forwardTransition ? transition.colderMaterial : transition.warmerMaterial;
             }
         }
 
