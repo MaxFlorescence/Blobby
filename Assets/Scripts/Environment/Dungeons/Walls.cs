@@ -5,7 +5,6 @@ using UnityEngine;
 /// <summary>
 ///     The different configurations of walls that can exist for a dungeon tile.
 /// </summary>
-
 [Flags]
 public enum Walls
 {
