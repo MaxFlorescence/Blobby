@@ -139,7 +139,7 @@ public class AlertSystem : MonoBehaviour
     /// </returns>
     private float AlphaFromTime(int i)
     {
-        StageState timerState = alertBoxTimers[i].State;
+        StagedTimerState timerState = alertBoxTimers[i].State;
 
         return timerState.stageName switch
         {
