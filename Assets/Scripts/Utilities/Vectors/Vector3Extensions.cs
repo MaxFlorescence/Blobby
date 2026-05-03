@@ -19,6 +19,15 @@ public static class Vector3Extensions
     }
 
     /// <returns>
+    ///     An <tt>IEnumerable</tt> over the components of the given vector (<tt>x</tt>, then
+    ///     <tt>y</tt>, then <tt>z</tt>), with the corresponding indices (0, then 1, then 2).
+    /// </returns>
+    public static IEnumerable<(int, float)> Enumerate(this Vector3 vector)
+    {
+        return vector.GetEnumerator().Enumerate();
+    }
+
+    /// <returns>
     ///     <tt>True</tt> iff the vector is within the given bounds (inclusive), element-wise.
     ///     <br/>
     ///     If the lower bound is <tt>null</tt>, it's treated as <tt>Vector3Int.zero</tt>.

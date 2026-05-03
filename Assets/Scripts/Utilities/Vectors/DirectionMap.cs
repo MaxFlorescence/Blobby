@@ -48,7 +48,7 @@ public class DirectionMap<T>
         int total = 0;
         int zeros = 0;
         int units = 0;
-        foreach ((int i, float c) in Utilities.Enumerate(direction.GetEnumerator()))
+        foreach ((int i, float c) in direction.Enumerate())
         {
             int? rounded = c.RoundIfClose();
             if (rounded == 0)

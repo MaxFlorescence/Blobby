@@ -4,7 +4,8 @@ using UnityEngine;
 /// <summary>
 ///     A class defining extensions for <tt>Vector3Int</tt>s.
 /// </summary>
-public static class Vector3IntExtensions {
+public static class Vector3IntExtensions
+{
     /// <summary>
     ///     An array of the standard 3D basis vectors and their negatives.
     /// </summary>
@@ -71,7 +72,7 @@ public static class Vector3IntExtensions {
     ///     </code>
     /// </summary>
     public static Vector3Int[] Axes(bool planar = false) => planar ? planarAxes : cardinalAxes;
-    
+
     /// <returns>
     ///     An <tt>IEnumerable</tt> over the components of the given vector (<tt>x</tt>, then
     ///     <tt>y</tt>, then <tt>z</tt>).
@@ -82,6 +83,15 @@ public static class Vector3IntExtensions {
         yield return vector.y;
         yield return vector.z;
         yield break;
+    }
+
+    /// <returns>
+    ///     An <tt>IEnumerable</tt> over the components of the given vector (<tt>x</tt>, then
+    ///     <tt>y</tt>, then <tt>z</tt>), with the corresponding indices (0, then 1, then 2).
+    /// </returns>
+    public static IEnumerable<(int, int)> Enumerate(this Vector3Int vector)
+    {
+        return vector.GetEnumerator().Enumerate();
     }
 
     /// <returns>
