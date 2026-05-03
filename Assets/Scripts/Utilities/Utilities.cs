@@ -103,17 +103,6 @@ public static class Extensions
         dividend %= divisor;
         return dividend < 0 ? dividend + divisor : dividend;
     }
-
-    public static IEnumerable<(int, T)> Enumerate<T>(this IEnumerable<T> enumerable)
-    {
-        int i = 0;
-        foreach (T t in enumerable)
-        {
-            yield return (i, t);
-            i++;
-        }
-        yield break;
-    }
 }
 
 class Utilities : MonoBehaviour
