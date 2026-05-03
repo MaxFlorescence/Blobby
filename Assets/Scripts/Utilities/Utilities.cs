@@ -16,18 +16,6 @@ public static class Extensions
         }
     }
 
-    public static bool Contains<T>(this T[] array, T query)
-    {
-        foreach (T item in array)
-        {
-            if (item.Equals(query))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static readonly Regex removeWhitespace = new(@"\s");
     public static string RemoveWhitespace(this string s)
     {
@@ -57,41 +45,6 @@ public static class Extensions
     public static bool OutOfBounds(this int i, int upperBound, int lowerBound = 0)
     {
         return i < lowerBound || upperBound < i;
-    }
-
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
-    /// <param name="data">
-    ///     The array itself.
-    /// </param>
-    /// <param name="i">
-    ///     The integer index of the desired element.
-    /// </param>
-    /// <returns>
-    ///     The item of the array that corresponds to the given index modulo the array's length.
-    /// </returns>
-    public static T ModularGet<T>(this T[] data, int i)
-    {
-        return data[Utilities.ModularIndex(i, data.Length)];
-    }
-
-    /// <summary>
-    ///     Sets the element of the array at the given index modulo the array's length to be the
-    ///     given value.
-    /// </summary>
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
-    /// <param name="data">
-    ///     The array itself.
-    /// </param>
-    /// <param name="i">
-    ///     The integer index of the desired element.
-    /// </param>
-    public static void ModularSet<T>(this T[] data, int i, T value)
-    {
-        data[Utilities.ModularIndex(i, data.Length)] = value;
     }
 
     /// <summary>
@@ -149,14 +102,13 @@ public static class Extensions
         return number.Approx(rounded, epsilon) ? rounded : null;
     }
 
-    public static IEnumerable<T> Shuffled<T>(this T[] array)
+    /// <returns>
+    ///     <tt>0 &lt;= remainder &lt; divisor</tt> such that <tt>dividend = k * divisor + remainder</tt>.
+    /// </returns>
+    public static int Modulo(this int dividend, int divisor)
     {
-        foreach (int i in Utilities.ArgShuffle(array))
-        {
-            yield return array[i];
-        }
-
-        yield break;
+        dividend %= divisor;
+        return dividend < 0 ? dividend + divisor : dividend;
     }
 }
 
@@ -186,40 +138,14 @@ class Utilities : MonoBehaviour
         INVENTORY_UI_LAYER = LayerMask.NameToLayer("InventoryUI");
         IGNORE_CAMERA_LAYER = LayerMask.NameToLayer("Ignore Camera");
     }
-    
-    public static int[] ArgShuffle<T>(T[] array)
-    {
-        int n = array.Length;
-        int[] indices = new int[n];
-        int zeroIndex = 0;
-
-        for (int i = n-1; i > 0; i--)
-        {
-            int k = Random.Range(0, i-1);
-
-            indices[i] = (indices[k] == 0) ? k+1 : indices[k];
-            if (indices[i] == n) zeroIndex = i;
-
-            indices[k] = i+1;
-        }
-        if (n > 0) {
-            indices[zeroIndex] = 0;
-        }
-
-        return indices;
-    }
-
-    public static T SelectRandom<T>(T[] array)
-    {
-        return array[Random.Range(0, array.Length)];
-    }
 
     public static T Clamp<T>(T n, T min, T max) where T : IComparable
     {
         if (n.CompareTo(min) < 0)
         {
             return min;
-        } else if (n.CompareTo(max) > 0)
+        }
+        else if (n.CompareTo(max) > 0)
         {
             return max;
         }
@@ -266,18 +192,6 @@ class Utilities : MonoBehaviour
         position.z = index % yMax;
 
         return position;
-    }
-
-    /// <param name="i"></param>
-    /// <param name="m"></param>
-    /// <returns>
-    ///     <tt>j = k * m + i</tt>, where <tt>k</tt> is an integer such that
-    ///     <tt>0 &lt;= j &lt; m</tt>.
-    /// </returns>
-    public static int ModularIndex(int i, int m)
-    {
-        i %= m;
-        return i < 0 ? i + m : i;
     }
 
     public static T LoadPersistentOrDefaultData<T>(string filename)

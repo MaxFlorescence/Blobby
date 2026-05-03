@@ -446,10 +446,8 @@ public class LatticeGraph
 
         // randomly iterate through the indices found 
         (Vector3Int, Vector3Int)[] possibleSpots = foundSpots.ToArray();
-        foreach (int i in Utilities.ArgShuffle(possibleSpots))
+        foreach ((Vector3Int stairsDownIndex, Vector3Int stairDir) in possibleSpots.Shuffled())
         {
-            (Vector3Int stairsDownIndex, Vector3Int stairDir) = possibleSpots[i];
-
             // make sure that the node immediately after the downward connection is in the dungeon
             Vector3Int exit = stairsDownIndex + Vector3Int.down + 2*stairDir;
             if (!exit.OutOfBounds(layoutDimensions - Vector3Int.one)) {
