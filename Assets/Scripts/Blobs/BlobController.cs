@@ -642,7 +642,7 @@ public class BlobController : MonoBehaviour, IControllable
 
         foreach (AtomController atom in atomControllers)
         {
-            touchingUnion.AddAll(atom.touching);
+            touchingUnion.UnionWith(atom.touching);
         }
 
         return touchingUnion;

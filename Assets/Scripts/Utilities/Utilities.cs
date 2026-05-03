@@ -9,13 +9,6 @@ using Unity.Mathematics;
 
 public static class Extensions
 {
-    public static void AddAll<T>(this HashSet<T> addTo, IEnumerable<T> addFrom) {
-        foreach (T item in addFrom)
-        {
-            addTo.Add(item);
-        }
-    }
-
     private static readonly Regex removeWhitespace = new(@"\s");
     public static string RemoveWhitespace(this string s)
     {
