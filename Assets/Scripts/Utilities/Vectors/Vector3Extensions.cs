@@ -1,7 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Vector3Extensions {
+/// <summary>
+///     A class defining extensions for <tt>Vector3</tt>s.
+/// </summary>
+public static class Vector3Extensions
+{
+    /// <returns>
+    ///     An <tt>IEnumerable</tt> over the components of the given vector (<tt>x</tt>, then
+    ///     <tt>y</tt>, then <tt>z</tt>).
+    /// </returns>
     public static IEnumerable<float> GetEnumerator(this Vector3 vector)
     {
         yield return vector.x;
@@ -24,6 +32,12 @@ public static class Vector3Extensions {
             || i.z.OutOfBounds(upperBounds.z, nonNullLowerBounds.z);
     }
 
+    /// <param name="nonzero">
+    ///     If <tt>true</tt>, excludes zero components of the vector.
+    /// </param>
+    /// <returns>
+    ///     The minimum-valued component of the given vector.
+    /// </returns>
     public static float Min(this Vector3 vector, bool nonzero = false)
     {
         float min = float.PositiveInfinity;
@@ -36,6 +50,12 @@ public static class Vector3Extensions {
         return min;
     }
 
+    /// <param name="nonzero">
+    ///     If <tt>true</tt>, excludes zero components of the vector.
+    /// </param>
+    /// <returns>
+    ///     The maximum-valued component of the given vector.
+    /// </returns>
     public static float Max(this Vector3 vector, bool nonzero = false)
     {
         return -(-vector).Min(nonzero);

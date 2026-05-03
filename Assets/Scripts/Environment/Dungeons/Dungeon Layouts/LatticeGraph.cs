@@ -285,12 +285,12 @@ public class LatticeGraph
     /// </returns>
     public Vector3Int? FindBridgeNode(int y, bool planarOnly = true)
     {
-        foreach(Vector2Int index in layoutDimensions.Indices2D()) {
-            if (this[index.x, y, index.y].IsSet()) continue;
+        foreach(Vector3Int index2D in layoutDimensions.Indices2D()) {
+            if (this[index2D.x, y, index2D.z].IsSet()) continue;
 
             foreach (Vector3Int direction in Vector3IntExtensions.Directions(planarOnly).Shuffled())
             {
-                Vector3Int bridge = direction + new Vector3Int(index.x, y, index.y);
+                Vector3Int bridge = direction + new Vector3Int(index2D.x, y, index2D.z);
                 if (!bridge.OutOfBounds(layoutDimensions - Vector3Int.one)
                     && this[bridge].IsSet() && !this[bridge].IsLocked())
                 {
@@ -484,10 +484,10 @@ public class LatticeGraph
         HashSet<(Vector3Int, Vector3Int)> foundSpots = new();
 
         // 
-        foreach (Vector2Int index2D in layoutDimensions.Indices2D())
+        foreach (Vector3Int index2D in layoutDimensions.Indices2D())
         {
-            if (this[index2D.x, y, index2D.y].IsSet()) continue;
-            Vector3Int index = new(index2D.x, y, index2D.y);
+            if (this[index2D.x, y, index2D.z].IsSet()) continue;
+            Vector3Int index = new(index2D.x, y, index2D.z);
 
             foreach (Vector3Int axis in Vector3IntExtensions.Directions(true))
             {

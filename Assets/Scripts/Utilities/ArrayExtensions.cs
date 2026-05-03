@@ -2,18 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-///     A class that defines different extensions for generic arrays.
+///     A class defining extensions for generic arrays.
 /// </summary>
 public static class ArrayExtensions
 {
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
     /// <param name="query">
     ///     The item to check for.
-    /// </param>
-    /// <param name="data">
-    ///     The array itself.
     /// </param>
     /// <returns>
     ///     <tt>True</tt> iff the given array contains the given item.
@@ -27,12 +21,6 @@ public static class ArrayExtensions
         return false;
     }
 
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
-    /// <param name="data">
-    ///     The array itself.
-    /// </param>
     /// <param name="i">
     ///     The integer index of the desired element.
     /// </param>
@@ -48,12 +36,6 @@ public static class ArrayExtensions
     ///     Sets the element of the array at the given index, modulo the array's length, to be the
     ///     given value.
     /// </summary>
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
-    /// <param name="data">
-    ///     The array itself.
-    /// </param>
     /// <param name="i">
     ///     The integer index of the desired element.
     /// </param>
@@ -62,12 +44,6 @@ public static class ArrayExtensions
         data[i.Modulo(data.Length)] = value;
     }
 
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
-    /// <param name="data">
-    ///     The array itself.
-    /// </param>
     /// <returns>
     ///     A uniform random element of the given array.
     /// </returns>
@@ -76,12 +52,6 @@ public static class ArrayExtensions
         return data[Random.Range(0, data.Length)];
     }
 
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
-    /// <param name="data">
-    ///     The array itself.
-    /// </param>
     /// <returns>
     ///     An <tt>IEnumerable</tt> over a random permutation of the given array.
     /// </returns>
@@ -94,13 +64,7 @@ public static class ArrayExtensions
 
         yield break;
     }
-
-    /// <typeparam name="T">
-    ///     The type of element in the array.
-    /// </typeparam>
-    /// <param name="data">
-    ///     The array itself.
-    /// </param>
+    
     /// <returns>
     ///     A random permutation of the integers from <tt>0</tt> to <tt>data.length - 1</tt>.
     /// </returns>
