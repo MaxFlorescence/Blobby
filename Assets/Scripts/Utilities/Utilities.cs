@@ -78,15 +78,6 @@ public static class Extensions
         int rounded = Mathf.RoundToInt(number);
         return number.Approx(rounded, epsilon) ? rounded : null;
     }
-
-    /// <returns>
-    ///     <tt>0 &lt;= remainder &lt; divisor</tt> such that <tt>dividend = k * divisor + remainder</tt>.
-    /// </returns>
-    public static int Modulo(this int dividend, int divisor)
-    {
-        dividend %= divisor;
-        return dividend < 0 ? dividend + divisor : dividend;
-    }
 }
 
 class Utilities : MonoBehaviour
@@ -114,36 +105,6 @@ class Utilities : MonoBehaviour
         INVISIBLE_LAYER = LayerMask.NameToLayer("Invisible");
         INVENTORY_UI_LAYER = LayerMask.NameToLayer("InventoryUI");
         IGNORE_CAMERA_LAYER = LayerMask.NameToLayer("Ignore Camera");
-    }
-
-    /// <summary>
-    ///     Calculates the 3D index of the given flat index <tt>i</tt>
-    /// </summary>
-    /// <param name="xMax">
-    ///     The maximum value (+1) of the 3D indices' x component.
-    /// </param>
-    /// <param name="yMax">
-    ///     The maximum value (+1) of the 3D indices' y component.
-    /// </param>
-    /// <returns>
-    ///     <tt>(
-    ///         x = index / p,
-    ///         y = (index % p) / yMax,
-    ///         z = (index % p) % yMax
-    ///     )</tt>
-    ///     <br/> Where <tt>/</tt> indicates integer division and <tt>p = xMax * yMax</tt>.
-    /// </returns>
-    public static Vector3Int Index3dOf(int index, int xMax, int yMax)
-    {
-        int prodMax = xMax * yMax;
-
-        Vector3Int position = new();
-        position.x = index / prodMax;
-        index %= prodMax;
-        position.y = index / yMax;
-        position.z = index % yMax;
-
-        return position;
     }
 
     public static T LoadPersistentOrDefaultData<T>(string filename)
