@@ -66,8 +66,9 @@ class FireLight : MonoBehaviour
     private void Start()
     {
         lightComponent = GetComponent<Light>();
-        origin = transform.position;
+        origin = lightComponent.transform.position;
         lastPosition = origin;
+        targetPosition = origin;
         targetIntensity = NextIntensity();
     }
 
