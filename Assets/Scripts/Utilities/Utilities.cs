@@ -9,12 +9,6 @@ using Unity.Mathematics;
 
 public static class Extensions
 {
-    private static readonly Regex removeWhitespace = new(@"\s");
-    public static string RemoveWhitespace(this string s)
-    {
-        return removeWhitespace.Replace(s, "");
-    }
-
     public static void SetLayer(this GameObject obj, LayerMask layer)
     {
         obj.layer = layer;
@@ -66,17 +60,6 @@ public static class Extensions
     public static T Clone<T>(this T cloneMe) where T : struct
     {
         return cloneMe;
-    }
-
-    public static bool Approx(this float actual, float expected, float epsilon = 1e-3f)
-    {
-        return math.abs(actual - expected) < epsilon;
-    }
-
-    public static int? RoundIfClose(this float number, float epsilon = 1e-3f)
-    {
-        int rounded = Mathf.RoundToInt(number);
-        return number.Approx(rounded, epsilon) ? rounded : null;
     }
 }
 
