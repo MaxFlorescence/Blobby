@@ -285,7 +285,7 @@ public class Grip : Interactable
 
     protected override void OnInteractionCooldownStart()
     {
-        gameObject.SetLayer(Utilities.IGNORE_CAMERA_LAYER);
+        gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
     }
 
     /// <summary>
@@ -378,7 +378,7 @@ public class Grip : Interactable
     private void UpdateState(GripState newState)
     {
         if (newState != GripState.Held)
-            gameObject.SetLayer(Utilities.DEFAULT_LAYER);
+            gameObject.SetLayer(GameObjectExtensions.DEFAULT_LAYER);
 
         gripState = newState;
     }

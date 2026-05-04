@@ -143,7 +143,7 @@ public class DungeonTile : MonoBehaviour
         if (type == DungeonTileType.Empty) return;
 
         visibleOnMap ??= visibleInWorld;
-        gameObject.SetLayer(visibleInWorld ? Utilities.DEFAULT_LAYER : Utilities.INVISIBLE_LAYER);
+        gameObject.SetLayer(visibleInWorld ? GameObjectExtensions.DEFAULT_LAYER : GameObjectExtensions.INVISIBLE_LAYER);
 
         mapIcon.SetActive((bool)visibleOnMap);
     }

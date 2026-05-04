@@ -154,9 +154,9 @@ public class Inventory : MonoBehaviour
     {
         return displayMode switch
         {
-            DisplayMode.Invisible => Utilities.INVISIBLE_LAYER,
-            DisplayMode.UI_Only => Utilities.INVENTORY_UI_LAYER,
-            _ => Utilities.DEFAULT_LAYER
+            DisplayMode.Invisible => GameObjectExtensions.INVISIBLE_LAYER,
+            DisplayMode.UI_Only => GameObjectExtensions.INVENTORY_UI_LAYER,
+            _ => GameObjectExtensions.DEFAULT_LAYER
         };
     }
 
@@ -218,7 +218,7 @@ public class Inventory : MonoBehaviour
         if (contents[i] == null) return false;
 
         if (contents[Selection] != null) {
-            contents[Selection].SetLayer(Utilities.INVISIBLE_LAYER);
+            contents[Selection].SetLayer(GameObjectExtensions.INVISIBLE_LAYER);
         }
         
         contents[i].SetLayer(GetDisplayLayer());

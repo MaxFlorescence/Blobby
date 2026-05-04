@@ -111,7 +111,7 @@ public class Cannon : Interactable, IControllable
                 StartInteractionCooldown(0.5f);
                 controlled = false;
                 blob.SetControlCanRelease(true);
-                gameObject.SetLayer(Utilities.DEFAULT_LAYER);
+                gameObject.SetLayer(GameObjectExtensions.DEFAULT_LAYER);
                 blob = null;   
             }
         }
@@ -162,7 +162,7 @@ public class Cannon : Interactable, IControllable
         blob.SetControlCanRelease(false);
         blob.SetRestrained(true, LOADED_BLOB_SIZE_FACTOR);
 
-        gameObject.SetLayer(Utilities.IGNORE_CAMERA_LAYER);
+        gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
         SetInteractionEnabled(false);
 
         AllowFreeRotation(false);
@@ -221,7 +221,7 @@ public class Cannon : Interactable, IControllable
 
         StartInteractionCooldown(3f);
         controlled = false;
-        gameObject.SetLayer(Utilities.DEFAULT_LAYER);
+        gameObject.SetLayer(GameObjectExtensions.DEFAULT_LAYER);
 
         blob.SetControlCanRelease(true);
         blob.Teleport(exitPosition);

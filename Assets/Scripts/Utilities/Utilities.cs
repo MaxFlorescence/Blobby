@@ -9,15 +9,6 @@ using Unity.Mathematics;
 
 public static class Extensions
 {
-    public static void SetLayer(this GameObject obj, LayerMask layer)
-    {
-        obj.layer = layer;
-        foreach (Transform child in obj.GetComponentsInChildren<Transform>())
-        {
-            child.gameObject.layer = layer;
-        }
-    }
-
     /// <summary>
     ///     Plays an AudioClip, and scales the AudioSource pitch randomly between the given bounds.
     /// </summary>
@@ -57,20 +48,6 @@ class Utilities : MonoBehaviour
     public static readonly string DUNGEON_CORRIDORS_PATH = "Dungeon Prefabs/Corridors/";
     public static readonly string DUNGEON_LAYOUTS_PATH = "Dungeon Layouts/";
     public static readonly string DEFAULT_DATA_PATH = "Default Data/";
-
-    public static int DEFAULT_LAYER { get; private set; }
-    public static int INVISIBLE_LAYER { get; private set; }
-    public static int INVENTORY_UI_LAYER { get; private set; }
-    public static int IGNORE_CAMERA_LAYER { get; private set; }
-
-
-    void Awake()
-    {
-        DEFAULT_LAYER = LayerMask.NameToLayer("Default");
-        INVISIBLE_LAYER = LayerMask.NameToLayer("Invisible");
-        INVENTORY_UI_LAYER = LayerMask.NameToLayer("InventoryUI");
-        IGNORE_CAMERA_LAYER = LayerMask.NameToLayer("Ignore Camera");
-    }
 
     public static T LoadPersistentOrDefaultData<T>(string filename)
     {

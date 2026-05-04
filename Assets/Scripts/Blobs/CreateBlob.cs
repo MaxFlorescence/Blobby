@@ -129,7 +129,7 @@ public class CreateBlob : MonoBehaviour
     {
         foreach (GameObject atom in blobAtoms)
         {
-            atom.SetLayer(Utilities.IGNORE_CAMERA_LAYER);
+            atom.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
         }
     }
 
