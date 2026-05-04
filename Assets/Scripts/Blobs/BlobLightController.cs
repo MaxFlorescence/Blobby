@@ -31,7 +31,7 @@ public class BlobLightController
 
     public BlobLightController()
     {
-        int typeCount = Utilities.CountNames<BlobLight>();
+        int typeCount = EnumUtilities.CountNames<BlobLight>();
         defaultStates = new bool[typeCount];
         lights = new Light[typeCount];
     }

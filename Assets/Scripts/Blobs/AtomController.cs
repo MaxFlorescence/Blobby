@@ -71,8 +71,8 @@ public class AtomController : MonoBehaviour
         drips = gameObject.AddComponent<ParticleSystem>();
         drips.Stop();
 
-        atomMaterials = new Material[] {Resources.Load<Material>(Files.BLOB_MATERIALS_PATH + "EyeSclera")};
-        stickyMaterials = new Material[] {Resources.Load<Material>(Files.BASIC_MATERIALS_PATH + "Highlighted")};
+        atomMaterials = new Material[] {Resources.Load<Material>(FileUtilities.BLOB_MATERIALS_PATH + "EyeSclera")};
+        stickyMaterials = new Material[] {Resources.Load<Material>(FileUtilities.BASIC_MATERIALS_PATH + "Highlighted")};
     }
 
     void Start()

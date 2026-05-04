@@ -29,7 +29,7 @@ public class OptionsMenu : Menu
 
     protected override void OnStart()
     {
-        GameInfo.options = Files.LoadPersistentOrDefaultData<OptionsStruct>("options");
+        GameInfo.options = FileUtilities.LoadPersistentOrDefaultData<OptionsStruct>("options");
         GameInfo.OptionsMenu = this;
         confirmationSettings.ConfirmAction = ReturnToPreviousMenu;
     }
@@ -47,7 +47,7 @@ public class OptionsMenu : Menu
 
     public void ApplyButton() {
         GameInfo.options = newOptions;
-        Files.SavePersistentData(newOptions, "options");
+        FileUtilities.SavePersistentData(newOptions, "options");
         unsavedChanges = false;
     }
 

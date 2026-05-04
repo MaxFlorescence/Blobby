@@ -92,7 +92,7 @@ public class Cannon : Interactable, IControllable
         barrel.SetCapacity(1);
         barrel.SetDisplayPositionCallback(() => ammoPlaceholder.position);
         barrel.SetAudio(LOAD_AUDIO);
-        fireAudioClip = Resources.Load<AudioClip>(Files.SOUNDS_PATH + FIRE_AUDIO);
+        fireAudioClip = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + FIRE_AUDIO);
 
         controlCooldownTimer = new(1.5f);
     }

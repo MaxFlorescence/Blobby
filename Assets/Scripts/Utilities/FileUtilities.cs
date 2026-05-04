@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 ///     A class defining utilities for loading data and resources.
 /// </summary>
-public static class Files
+public static class FileUtilities
 {
     public static readonly string SOUNDS_PATH = "Sounds/";
     public static readonly string BLOB_MATERIALS_PATH = "Materials/Blob Materials/";
