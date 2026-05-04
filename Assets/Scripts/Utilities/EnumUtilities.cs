@@ -3,7 +3,7 @@ using System;
 /// <summary>
 ///     A class defining utilities for Enums.
 /// </summary>
-class EnumUtilities
+public static class EnumUtilities
 {
     /// <returns>
     ///     The number of names defined in the given enum.
