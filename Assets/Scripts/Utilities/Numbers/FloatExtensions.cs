@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+///     A class defining extensions for <tt>float</tt>s.
+/// </summary>
 public static class FloatExtensions
 {
     private const float DEFAULT_EPSILON = 1e-3f;

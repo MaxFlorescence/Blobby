@@ -39,24 +39,6 @@ public static class Extensions
         audioSource.pitch = originalPitch;
     }
 
-    public static void DelayedExecute(this MonoBehaviour monoBehaviour, float delay, Action action)
-    {
-        if (delay > 0)
-        {
-            monoBehaviour.StartCoroutine(DelayedExecuteHelper(monoBehaviour, delay, action));
-        }
-        else
-        {
-            action.Invoke();
-        }
-    }
-
-    private static IEnumerator DelayedExecuteHelper(MonoBehaviour monoBehaviour, float delay, Action action)
-    {
-        yield return new WaitForSeconds(delay);
-        monoBehaviour.DelayedExecute(0, action);
-    }
-
     public static T Clone<T>(this T cloneMe) where T : struct
     {
         return cloneMe;
