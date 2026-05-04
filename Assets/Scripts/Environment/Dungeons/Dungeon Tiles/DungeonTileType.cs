@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -41,8 +42,12 @@ public static class TileTypeExtensions
     public static CorridorAssetsStruct LoadCorridorAssets(string tileName)
     {
         return new CorridorAssetsStruct(
-            prefab: Resources.Load<GameObject>(FileUtilities.DUNGEON_CORRIDORS_PATH + tileName),
-            minimapIcon: Resources.Load<Sprite>(FileUtilities.MINIMAP_ICONS_PATH + tileName)
+            prefab: Resources.Load<GameObject>(
+                Path.Combine(FileUtilities.DUNGEON_CORRIDORS, tileName)
+            ),
+            minimapIcon: Resources.Load<Sprite>(
+                Path.Combine(FileUtilities.MINIMAP_ICONS, tileName)
+            )
         );
     }
 

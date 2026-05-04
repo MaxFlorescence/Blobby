@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -175,12 +176,15 @@ public class Inventory : MonoBehaviour
     /// <param name="volume">
     ///     The volume to use for this inventory's audio source.
     /// </param>
-    public void SetAudio(
-        string addSoundResource = "", string removeSoundResource = "",
-        Vector2? audioPitchBounds = null, float volume = 1f)
+    public void SetAudio(string addSoundResource = "", string removeSoundResource = "",
+                         Vector2? audioPitchBounds = null, float volume = 1f)
     {
-        addAudioClip = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + addSoundResource);
-        removeAudioClip = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + removeSoundResource);
+        addAudioClip = Resources.Load<AudioClip>(
+            Path.Combine(FileUtilities.SOUNDS, addSoundResource)
+        );
+        removeAudioClip = Resources.Load<AudioClip>(
+            Path.Combine(FileUtilities.SOUNDS, removeSoundResource)
+        );
 
         this.audioPitchBounds = audioPitchBounds;
 

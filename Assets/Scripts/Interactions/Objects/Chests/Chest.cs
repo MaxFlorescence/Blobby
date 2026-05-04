@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -67,9 +68,9 @@ public class Chest : Grip
     {
         base.Start();
         animator = GetComponent<Animator>();
-        chestOpen = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + CHEST_OPEN_SOUND);
-        chestClose = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + CHEST_CLOSE_SOUND);
-        chestLoot = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + CHEST_LOOT_SOUND);
+        chestOpen = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, CHEST_OPEN_SOUND));
+        chestClose = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, CHEST_CLOSE_SOUND));
+        chestLoot = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, CHEST_LOOT_SOUND));
 
         contentsLight = contents.GetComponentInChildren<Light>();
     }

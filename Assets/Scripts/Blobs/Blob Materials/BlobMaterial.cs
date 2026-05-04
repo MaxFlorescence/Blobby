@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -56,86 +57,86 @@ public static class BlobMaterialExtensions
     {
         {BlobMaterial.Water, new BlobMaterialDataStruct(
             BlobMaterialProperties.Watery,
-            FileUtilities.BLOB_MATERIALS_PATH + "WaterJelly"
+            Path.Combine(FileUtilities.BLOB_MATERIALS, "WaterJelly")
         )},
         {BlobMaterial.Ice, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Icy,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Lava,  new BlobMaterialDataStruct(
             BlobMaterialProperties.Firey,
-            FileUtilities.BLOB_MATERIALS_PATH + "LavaJelly",
-            FileUtilities.OBJECT_MATERIALS_PATH + "Flame"
+            Path.Combine(FileUtilities.BLOB_MATERIALS, "LavaJelly"),
+            Path.Combine(FileUtilities.OBJECT_MATERIALS, "Flame")
         )},
         {BlobMaterial.Rock,  new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Heavy
             | BlobMaterialProperties.Transitions_With_Heat,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Watery | BlobMaterialProperties.Can_Dissolve,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Frozen_Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Icy,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Oily,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Burning_Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Firey | BlobMaterialProperties.Slippery,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Sweet
             | BlobMaterialProperties.Transitions_With_Cold | BlobMaterialProperties.Can_Extinguish
             | BlobMaterialProperties.Transitions_With_Heat,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Burning_Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Firey,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Crystal_Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Sweet | BlobMaterialProperties.Solid
             | BlobMaterialProperties.Transitions_With_Heat,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Soda, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Watery | BlobMaterialProperties.Sweet | BlobMaterialProperties.Light,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Frozen_Soda, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Icy | BlobMaterialProperties.Light,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Liquid_Nitrogen, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Can_Freeze
             | BlobMaterialProperties.Light,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Ferrofluid, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Oily | BlobMaterialProperties.Magnetic | BlobMaterialProperties.Conductive,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
 
         {BlobMaterial.Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy
             | BlobMaterialProperties.Transitions_With_Heat,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Burning_Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy | BlobMaterialProperties.Firey,
-            FileUtilities.MISSING_MATERIAL_PATH
+            FileUtilities.MISSING_MATERIAL
         )},
     };
 

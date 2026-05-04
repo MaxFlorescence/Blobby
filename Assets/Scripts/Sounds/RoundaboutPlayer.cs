@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -13,7 +14,9 @@ public class RoundaboutPlayer : MonoBehaviour
 
     private void SetupAudio() {
         audioSource = GameInfo.ControlledBlob.GetCenterAtom().AddComponent<AudioSource>();
-        audioSource.clip = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + "roundabout");
+        audioSource.clip = Resources.Load<AudioClip>(
+            Path.Combine(FileUtilities.SOUNDS, "roundabout")
+        );
     }
 
     void Update()

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -71,8 +72,12 @@ public class AtomController : MonoBehaviour
         drips = gameObject.AddComponent<ParticleSystem>();
         drips.Stop();
 
-        atomMaterials = new Material[] {Resources.Load<Material>(FileUtilities.BLOB_MATERIALS_PATH + "EyeSclera")};
-        stickyMaterials = new Material[] {Resources.Load<Material>(FileUtilities.BASIC_MATERIALS_PATH + "Highlighted")};
+        atomMaterials = new Material[] {Resources.Load<Material>(
+            Path.Combine(FileUtilities.BLOB_MATERIALS, "EyeSclera")
+        )};
+        stickyMaterials = new Material[] {Resources.Load<Material>(
+            Path.Combine(FileUtilities.BASIC_MATERIALS, "Highlighted")
+        )};
     }
 
     void Start()

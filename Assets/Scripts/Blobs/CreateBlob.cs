@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -52,10 +53,6 @@ public class CreateBlob : MonoBehaviour
     ///     adjacent.
     /// </summary>
     private const float EPSILON = 1E-3f;
-    /// <summary>
-    ///     The physics material for the blob's atoms. Extremely high friction and bounciness.
-    /// </summary>
-    private readonly string JELLY_PHYSIC_MATERIAL = FileUtilities.BLOB_MATERIALS_PATH + "JellyPhysic";
     /// <summary>
     ///     Quick reference for <tt>blobAtoms[0]</tt>.
     /// </summary>
@@ -246,7 +243,10 @@ public class CreateBlob : MonoBehaviour
     /// </summary>
     private void AddPhysicMaterials()
     {
-        PhysicMaterial jellyPhysic = Resources.Load<PhysicMaterial>(JELLY_PHYSIC_MATERIAL);
+        // extremely high friction and bounciness physic material
+        PhysicMaterial jellyPhysic = Resources.Load<PhysicMaterial>(
+            Path.Combine(FileUtilities.BLOB_MATERIALS, "JellyPhysic")
+        );
 
         for (int i = 0; i < blobAtoms.Length; i++)
         {

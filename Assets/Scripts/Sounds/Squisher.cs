@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -19,7 +20,7 @@ public class Squisher : MonoBehaviour
         clips = new AudioClip[CLIP_COUNT];
 
         for (int i = 0; i < CLIP_COUNT; i++) {
-            clips[i] = Resources.Load<AudioClip>(FileUtilities.SOUNDS_PATH + $"squish_{i}");
+            clips[i] = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, $"squish_{i}"));
         }
     }
 
