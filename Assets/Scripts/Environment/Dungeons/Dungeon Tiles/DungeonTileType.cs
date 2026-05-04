@@ -41,8 +41,8 @@ public static class TileTypeExtensions
     public static CorridorAssetsStruct LoadCorridorAssets(string tileName)
     {
         return new CorridorAssetsStruct(
-            prefab: Resources.Load<GameObject>(Utilities.DUNGEON_CORRIDORS_PATH + tileName),
-            minimapIcon: Resources.Load<Sprite>(Utilities.MINIMAP_ICONS_PATH + tileName)
+            prefab: Resources.Load<GameObject>(Files.DUNGEON_CORRIDORS_PATH + tileName),
+            minimapIcon: Resources.Load<Sprite>(Files.MINIMAP_ICONS_PATH + tileName)
         );
     }
 

@@ -55,7 +55,7 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     The physics material for the blob's atoms. Extremely high friction and bounciness.
     /// </summary>
-    private readonly string JELLY_PHYSIC_MATERIAL = Utilities.BLOB_MATERIALS_PATH + "JellyPhysic";
+    private readonly string JELLY_PHYSIC_MATERIAL = Files.BLOB_MATERIALS_PATH + "JellyPhysic";
     /// <summary>
     ///     Quick reference for <tt>blobAtoms[0]</tt>.
     /// </summary>
