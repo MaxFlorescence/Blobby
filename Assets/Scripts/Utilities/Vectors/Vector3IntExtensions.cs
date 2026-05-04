@@ -103,9 +103,9 @@ public static class Vector3IntExtensions
     {
         Vector3Int nonNullLowerBounds = lowerBounds ?? Vector3Int.zero;
 
-        return i.x.OutOfBounds(upperBounds.x, nonNullLowerBounds.x)
-            || i.y.OutOfBounds(upperBounds.y, nonNullLowerBounds.y)
-            || i.z.OutOfBounds(upperBounds.z, nonNullLowerBounds.z);
+        return i.x.OutOfBounds(nonNullLowerBounds.x, upperBounds.x)
+            || i.y.OutOfBounds(nonNullLowerBounds.y, upperBounds.y)
+            || i.z.OutOfBounds(nonNullLowerBounds.z, upperBounds.z);
     }
 
     /// <param name="nonzero">

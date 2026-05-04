@@ -24,22 +24,6 @@ public static class Extensions
         }
     }
 
-    /// <returns>
-    ///     <tt>True</tt> iff the float is within the given bounds (inclusive).
-    /// </returns>
-    public static bool OutOfBounds(this float i, float upperBound, float lowerBound = 0)
-    {
-        return i < lowerBound || upperBound < i;
-    }
-
-    /// <returns>
-    ///     <tt>True</tt> iff the integer is within the given bounds (inclusive).
-    /// </returns>
-    public static bool OutOfBounds(this int i, int upperBound, int lowerBound = 0)
-    {
-        return i < lowerBound || upperBound < i;
-    }
-
     /// <summary>
     ///     Plays an AudioClip, and scales the AudioSource pitch randomly between the given bounds.
     /// </summary>
@@ -130,20 +114,6 @@ class Utilities : MonoBehaviour
         INVISIBLE_LAYER = LayerMask.NameToLayer("Invisible");
         INVENTORY_UI_LAYER = LayerMask.NameToLayer("InventoryUI");
         IGNORE_CAMERA_LAYER = LayerMask.NameToLayer("Ignore Camera");
-    }
-
-    public static T Clamp<T>(T n, T min, T max) where T : IComparable
-    {
-        if (n.CompareTo(min) < 0)
-        {
-            return min;
-        }
-        else if (n.CompareTo(max) > 0)
-        {
-            return max;
-        }
-
-        return n;
     }
 
     /// <summary>

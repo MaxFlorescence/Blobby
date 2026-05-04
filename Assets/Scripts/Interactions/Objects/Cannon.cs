@@ -270,7 +270,7 @@ public class Cannon : Interactable, IControllable
     {
         if (angleDelta == 0) angleDelta = -angle;
 
-        if (!(angle + angleDelta).OutOfBounds(ANGLE_BOUNDS.y, ANGLE_BOUNDS.x))
+        if (!(angle + angleDelta).OutOfBounds(ANGLE_BOUNDS.x, ANGLE_BOUNDS.y))
         {
             angle += angleDelta;
             barrelTransform.Rotate(Vector3.forward, angleDelta);

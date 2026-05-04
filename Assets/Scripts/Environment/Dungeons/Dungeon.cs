@@ -301,8 +301,8 @@ public class Dungeon : MonoBehaviour
     /// </param>
     public void UpdateActiveLevel(int levelIndex)
     {
+        levelIndex = levelIndex.Clamp(0, layoutDimensions.y - 1);
         if (activeLevelIndex == levelIndex) return;
-        levelIndex = Utilities.Clamp(levelIndex, 0, layoutDimensions.y - 1);
 
         if (activeLevelIndex >= 0) {
             foreach (Vector3Int index2D in layoutDimensions.Indices2D())

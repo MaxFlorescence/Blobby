@@ -341,10 +341,8 @@ public class Grip : Interactable
     /// </param>
     private void ShrinkByDistance(float dist)
     {
-        float scale = Utilities.Clamp(
-            dist * (1 - finalScaleFactor) / initialDistance + finalScaleFactor,
-            0, 1
-        );
+        float scale = dist * (1 - finalScaleFactor) / initialDistance + finalScaleFactor;
+        scale = scale.Clamp(0, 1);
 
         if (currentScaleFactor > scale) SetScale(scale);
     }
@@ -360,10 +358,8 @@ public class Grip : Interactable
     /// </summary>
     private void GrowByCooldown()
     {
-        float scale = Utilities.Clamp(
-            finalScaleFactor + (1 - finalScaleFactor) * cooldownTimer.Time / cooldownScaleDuration,
-            0, 1
-        );
+        float scale = finalScaleFactor + (1 - finalScaleFactor) * cooldownTimer.Time / cooldownScaleDuration;
+        scale = scale.Clamp(0, 1);
 
         if (currentScaleFactor < scale)
         {
