@@ -26,10 +26,14 @@ public class Menu : MonoBehaviour
     /// </summary>
     protected bool isSubmenu = false;
 
+    void Awake()
+    {
+        HideMenu();
+    }
+
     void Start()
     {
         OnStart();
-        HideMenu();
     }
 
     virtual protected void OnStart() {}

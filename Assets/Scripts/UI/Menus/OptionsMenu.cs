@@ -42,10 +42,13 @@ public class OptionsMenu : Menu
 
     protected override void OnShow() {
         newOptions = GameInfo.options.Clone();
+
         mouseSlider.value = 100 * newOptions.mouseSensitivity;
         environmentIntensitySlider.value = 100 * newOptions.environmentLightIntensity;
         gammaSlider.value = 100 * newOptions.gamma;
         gainSlider.value = 100 * newOptions.gain;
+
+        unsavedChanges = false;
     }
 
     public void ApplyButton() {
@@ -55,7 +58,8 @@ public class OptionsMenu : Menu
     }
 
     public void ReturnButton() {
-        if (unsavedChanges) {
+        if (unsavedChanges)
+        {
             GameInfo.ConfirmationDialogMenu.ShowMenu(confirmationSettings);
         }
         else
