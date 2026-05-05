@@ -42,7 +42,10 @@ public class OptionsMenu : Menu
 
     protected override void OnShow() {
         newOptions = GameInfo.options.Clone();
-        mouseSlider.value = newOptions.mouseSensitivity;
+        mouseSlider.value = 100 * newOptions.mouseSensitivity;
+        environmentIntensitySlider.value = 100 * newOptions.environmentLightIntensity;
+        gammaSlider.value = 100 * newOptions.gamma;
+        gainSlider.value = 100 * newOptions.gain;
     }
 
     public void ApplyButton() {
@@ -80,7 +83,49 @@ public class OptionsMenu : Menu
     public TextMeshProUGUI mouseInfoText;
     public void MouseSensitivitySlider() {
         unsavedChanges = true;
-        newOptions.mouseSensitivity = mouseSlider.value;
-        mouseInfoText.SetText("Mouse Sensitivity: " + (int)(100*mouseSlider.value) + "%");
+        newOptions.mouseSensitivity = mouseSlider.value / 100;
+        mouseInfoText.SetText($"Mouse Sensitivity: {newOptions.mouseSensitivity:P0}");
+    }
+
+    /// <summary>
+    ///     The slider for the environment light intensity option.
+    /// </summary>
+    public Slider environmentIntensitySlider;
+    /// <summary>
+    ///     The text displaying the current environment light intensity option.
+    /// </summary>
+    public TextMeshProUGUI intensityInfoText;
+    public void EnvironmentLightIntensitySlider() {
+        unsavedChanges = true;
+        newOptions.environmentLightIntensity = environmentIntensitySlider.value / 100;
+        intensityInfoText.SetText($"Environment Light Intensity: {newOptions.environmentLightIntensity:P0}");
+    }
+
+    /// <summary>
+    ///     The slider for the environment gamma option.
+    /// </summary>
+    public Slider gammaSlider;
+    /// <summary>
+    ///     The text displaying the current gain option.
+    /// </summary>
+    public TextMeshProUGUI gammaInfoText;
+    public void GammaSlider() {
+        unsavedChanges = true;
+        newOptions.gamma = gammaSlider.value / 100;
+        gammaInfoText.SetText($"Gamma: {newOptions.gamma:F2}");
+    }
+
+    /// <summary>
+    ///     The slider for the environment gamma option.
+    /// </summary>
+    public Slider gainSlider;
+    /// <summary>
+    ///     The text displaying the current gain option.
+    /// </summary>
+    public TextMeshProUGUI gainInfoText;
+    public void GainSlider() {
+        unsavedChanges = true;
+        newOptions.gain = gainSlider.value / 100;
+        gainInfoText.SetText($"Gain: {newOptions.gain:F2}");
     }
 }

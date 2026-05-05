@@ -31,4 +31,15 @@ public static class FloatExtensions
         int rounded = Mathf.RoundToInt(number);
         return number.Approx(rounded, epsilon) ? rounded : null;
     }
+
+    /// <param name="factor">
+    ///     The factor to round by.
+    /// </param>
+    /// <returns>
+    ///     The given number rounded to the nearest multiple of the given factor.
+    /// </returns>
+    public static float Round(this float number, float factor = 1)
+    {
+        return Mathf.RoundToInt(number / factor) * factor;
+    }
 }

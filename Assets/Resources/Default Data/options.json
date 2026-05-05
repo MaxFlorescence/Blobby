@@ -1,3 +1,6 @@
 {
-    "mouseSensitivity": 1
+    "mouseSensitivity": 1.00,
+    "environmentLightIntensity": 0.25,
+    "gamma": 0.00,
+    "gain": 0.00
 }
