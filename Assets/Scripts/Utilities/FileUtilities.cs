@@ -36,7 +36,7 @@ public static class FileUtilities
         }
         catch (FileNotFoundException)
         {
-            dataString = Resources.Load<TextAsset>(DEFAULT_DATA + filename).text;
+            dataString = Resources.Load<TextAsset>(Path.Combine(DEFAULT_DATA, filename)).text;
         }
 
         return JsonUtility.FromJson<T>(dataString);
