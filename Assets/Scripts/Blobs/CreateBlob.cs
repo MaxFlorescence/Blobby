@@ -65,7 +65,7 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     Spring constant for the springs maintaining the blob's shape.
     /// </summary>
-    private float springForce = 100f;
+    private const float DEFAULT_SPRING_FORCE = 100f;
     /// <summary>
     ///    Number of edges in an icosahedron, plus 12 for radial connections (one per vertex).
     /// </summary>
@@ -282,31 +282,29 @@ public class CreateBlob : MonoBehaviour
         {
             for (int j = 0; j < i; j++)
             {
-                bool isCenterObject = (j == 0);
-                if (isCenterObject || AtomsAreAdjacent(i, j, SIDE_LENGTH, ballAdjacency))
-                {
-                    Assert.IsTrue(
-                        newIndex < NUM_SPRINGS,
-                        string.Format("Number of necessary springs is greater than expected. ({0} >= {1})", newIndex, NUM_SPRINGS)
-                    );
+                if (j > 0 && !AtomsAreAdjacent(i, j, SIDE_LENGTH, ballAdjacency)) continue;
+                
+                Assert.IsTrue(
+                    newIndex < NUM_SPRINGS,
+                    string.Format("Number of necessary springs is greater than expected. ({0} >= {1})", newIndex, NUM_SPRINGS)
+                );
 
-                    Rigidbody from = blobAtoms[i].GetComponent<Rigidbody>();
-                    Rigidbody to = blobAtoms[j].GetComponent<Rigidbody>();
+                Rigidbody from = blobAtoms[i].GetComponent<Rigidbody>();
+                Rigidbody to = blobAtoms[j].GetComponent<Rigidbody>();
 
-                    springJoints[newIndex] = blobAtoms[i].AddComponent<SpringJoint>();
-                    springJoints[newIndex].connectedBody = to;
+                springJoints[newIndex] = blobAtoms[i].AddComponent<SpringJoint>();
+                springJoints[newIndex].connectedBody = to;
 
-                    springJoints[newIndex].enableCollision = true;
-                    springJoints[newIndex].spring = springForce;
+                springJoints[newIndex].enableCollision = true;
+                springJoints[newIndex].spring = DEFAULT_SPRING_FORCE;
 
-                    // manually set anchor positions
-                    springJoints[newIndex].autoConfigureConnectedAnchor = false;
-                    springJoints[newIndex].anchor = Vector3.zero;
-                    connectedAnchors[newIndex] = to.transform.InverseTransformPoint(from.position);
-                    springJoints[newIndex].connectedAnchor = connectedAnchors[newIndex];
+                // manually set anchor positions
+                springJoints[newIndex].autoConfigureConnectedAnchor = false;
+                springJoints[newIndex].anchor = Vector3.zero;
+                connectedAnchors[newIndex] = to.transform.InverseTransformPoint(from.position);
+                springJoints[newIndex].connectedAnchor = connectedAnchors[newIndex];
 
-                    newIndex++;
-                }
+                newIndex++;
             }
         }
 
@@ -515,7 +513,7 @@ public class CreateBlob : MonoBehaviour
         for (int i = 0; i < NUM_SPRINGS; i++)
         {
             springJoints[i].connectedAnchor = factor * connectedAnchors[i];
-            springJoints[i].spring = factor * springForce;
+            springJoints[i].spring = factor * DEFAULT_SPRING_FORCE;
         }
 
         // TODO?
