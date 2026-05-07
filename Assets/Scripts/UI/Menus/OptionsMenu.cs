@@ -22,7 +22,7 @@ public class OptionsMenu : Menu
     ///     Settings for the unsaved changes confirmation dialog
     /// </summary>
     private ConfirmationConfigStruct confirmationSettings = new(
-        WarningText: "You have unsaved changes. Are you sure you want to return without saving?",
+        WarningText: "You have unsaved changes. Returning now will discard them.",
         ConfirmText: "Yes, return without saving.",
         CancelText: "No, keep editing."
     );
