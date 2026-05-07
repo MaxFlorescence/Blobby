@@ -1,6 +1,28 @@
 {
-    "mouseSensitivity": 1.00,
-    "environmentLightIntensity": 0.25,
-    "gamma": 0.00,
-    "gain": 0.00
+    "SliderOptions": [
+        {
+            "name": "Mouse Sensitivity",
+            "value": 1.00,
+            "format": "P0",
+            "unsaved": false
+        },
+        {
+            "name": "Environment Light Intensity",
+            "value": 0.25,
+            "format": "P0",
+            "unsaved": false
+        },
+        {
+            "name": "Gamma",
+            "value": 0.00,
+            "format": "F2",
+            "unsaved": false
+        },
+        {
+            "name": "Gain",
+            "value": 0.00,
+            "format": "F2",
+            "unsaved": false
+        }
+    ]
 }

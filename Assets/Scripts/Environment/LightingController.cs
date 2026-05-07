@@ -18,8 +18,12 @@ public class LightingController : MonoBehaviour
 
     void Update()
     {
-        environmentLight.intensity = GameInfo.options.environmentLightIntensity;
-        liftGammaGain.gamma.Override(new Vector4(1f, 1f, 1f, GameInfo.options.gamma));
-        liftGammaGain.gain.Override(new Vector4(1f, 1f, 1f, GameInfo.options.gain));
+        environmentLight.intensity = GameInfo.options.GetFloat(OptionName.EnvironmentLightIntensity);
+        liftGammaGain.gamma.Override(new Vector4(
+            1f, 1f, 1f, GameInfo.options.GetFloat(OptionName.Gamma)
+        ));
+        liftGammaGain.gain.Override(new Vector4(
+            1f, 1f, 1f, GameInfo.options.GetFloat(OptionName.Gain)
+        ));
     }
 }

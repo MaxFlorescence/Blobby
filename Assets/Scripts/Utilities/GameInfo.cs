@@ -21,7 +21,7 @@ public static class GameInfo
     public static readonly string DEMO_LEVEL = "Demo Level";
 
     // Settings
-    public static OptionsStruct options;
+    public static GameOptionsStruct options;
     public static OptionsMenu OptionsMenu { get; set; }
 
     // Game State
