@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System.IO;
 
 public enum OptionName
 {
@@ -15,6 +16,7 @@ public enum OptionName
 /// </summary>
 public class OptionsMenu : Menu
 {
+    private const string OPTIONS_FILE = "options";
     /// <summary>
     ///     The menu to return to after closing the options menu.
     /// </summary>
@@ -37,7 +39,10 @@ public class OptionsMenu : Menu
 
     protected override void OnStart()
     {
-        GameInfo.options = FileUtilities.LoadPersistentOrDefaultData<GameOptionsStruct>("options");
+        GameInfo.Options = FileUtilities.LoadPersistentOrDefaultData<GameOptionsStruct>(OPTIONS_FILE);
+        GameInfo.DefaultOptions = JsonUtility.FromJson<GameOptionsStruct>(
+            Resources.Load<TextAsset>(Path.Combine(FileUtilities.DEFAULT_DATA, OPTIONS_FILE)).text
+        );
         GameInfo.OptionsMenu = this;
         confirmationSettings.ConfirmAction = ReturnToPreviousMenu;
 
@@ -56,31 +61,34 @@ public class OptionsMenu : Menu
         foreach (SliderController slider in sliderControllers)
         {
             slider.InitializeOption(
-                GameInfo.options.SliderOptions[(int)slider.optionName]
+                GameInfo.Options.SliderOptions[(int)slider.optionName]
             );
         }
         foreach (ToggleController toggle in toggleControllers)
         {
             toggle.InitializeOption(
-                GameInfo.options.ToggleOptions[(int)toggle.optionName]
+                GameInfo.Options.ToggleOptions[(int)toggle.optionName]
             );
         }
         foreach (DropdownController dropdown in dropdownControllers)
         {
             dropdown.InitializeOption(
-                GameInfo.options.DropdownOptions[(int)dropdown.optionName]
+                GameInfo.Options.DropdownOptions[(int)dropdown.optionName]
             );
         }
     }
 
     public void ApplyButton() {
-        GameInfo.options = new GameOptionsStruct(
-            sliderControllers.Select(slider => slider.option).ToArray(),
-            toggleControllers.Select(toggle => toggle.option).ToArray(),
-            dropdownControllers.Select(dropdown => dropdown.option).ToArray()
+        GameInfo.Options = new GameOptionsStruct(
+            sliderControllers.OrderBy(slider => slider.optionName)
+                .Select(slider => slider.option).ToArray(),
+            toggleControllers.OrderBy(toggle => toggle.optionName)
+                .Select(toggle => toggle.option).ToArray(),
+            dropdownControllers.OrderBy(dropdown => dropdown.optionName)
+                .Select(dropdown => dropdown.option).ToArray()
         );
 
-        FileUtilities.SavePersistentData(GameInfo.options, "options");
+        FileUtilities.SavePersistentData(GameInfo.Options, "options");
         OnShow(); // set as default options
     }
 

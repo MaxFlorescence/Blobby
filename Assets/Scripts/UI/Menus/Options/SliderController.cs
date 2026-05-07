@@ -2,10 +2,16 @@ using UnityEngine.UI;
 
 public class SliderController : OptionController<Slider, float>
 {
+    public override float GetDefaultValue()
+    {
+        return GameInfo.DefaultOptions.GetFloat(optionName);
+    }
+
     protected override float GetSelectableValue()
     {
         return selectable.value;
     }
+
     protected override void SetSelectableValue(float value)
     {
         selectable.value = value;

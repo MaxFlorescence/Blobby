@@ -10,31 +10,28 @@ public abstract class OptionController<S, T> : MonoBehaviour where S : Selectabl
     public S selectable;
     public TextMeshProUGUI infoText;
     public Button resetButton;
+    public Button loadDefaultButton;
 
     private T storedValue;
 
     // selectable ui component
     public void ChangeValueSelectable() {
-        SetOption(reset: false);
+        loadDefaultButton.interactable = true;
+        SetOption(reset: false, TransformValue(GetSelectableValue()));
     }
 
     // reset button ui component
     public void ResetValueButton()
     {
         SetSelectableValue(InverseTransformValue(storedValue));
-        SetOption(reset: true);
+        SetOption(reset: true, storedValue);
     }
 
-    // reset value to default
-    public void LoadDefaultButton()
-    {
-    }
-
-    private void SetOption(bool reset)
+    protected void SetOption(bool reset, T newValue)
     {
         option.unsaved = !reset;
         resetButton.interactable = !reset;
-        option.value = reset ? storedValue : TransformValue(GetSelectableValue());
+        option.value = newValue;
         UpdateInfoText();
     }
 
@@ -51,7 +48,19 @@ public abstract class OptionController<S, T> : MonoBehaviour where S : Selectabl
         option.format = newOption.format;
 
         ResetValueButton();
+        if (storedValue.Equals(GetDefaultValue())) loadDefaultButton.interactable = false;
     }
+
+    // reset value to default
+    public void LoadDefaultButton()
+    {
+        loadDefaultButton.interactable = false;
+        T defaultValue = GetDefaultValue();
+        SetSelectableValue(InverseTransformValue(defaultValue));
+        SetOption(reset: false, defaultValue);
+    }
+
+    public abstract T GetDefaultValue();
 
     protected abstract T GetSelectableValue();
 

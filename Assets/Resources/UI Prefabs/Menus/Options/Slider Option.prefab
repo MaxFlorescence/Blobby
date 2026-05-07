@@ -538,6 +538,7 @@ MonoBehaviour:
   selectable: {fileID: 3326725531076017779}
   infoText: {fileID: 7260901405760974265}
   resetButton: {fileID: 2948949998725129713}
+  loadDefaultButton: {fileID: 8470557592298387269}
 --- !u!1 &3336888374436427564
 GameObject:
   m_ObjectHideFlags: 0
