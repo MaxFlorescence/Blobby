@@ -128,7 +128,7 @@ public class AtomController : MonoBehaviour
         if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
         {
             renderer.renderMode = ParticleSystemRenderMode.Mesh;
-            renderer.mesh = blobController.dropletMesh;
+            renderer.mesh = blobController.DropletMesh;
             renderer.alignment = ParticleSystemRenderSpace.Velocity;
         }
 
@@ -174,7 +174,7 @@ public class AtomController : MonoBehaviour
 
         if (!blobController.IsAtom(obj))
         { // do nothing special when colliding with other atoms
-            blobController.Squish();
+            blobController.Squisher.Squish();
 
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.

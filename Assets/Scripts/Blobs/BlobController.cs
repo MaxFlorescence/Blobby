@@ -12,9 +12,9 @@ public class BlobController : MonoBehaviour, IControllable
     //----------------------------------------------------------------------------------------------
     private Vector3 jumpDirection = Vector3.up;
     private bool jumpOnNextFixedUpdate = false;
+    private const float JUMP_MULTIPLIER = 8f;
     private bool movementInputEnabled = true;
-    private float movementIntensityFactor = 10f;
-    private float jumpIntensityFactor = 8f;
+    private const float MOVEMENT_MULTIPLIER = 10f;
     public bool controlled { get; set; } = false;
 
     //----------------------------------------------------------------------------------------------
@@ -32,13 +32,9 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     private bool springsLocked = false;
     /// <summary>
-    ///     The factor by which the blob can grow from its original size.
+    ///     The factors by which the blob can shrink or grow from its original size (1f).
     /// </summary>
-    private float blobGrowingFactor = 1.5f;
-    /// <summary>
-    ///     The factor by which the blob can shrink from its original size.
-    /// </summary>
-    private float blobShrinkingFactor = 0.5f;
+    private readonly float[] SIZE_FACTORS = {0.5f, 1f, 1.5f, 2.5f};
 
     //----------------------------------------------------------------------------------------------
     // STICKING
@@ -55,12 +51,12 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Circular buffer of capacity <tt>STICKY_COUNT</tt> for holding sticky atoms.
     /// </summary>
-    private GameObject[] atomStickies = new GameObject[STICKY_COUNT];
+    private readonly GameObject[] atomStickies = new GameObject[STICKY_COUNT];
     /// <summary>
     ///     Indicates if atoms can become sticky. If <tt>false</tt>, no atoms are sticky.
     /// </summary>
     private bool stickyMode = false;
-    private float stickyMovementModifier = 1.2f;
+    private const float STICKY_MOVEMENT_MULTIPLIER = 1.2f;
 
     //----------------------------------------------------------------------------------------------
     // INVENTORY
@@ -80,7 +76,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     How far away the inventory camera is from the inventory display position.
     /// </summary>
-    private float inventoryCameraDistance = 2f;
+    private const float INVENTORY_CAMERA_DISTANCE = 2f;
     /// <summary>
     ///     The player can cause the blob to drop a held object iff this is <tt>true</tt>.
     /// </summary>
@@ -91,11 +87,11 @@ public class BlobController : MonoBehaviour, IControllable
     //----------------------------------------------------------------------------------------------
     private MeshRenderer blobMesh;
     private BlobMaterial blobMaterials;
-    public Mesh dropletMesh { get; private set; }
+    public Mesh DropletMesh { get; private set; }
     /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
     /// </summary>
-    private BlobLightController blobLightController = new();
+    public BlobLightController Lights { get; private set; }= new();
     public bool AtomsVisible { get; private set; } = false;
 
     //----------------------------------------------------------------------------------------------
@@ -105,7 +101,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Makes squishy noises on collisions.
     /// </summary>
-    private Squisher squisher;
+    public Squisher Squisher { get; private set; }
     /// <summary>
     ///     The sound to play when obtaining an object.
     /// </summary>
@@ -122,8 +118,8 @@ public class BlobController : MonoBehaviour, IControllable
     //----------------------------------------------------------------------------------------------
     // GHOST MODE
     //----------------------------------------------------------------------------------------------
-    public bool ghostMode { get; private set; } = false;
-    private float ghostSpeed = 0.5f;
+    public bool GhostMode { get; private set; } = false;
+    private const float GHOST_SPEED = 0.5f;
 
     void Awake()
     {
@@ -133,7 +129,7 @@ public class BlobController : MonoBehaviour, IControllable
         blobMesh = createBlob.gameObject.GetComponent<MeshRenderer>();
         
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        dropletMesh = Instantiate(sphere.GetComponent<MeshFilter>().mesh);
+        DropletMesh = Instantiate(sphere.GetComponent<MeshFilter>().mesh);
         Destroy(sphere);
 
         audioSource = gameObject.AddComponent<AudioSource>();
@@ -159,9 +155,10 @@ public class BlobController : MonoBehaviour, IControllable
         inventoryCamera = transform.parent.GetComponentsInChildren<Camera>()[0];
         inventoryCamera.enabled = true;
 
-        Light[] lights = transform.parent.GetComponentsInChildren<Light>();
-        blobLightController.AddLight(BlobLight.Material_Glow, lights[0], false);
-        blobLightController.AddLight(BlobLight.Inventory_Icon, lights[1], false);
+        // TODO: order of elements in array unclear
+        Light[] lightComponents = transform.parent.GetComponentsInChildren<Light>();
+        Lights.Define(BlobLight.Material_Glow, lightComponents[0], false);
+        Lights.Define(BlobLight.Inventory_Icon, lightComponents[1], false);
 
         SetBlobMaterials(BlobMaterial.Water);
 
@@ -173,8 +170,8 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     private void SetupSounds()
     {
-        squisher = centerAtom.AddComponent<Squisher>();
-        squisher.audioSource = audioSource;
+        Squisher = centerAtom.AddComponent<Squisher>();
+        Squisher.audioSource = audioSource;
         
         inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
     }
@@ -184,7 +181,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     void FixedUpdate()
     {
-        if (ghostMode) ApplyGhostMovement();
+        if (GhostMode) ApplyGhostMovement();
 
         if (!movementInputEnabled || !controlled)
             return;
@@ -197,11 +194,11 @@ public class BlobController : MonoBehaviour, IControllable
         {
             movementForce = movementForce.normalized;
         }
-        movementForce *= movementIntensityFactor * (stickyMode ? stickyMovementModifier : 1);
+        movementForce *= MOVEMENT_MULTIPLIER * (stickyMode ? STICKY_MOVEMENT_MULTIPLIER : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
         // so detect the keypress in Update() and perform the action in FixedUpdate().
-        Vector3 jumpForce = jumpOnNextFixedUpdate ? (jumpIntensityFactor * jumpDirection) : Vector3.zero;
+        Vector3 jumpForce = jumpOnNextFixedUpdate ? (JUMP_MULTIPLIER * jumpDirection) : Vector3.zero;
         jumpOnNextFixedUpdate = false;
 
         ApplyForces(movementForce, jumpForce, true);
@@ -309,15 +306,15 @@ public class BlobController : MonoBehaviour, IControllable
             // left mouse shrinks, right mouse grows
             if (Input.GetMouseButton(0))
             {
-                TrySetSpringLengths(blobShrinkingFactor);
+                TrySetSpringLengths(size: 0);
             }
             else if (Input.GetMouseButton(1))
             {
-                TrySetSpringLengths(blobGrowingFactor);
+                TrySetSpringLengths(size: 2);
             }
             else
             {
-                TrySetSpringLengths();
+                TrySetSpringLengths(size: 1);
             }
         }
 
@@ -352,7 +349,7 @@ public class BlobController : MonoBehaviour, IControllable
         GameObject inventorySelection = inventory.GetObject();
         Transform targetTransform = inventorySelection != null ?
             inventorySelection.transform : transform;
-        inventoryCamera.transform.position = targetTransform.position + inventoryCameraDistance * Vector3.back;
+        inventoryCamera.transform.position = targetTransform.position + INVENTORY_CAMERA_DISTANCE * Vector3.back;
         inventoryCamera.transform.LookAt(targetTransform);
     }
 
@@ -444,8 +441,8 @@ public class BlobController : MonoBehaviour, IControllable
 /// </summary>
     private void ToggleGhostMode()
     {
-        ghostMode = !ghostMode;
-        SetRestrained(ghostMode);
+        GhostMode = !GhostMode;
+        SetRestrained(GhostMode);
     }
 
     /// <summary>
@@ -453,7 +450,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     private void ApplyGhostMovement()
     {
-        if (!ghostMode) return;
+        if (!GhostMode) return;
 
         (Vector3 forwardForce, Vector3 rightwardForce) = GetInputAxisForces();
 
@@ -471,7 +468,7 @@ public class BlobController : MonoBehaviour, IControllable
 
         foreach (GameObject atom in createBlob.GetAtoms())
         {
-            atom.transform.position += ghostSpeed * translation;
+            atom.transform.position += GHOST_SPEED * translation;
         }
     }
 
@@ -687,8 +684,9 @@ public class BlobController : MonoBehaviour, IControllable
     /// <returns>
     ///     <tt>True</tt> iff the spring lengths were successfully updated.
     /// </returns>
-    public bool TrySetSpringLengths(float factor = 1f, bool immediately = false)
+    public bool TrySetSpringLengths(int size = 1, bool immediately = false)
     {
+        float factor = SIZE_FACTORS[size];
         if (springsLocked || createBlob.GetSpringLengthFactor() == factor) return false;
         
         createBlob.SetSpringLengthFactor(factor, immediately);
@@ -733,7 +731,7 @@ public class BlobController : MonoBehaviour, IControllable
     {
         blobMaterials = newBlobMaterials;
 
-        blobLightController.SetLight(BlobLight.Material_Glow, newBlobMaterials.HasProperty(BlobMaterialProperties.Glowing), true);
+        Lights.Set(BlobLight.Material_Glow, newBlobMaterials.HasProperty(BlobMaterialProperties.Glowing), true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
@@ -745,24 +743,6 @@ public class BlobController : MonoBehaviour, IControllable
     }
 
     /// <summary>
-    ///     Sets the state of one of the blob's lights, optionally saving it as the light's default.
-    /// </summary>
-    /// <param name="blobLight">
-    ///     Which blob light to modify the state of.
-    /// </param>
-    /// <param name="enable">
-    ///     <tt>True<\tt>/<tt>false</tt> enable/disable the light, respectively. <tt>null</tt> sets
-    ///     the light's state to be the opposite of its default.
-    /// </param>
-    /// <param name="save">
-    ///     <tt>True</tt> sets the light's default state to that determined by the enable parameter.
-    /// </param>
-    public void SetLight(BlobLight blobLight, bool? enable = null, bool save = false)
-    {
-        blobLightController.SetLight(blobLight, enable, save);
-    }
-
-    /// <summary>
     ///     Enables/disables the blob's ability to release held objects from its inventory.
     /// </summary>
     public void SetControlCanRelease(bool canRelease)
@@ -770,29 +750,10 @@ public class BlobController : MonoBehaviour, IControllable
         controlCanRelease = canRelease;
     }
 
-    /// <summary>
-    ///     Sets the state of one of the blob's lights back to its default.
-    /// </summary>
-    /// <param name="blobLight">
-    ///     Which blob light to modify the state of.
-    /// </param>
-    public void ResetLight(BlobLight blobLight)
-    {
-        blobLightController.ResetLight(blobLight);
-    }
-
-    /// <summary>
-    ///     Plays a squish noise.
-    /// </summary>
-    public void Squish()
-    {
-        squisher.squish();
-    }
-
     public override string ToString()
     {
         return $"BlobController: {name}\n"
-        + $" ghostMode: {ghostMode}\n"
+        + $" ghostMode: {GhostMode}\n"
         + $" blobMaterials: {blobMaterials} ({blobMaterials.GetProperties()})\n"
         + $" stickyMode: {stickyMode}\n"
         + $" springFactor: {createBlob.GetSpringLengthFactor()}\n"

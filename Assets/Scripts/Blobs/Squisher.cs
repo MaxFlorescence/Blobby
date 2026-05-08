@@ -27,7 +27,7 @@ public class Squisher : MonoBehaviour
     /// <summary>
     ///     Play a random squish noise with a random pitch.
     /// </summary>
-    public void squish() {
+    public void Squish() {
         if (!GameInfo.StartCutscene) {
             audioSource.pitch = Random.Range(0.5f, 1.5f);
             int i = Random.Range(0, 8);

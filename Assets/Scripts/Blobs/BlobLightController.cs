@@ -23,11 +23,11 @@ public class BlobLightController
     // ---------------------------------------------------------------------------------------------
     // DATA
     // ---------------------------------------------------------------------------------------------
-    private Light[] lights;
+    private readonly Light[] lights;
     /// <summary>
     ///     The default state of each light type.
     /// </summary>
-    private bool[] defaultStates;
+    private readonly bool[] defaultStates;
 
     public BlobLightController()
     {
@@ -39,7 +39,7 @@ public class BlobLightController
     /// <summary>
     ///     Add an entry for the given type of blob light.
     /// </summary>
-    public void AddLight(BlobLight blobLight, Light light, bool defaultState)
+    public void Define(BlobLight blobLight, Light light, bool defaultState)
     {
         defaultStates[(int)blobLight] = defaultState;
         lights[(int)blobLight] = light;
@@ -58,7 +58,7 @@ public class BlobLightController
     /// <param name="save">
     ///     <tt>True</tt> sets the light's default state to that determined by the enable parameter.
     /// </param>
-    public void SetLight(BlobLight blobLight, bool? enable, bool save = false)
+    public void Set(BlobLight blobLight, bool? enable = null, bool save = false)
     {
         int index = (int)blobLight;
         enable ??= !defaultStates[index];
@@ -74,7 +74,7 @@ public class BlobLightController
     /// <param name="blobLight">
     ///     Which blob light to modify the state of.
     /// </param>
-    public void ResetLight(BlobLight blobLight)
+    public void Reset(BlobLight blobLight)
     {
         lights[(int)blobLight].enabled = defaultStates[(int)blobLight];
     }

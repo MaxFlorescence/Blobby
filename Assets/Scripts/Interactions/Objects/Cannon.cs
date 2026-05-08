@@ -108,7 +108,7 @@ public class Cannon : Interactable, IControllable
         {
             blob.Teleport(ammoPlaceholder.position);
 
-            if (blob.ghostMode) {
+            if (blob.GhostMode) {
                 StartInteractionCooldown(0.5f);
                 controlled = false;
                 blob.SetControlCanRelease(true);

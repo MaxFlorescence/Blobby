@@ -33,8 +33,8 @@ public class CameraSwitcher : MonoBehaviour
     void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (camera.gameObject.layer == GameObjectExtensions.INVENTORY_UI_LAYER) {
-            GameInfo.ControlledBlob.SetLight(BlobLight.Inventory_Icon, true);
-            GameInfo.ControlledBlob.SetLight(BlobLight.Material_Glow, false);
+            GameInfo.ControlledBlob.Lights.Set(BlobLight.Inventory_Icon, true);
+            GameInfo.ControlledBlob.Lights.Set(BlobLight.Material_Glow, false);
         }
     }
 
@@ -44,8 +44,8 @@ public class CameraSwitcher : MonoBehaviour
     void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (camera.gameObject.layer == GameObjectExtensions.INVENTORY_UI_LAYER) {
-            GameInfo.ControlledBlob.ResetLight(BlobLight.Inventory_Icon);
-            GameInfo.ControlledBlob.ResetLight(BlobLight.Material_Glow);
+            GameInfo.ControlledBlob.Lights.Reset(BlobLight.Inventory_Icon);
+            GameInfo.ControlledBlob.Lights.Reset(BlobLight.Material_Glow);
         }
     }
 
