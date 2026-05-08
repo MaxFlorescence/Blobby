@@ -93,7 +93,7 @@ public class Timer
             if (mode == TimerMode.Repeat) Reset();
             else Running = false;
 
-            return mode != TimerMode.Pulse || wasRunning;
+            return (mode == TimerMode.Toggle) || wasRunning;
         }
 
         return false;
@@ -112,6 +112,16 @@ public class Timer
 
         Time = 0;
         Running = true;
+    }
+
+    /// <summary>
+    ///     Force the timer to have completed its set interval. The timer will send completion
+    ///     signals on the next update.
+    /// </summary>
+    public void Skip(bool sendCompletionSignal = true)
+    {
+        Time = Interval;
+        Running = sendCompletionSignal;
     }
 
     public virtual void SetInterval(float interval)

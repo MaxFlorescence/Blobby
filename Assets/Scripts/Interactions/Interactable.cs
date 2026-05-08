@@ -62,7 +62,7 @@ public abstract class Interactable : MonoBehaviour
     /// </returns>
     public bool InteractionEnd(BlobController blob)
     {
-        if (interactionEnabled)
+        if (!interactionEnabled)
         {
             OnInteractionEnd(blob);
             return true;
@@ -88,6 +88,15 @@ public abstract class Interactable : MonoBehaviour
         if (usingCooldownCallbacks) {
             OnInteractionCooldownStart();
         }
+    }
+
+    /// <summary>
+    ///     Ends the interaction cooldown without triggering callbacks.
+    /// </summary>
+    protected void InterruptInteractionCooldown()
+    {
+        cooldownTimer.Skip(false);
+        interactionEnabled = true;
     }
 
     /// <summary>

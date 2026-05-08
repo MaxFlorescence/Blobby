@@ -208,6 +208,7 @@ public class AtomController : MonoBehaviour
         {
             touching.Remove(obj);
         }
+        
         if (!blobController.IsTouching(obj) && obj.TryGetComponent<Interactable>(out var interactableObj))
         {
             interactableObj.InteractionEnd(blobController);

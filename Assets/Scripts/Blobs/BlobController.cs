@@ -86,7 +86,7 @@ public class BlobController : MonoBehaviour, IControllable
     // VISUALS
     //----------------------------------------------------------------------------------------------
     private MeshRenderer blobMesh;
-    private BlobMaterial blobMaterials;
+    public BlobMaterial Material { get; private set; }
     public Mesh DropletMesh { get; private set; }
     /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
@@ -160,7 +160,7 @@ public class BlobController : MonoBehaviour, IControllable
         Lights.Define(BlobLight.Material_Glow, lightComponents[0], false);
         Lights.Define(BlobLight.Inventory_Icon, lightComponents[1], false);
 
-        SetBlobMaterials(BlobMaterial.Water);
+        SetBlobMaterials(BlobMaterial.Water, true);
 
         SetupSounds();
     }
@@ -619,20 +619,6 @@ public class BlobController : MonoBehaviour, IControllable
         return centerAtom;
     }
 
-    /// <summary>
-    ///     Determines if the blob has the given material properties.
-    /// </summary>
-    /// <param name="materialProperties">
-    ///     The material properties to test for.
-    /// </param>
-    /// <returns>
-    ///     <tt>True</tt> iff the blob has the material properties.
-    /// </returns>
-    public bool BlobMaterialsHas(BlobMaterialProperties materialProperties)
-    {
-        return blobMaterials.HasProperty(materialProperties);
-    }
-
     private HashSet<GameObject> TouchingObjects()
     {
         HashSet<GameObject> touchingUnion = new();
@@ -727,11 +713,14 @@ public class BlobController : MonoBehaviour, IControllable
     /// <param name="newBlobMaterials">
     ///     The blob materials to set.
     /// </param>
-    public void SetBlobMaterials(BlobMaterial newBlobMaterials)
+    public void SetBlobMaterials(BlobMaterial newBlobMaterials, bool force = false)
     {
-        blobMaterials = newBlobMaterials;
+        if (!force && Material == newBlobMaterials) return;
 
-        Lights.Set(BlobLight.Material_Glow, newBlobMaterials.HasProperty(BlobMaterialProperties.Glowing), true);
+        Material = newBlobMaterials;
+
+        bool glow = newBlobMaterials.Has(BlobMaterialProperties.Glowing);
+        Lights.Set(BlobLight.Material_Glow, glow, true);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
@@ -754,7 +743,7 @@ public class BlobController : MonoBehaviour, IControllable
     {
         return $"BlobController: {name}\n"
         + $" ghostMode: {GhostMode}\n"
-        + $" blobMaterials: {blobMaterials} ({blobMaterials.GetProperties()})\n"
+        + $" blobMaterials: {Material} ({Material.GetProperties()})\n"
         + $" stickyMode: {stickyMode}\n"
         + $" springFactor: {createBlob.GetSpringLengthFactor()}\n"
         + $" touchingSomething: {IsTouching()}\n"
