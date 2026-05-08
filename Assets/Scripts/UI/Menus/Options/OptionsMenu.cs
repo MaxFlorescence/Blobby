@@ -3,17 +3,6 @@ using System.Linq;
 using System.IO;
 
 /// <summary>
-///     The available game options.
-/// </summary>
-public enum OptionName
-{
-    MouseSensitivity = 0,
-    EnvironmentLightIntensity = 1,
-    Gamma = 2,
-    Gain = 3
-}
-
-/// <summary>
 ///     A class defining the options menu of the game.
 /// </summary>
 public class OptionsMenu : Menu

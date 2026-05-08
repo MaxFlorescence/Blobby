@@ -23,6 +23,18 @@
             "value": 0.00,
             "percentage": false,
             "unsaved": false
+        },
+        {
+            "name": "Music Volume",
+            "value": 1.00,
+            "percentage": true,
+            "unsaved": false
+        },
+        {
+            "name": "Sound Effects Volume",
+            "value": 1.00,
+            "percentage": true,
+            "unsaved": false
         }
     ],
     "ToggleOptions": [],

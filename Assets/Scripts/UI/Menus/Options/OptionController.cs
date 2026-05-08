@@ -3,6 +3,22 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
+///     The available game options.
+/// </summary>
+public enum OptionName
+{
+    // Slider Options
+    MouseSensitivity = 0,
+    EnvironmentLightIntensity = 1,
+    Gamma = 2,
+    Gain = 3,
+    MusicVolume = 4,
+    SoundEffectsVolume = 5
+    // Toggle Options
+    // Dropdown Options
+}
+
+/// <summary>
 ///     A class for controlling an in-game option's UI components.
 /// </summary>
 /// <typeparam name="S">
