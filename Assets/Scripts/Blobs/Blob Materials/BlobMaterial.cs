@@ -26,11 +26,6 @@ public enum BlobMaterial
 [Flags]
 public enum BlobMaterialProperties
 {
-    Watery = Can_Extinguish | Cold_Transition | Conductive,
-    Icy = Can_Extinguish | Can_Freeze | Solid | Slippery | Heat_Transition,
-    Firey = Can_Ignite | Glowing | Wet_Transition | Cold_Transition,
-    Viscous = Sticky | Heavy,
-    Oily = Heat_Transition | Slippery,
     None            = 0,
     Can_Ignite      = 0b_0000_0000_0000_0000_0001,
     Can_Extinguish  = 0b_0000_0000_0000_0000_0010,
@@ -48,7 +43,12 @@ public enum BlobMaterialProperties
     Light           = 0b_0000_0010_0000_0000_0000,
     Heavy           = 0b_0000_0100_0000_0000_0000,
     Solid           = 0b_0000_1000_0000_0000_0000,
-    Bouncy          = 0b_0001_0000_0000_0000_0000
+    Bouncy          = 0b_0001_0000_0000_0000_0000,
+    Watery = Can_Extinguish | Cold_Transition | Conductive,
+    Icy = Can_Extinguish | Can_Freeze | Solid | Slippery | Heat_Transition,
+    Firey = Can_Ignite | Glowing | Wet_Transition | Cold_Transition,
+    Viscous = Sticky | Heavy,
+    Oily = Heat_Transition | Slippery
 }
 
 public static class BlobMaterialExtensions
@@ -64,7 +64,8 @@ public static class BlobMaterialExtensions
         )},
         {BlobMaterial.Ice, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Icy,
-            FileUtilities.MISSING_MATERIAL
+            Path.Combine(FileUtilities.BLOB_MATERIALS, "IceJelly"),
+            Path.Combine(FileUtilities.BLOB_MATERIALS, "Invisible")
         )},
 
         {BlobMaterial.Lava,  new BlobMaterialDataStruct(
