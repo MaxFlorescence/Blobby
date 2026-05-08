@@ -1,5 +1,8 @@
 using UnityEngine.UI;
 
+/// <summary>
+///     A class for controlling an in-game slider option's UI components.
+/// </summary>
 public class SliderController : OptionController<Slider, float>
 {
     public override float GetDefaultValue()
@@ -25,5 +28,10 @@ public class SliderController : OptionController<Slider, float>
     protected override float InverseTransformValue(float value)
     {
         return value * 100;
+    }
+
+    protected override string FormattedValue()
+    {
+        return option.percentage ? $"{option.value:P0}" : $"{option.value:F2}";
     }
 }

@@ -1,5 +1,8 @@
 using UnityEngine.UI;
 
+/// <summary>
+///     A class for controlling an in-game dropdown option's UI components.
+/// </summary>
 public class DropdownController : OptionController<Dropdown, int>
 {
     public override int GetDefaultValue()

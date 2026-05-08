@@ -3,26 +3,28 @@
         {
             "name": "Mouse Sensitivity",
             "value": 1.00,
-            "format": "P0",
+            "percentage": true,
             "unsaved": false
         },
         {
             "name": "Environment Light Intensity",
             "value": 0.25,
-            "format": "P0",
+            "percentage": true,
             "unsaved": false
         },
         {
             "name": "Gamma",
             "value": 0.00,
-            "format": "F2",
+            "percentage": false,
             "unsaved": false
         },
         {
             "name": "Gain",
             "value": 0.00,
-            "format": "F2",
+            "percentage": false,
             "unsaved": false
         }
-    ]
+    ],
+    "ToggleOptions": [],
+    "DropdownOptions": []
 }

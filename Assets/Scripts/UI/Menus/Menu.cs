@@ -28,8 +28,11 @@ public class Menu : MonoBehaviour
 
     void Awake()
     {
+        OnAwake();
         HideMenu();
     }
+
+    virtual protected void OnAwake() {}
 
     void Start()
     {

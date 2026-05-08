@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Linq;
-using UnityEngine.UI;
 using System.IO;
 
+/// <summary>
+///     The available game options.
+/// </summary>
 public enum OptionName
 {
     MouseSensitivity = 0,
@@ -16,20 +18,33 @@ public enum OptionName
 /// </summary>
 public class OptionsMenu : Menu
 {
+    /// <summary>
+    ///     The name of the file that contains the game's options.
+    /// </summary>
     private const string OPTIONS_FILE = "options";
+
     /// <summary>
     ///     The menu to return to after closing the options menu.
     /// </summary>
     public Menu returnMenu;
+
     /// <summary>
-    ///     The editable options as displayed to the player.
+    ///     The editable slider options as displayed to the player.
     /// </summary>
     private SliderController[] sliderControllers;
+
+    /// <summary>
+    ///     The editable toggle options as displayed to the player.
+    /// </summary>
     private ToggleController[] toggleControllers;
+
+    /// <summary>
+    ///     The editable dropdown options as displayed to the player.
+    /// </summary>
     private DropdownController[] dropdownControllers;
 
     /// <summary>
-    ///     Settings for the unsaved changes confirmation dialog
+    ///     Settings for the unsaved changes confirmation dialog.
     /// </summary>
     private ConfirmationConfigStruct confirmationSettings = new(
         WarningText: "You have unsaved changes. Returning now will discard them.",
@@ -37,12 +52,16 @@ public class OptionsMenu : Menu
         CancelText: "No, keep editing."
     );
 
-    protected override void OnStart()
+    protected override void OnAwake()
     {
         GameInfo.Options = FileUtilities.LoadPersistentOrDefaultData<GameOptionsStruct>(OPTIONS_FILE);
         GameInfo.DefaultOptions = JsonUtility.FromJson<GameOptionsStruct>(
             Resources.Load<TextAsset>(Path.Combine(FileUtilities.DEFAULT_DATA, OPTIONS_FILE)).text
         );
+    }
+
+    protected override void OnStart()
+    {
         GameInfo.OptionsMenu = this;
         confirmationSettings.ConfirmAction = ReturnToPreviousMenu;
 
@@ -78,6 +97,9 @@ public class OptionsMenu : Menu
         }
     }
 
+    /// <summary>
+    ///     The button that the player presses to save their changes to the game options.
+    /// </summary>
     public void ApplyButton() {
         GameInfo.Options = new GameOptionsStruct(
             sliderControllers.OrderBy(slider => slider.optionName)
@@ -88,10 +110,13 @@ public class OptionsMenu : Menu
                 .Select(dropdown => dropdown.option).ToArray()
         );
 
-        FileUtilities.SavePersistentData(GameInfo.Options, "options");
+        FileUtilities.SavePersistentData(GameInfo.Options, OPTIONS_FILE);
         OnShow(); // set as default options
     }
 
+    /// <summary>
+    ///     The button that the player presses to return to the previous menu.
+    /// </summary>
     public void ReturnButton() {
         bool unsavedChanges = sliderControllers.Any(slider => slider.option.unsaved) ||
             toggleControllers.Any(toggle => toggle.option.unsaved) ||
