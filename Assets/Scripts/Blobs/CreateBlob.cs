@@ -61,11 +61,12 @@ public class CreateBlob : MonoBehaviour
     //----------------------------------------------------------------------------------------------
     // SPRINGS
     //----------------------------------------------------------------------------------------------
-    private SpringJoint[] springJoints;
+    private ConfigurableJoint[] joints;
     /// <summary>
     ///     Spring constant for the springs maintaining the blob's shape.
     /// </summary>
-    private const float DEFAULT_SPRING_FORCE = 100f;
+    private const float DEFAULT_SPRING_FORCE = 30f;
+    private const float ATOM_MOTION_LIMIT = 2f;
     /// <summary>
     ///    Number of edges in an icosahedron, plus 12 for radial connections (one per vertex).
     /// </summary>
@@ -117,7 +118,7 @@ public class CreateBlob : MonoBehaviour
 
         AddPhysicMaterials();
 
-        springJoints = ConnectAtoms(false);
+        joints = ConnectAtoms(false);
 
         centerAtom.AddComponent<BlobController>();
     }
@@ -271,9 +272,9 @@ public class CreateBlob : MonoBehaviour
     /// <returns>
     ///     The array of SpringJoints added, in no particular order.
     /// </returns>
-    private SpringJoint[] ConnectAtoms(bool ballAdjacency)
+    private ConfigurableJoint[] ConnectAtoms(bool ballAdjacency)
     {
-        SpringJoint[] springJoints = new SpringJoint[NUM_SPRINGS];
+        ConfigurableJoint[] joints = new ConfigurableJoint[NUM_SPRINGS];
         connectedAnchors = new Vector3[NUM_SPRINGS];
         int newIndex = 0;
 
@@ -292,17 +293,24 @@ public class CreateBlob : MonoBehaviour
                 Rigidbody from = blobAtoms[i].GetComponent<Rigidbody>();
                 Rigidbody to = blobAtoms[j].GetComponent<Rigidbody>();
 
-                springJoints[newIndex] = blobAtoms[i].AddComponent<SpringJoint>();
-                springJoints[newIndex].connectedBody = to;
+                joints[newIndex] = blobAtoms[i].AddComponent<ConfigurableJoint>();
+                joints[newIndex].connectedBody = to;
 
-                springJoints[newIndex].enableCollision = true;
-                springJoints[newIndex].spring = DEFAULT_SPRING_FORCE;
+                joints[newIndex].enableCollision = true;
+
+                joints[newIndex].SetAllMotionConstraints(ConfigurableJointMotion.Limited);
+                joints[newIndex].SetAllAngularMotionConstraints(ConfigurableJointMotion.Locked);
+                joints[newIndex].projectionMode = JointProjectionMode.PositionAndRotation;
+
+                joints[newIndex].SetAllSpringForces(DEFAULT_SPRING_FORCE);
+
+                joints[newIndex].SetLinearLimit(ATOM_MOTION_LIMIT);
 
                 // manually set anchor positions
-                springJoints[newIndex].autoConfigureConnectedAnchor = false;
-                springJoints[newIndex].anchor = Vector3.zero;
+                joints[newIndex].autoConfigureConnectedAnchor = false;
+                joints[newIndex].anchor = Vector3.zero;
                 connectedAnchors[newIndex] = to.transform.InverseTransformPoint(from.position);
-                springJoints[newIndex].connectedAnchor = connectedAnchors[newIndex];
+                joints[newIndex].connectedAnchor = connectedAnchors[newIndex];
 
                 newIndex++;
             }
@@ -313,7 +321,7 @@ public class CreateBlob : MonoBehaviour
             string.Format("Number of springs created is less than expected. ({0} < {1})", newIndex, NUM_SPRINGS)
         );
 
-        return springJoints;
+        return joints;
     }
 
     /// <summary>
@@ -474,59 +482,56 @@ public class CreateBlob : MonoBehaviour
     /// <summary>
     ///     Modify each spring's connectedAnchor to be <tt>factor</tt> times the original value.
     /// </summary>
-    /// <param name="factor">
+    /// <param name="lengthFactor">
     ///     The new spring length factor.
     /// </param>
-    public void SetSpringLengthFactor(float factor = 1, bool immediately = false)
+    public void SetJointProperties(float lengthFactor = 1, bool spring = true, bool immediately = false)
     {
-        // For atoms that are separated from the center atom by an object, allow them to phase
-        // through temporarily. This gives the player a way to get unstuck in some situations.
-        if (springLengthFactor > factor)
-        {
-            Vector3 centerPosition = centerAtom.transform.position;
-            LayerMask layerMask = ~LayerMask.GetMask("Inventory UI", "Ignore Camera");
-
-            for (int i = 1; i < NUM_ATOMS; i++)
-            {
-                Vector3 atomPosition = blobAtoms[i].transform.position;
-                Vector3 differenceVector = centerPosition - atomPosition;
-                
-                bool hitSomething = Physics.Raycast(
-                    atomPosition,
-                    differenceVector.normalized,
-                    out RaycastHit hitInfo,
-                    differenceVector.magnitude,
-                    layerMask.value,
-                    QueryTriggerInteraction.Ignore
-                );
-
-                if (hitSomething)
-                {
-                    AtomController atomController = blobAtoms[i].GetComponent<AtomController>();
-                    atomController.SetCollider(false);
-                    this.DelayedExecute(0.5f, () => atomController.SetCollider(true));
-                }
-            }
-        }
+        if (springLengthFactor > lengthFactor) ClipSeparatedAtoms();
         
-        springLengthFactor = factor;
+        springLengthFactor = lengthFactor;
         for (int i = 0; i < NUM_SPRINGS; i++)
         {
-            springJoints[i].connectedAnchor = factor * connectedAnchors[i];
-            springJoints[i].spring = factor * DEFAULT_SPRING_FORCE;
+            joints[i].connectedAnchor = lengthFactor * connectedAnchors[i];
+
+            if (immediately) joints[i].SetLinearLimit(0);
+            this.DelayedExecute(immediately ? 0.5f : 0,  () => joints[i].SetLinearLimit(
+                spring ? ATOM_MOTION_LIMIT : 0
+            ));
         }
 
-        // TODO?
-        // if (immediately)
-        // {
-        //     for (int i = 0; i < NUM_SPRINGS; i++)
-        //     {
-        //         if (springJoints[i].connectedBody != centerAtom.GetComponent<Rigidbody>()) continue;
-                
-        //         springJoints[i].gameObject.transform.position = springJoints[i].connectedAnchor + centerAtom.transform.position;
-        //     }
-        // }
+        meshScale = 1f + ATOM_SCALE/lengthFactor;
+    }
 
-        meshScale = 1f + ATOM_SCALE/factor;
+    /// <summary>
+    ///     Temporarily allow atoms that are separated from the center atom by an object them to
+    ///     phase through objects. This gives the player a way to get unstuck in some situations.
+    /// </summary>
+    private void ClipSeparatedAtoms()
+    {
+        Vector3 centerPosition = centerAtom.transform.position;
+        LayerMask layerMask = ~LayerMask.GetMask("Inventory UI", "Ignore Camera");
+
+        for (int i = 1; i < NUM_ATOMS; i++)
+        {
+            Vector3 atomPosition = blobAtoms[i].transform.position;
+            Vector3 differenceVector = centerPosition - atomPosition;
+            
+            bool hitSomething = Physics.Raycast(
+                atomPosition,
+                differenceVector.normalized,
+                out RaycastHit hitInfo,
+                differenceVector.magnitude,
+                layerMask.value,
+                QueryTriggerInteraction.Ignore
+            );
+
+            if (hitSomething)
+            {
+                AtomController atomController = blobAtoms[i].GetComponent<AtomController>();
+                atomController.SetCollider(false);
+                this.DelayedExecute(0.5f, () => atomController.SetCollider(true));
+            }
+        }
     }
 }

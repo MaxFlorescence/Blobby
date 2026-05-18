@@ -539,7 +539,7 @@ public class BlobController : MonoBehaviour, IControllable
             SetColliders(false);
             SetStickyMode(false);
             StopMovement();
-            createBlob.SetSpringLengthFactor(springOverrideFactor, true);
+            createBlob.SetJointProperties(springOverrideFactor, false, true);
             LockSprings(true);
         }
         else
@@ -675,7 +675,7 @@ public class BlobController : MonoBehaviour, IControllable
         float factor = SIZE_FACTORS[size];
         if (springsLocked || createBlob.GetSpringLengthFactor() == factor) return false;
         
-        createBlob.SetSpringLengthFactor(factor, immediately);
+        createBlob.SetJointProperties(factor, true, immediately);
         return true;
     }
     
@@ -721,6 +721,7 @@ public class BlobController : MonoBehaviour, IControllable
 
         bool glow = newBlobMaterials.Has(BlobMaterialProperties.Glowing);
         Lights.Set(BlobLight.Material_Glow, glow, true);
+        createBlob.SetJointProperties(1, !newBlobMaterials.Has(BlobMaterialProperties.Solid), false);
 
         blobMesh.materials = new Material[] {newBlobMaterials.Body()};
 
