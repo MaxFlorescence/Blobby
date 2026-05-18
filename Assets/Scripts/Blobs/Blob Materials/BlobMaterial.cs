@@ -102,7 +102,7 @@ public static class BlobMaterialExtensions
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Sweet
             | BlobMaterialProperties.Cold_Transition | BlobMaterialProperties.Can_Extinguish
             | BlobMaterialProperties.Heat_Transition,
-            FileUtilities.MISSING_MATERIAL
+            Path.Combine(FileUtilities.BLOB_MATERIALS, "HoneyJelly")
         )},
         {BlobMaterial.Burning_Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Viscous | BlobMaterialProperties.Firey,
