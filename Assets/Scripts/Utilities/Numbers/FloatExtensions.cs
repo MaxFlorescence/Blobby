@@ -14,9 +14,11 @@ public static class FloatExtensions
     ///     <tt>True</tt> iff the actual value is approximately equal to the expected value (within
     ///     <tt>epsilon</tt>).
     /// </returns>
-    public static bool Approx(this float actual, float expected, float epsilon = DEFAULT_EPSILON)
+    public static bool Approx(this float actual, float? expected, float epsilon = DEFAULT_EPSILON)
     {
-        return Mathf.Abs(actual - expected) < epsilon;
+        if (expected == null) return false;
+
+        return Mathf.Abs(actual - (float)expected) < epsilon;
     }
 
     /// <param name="epsilon">

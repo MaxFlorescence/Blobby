@@ -13,7 +13,7 @@ public class RoundaboutPlayer : MonoBehaviour
     private bool audioIsPaused = false;
 
     private void SetupAudio() {
-        audioSource = GameInfo.ControlledBlob.GetCenterAtom().AddComponent<AudioSource>();
+        audioSource = GameInfo.ControlledBlob.GetComponent<AudioSource>();
         audioSource.clip = Resources.Load<AudioClip>(
             Path.Combine(FileUtilities.SOUNDS, "roundabout")
         );
@@ -42,7 +42,7 @@ public class RoundaboutPlayer : MonoBehaviour
             SetupAudio();
         }
 
-        float height = GameInfo.ControlledBlob.GetPosition().y;
+        float height = GameInfo.ControlledBlob.Position.y;
 
         if (!playing && height <= 15) {
             playing = true;

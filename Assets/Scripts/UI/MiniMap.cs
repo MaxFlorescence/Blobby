@@ -51,7 +51,7 @@ public class MiniMap : MonoBehaviour
     void Update()
     {
         Vector3 dungeonPosition = GameInfo.CurrentDungeon.CoordinatesOf(
-            GameInfo.ControlledBlob.GetPosition()
+            GameInfo.ControlledBlob.Position
         );
         dungeonPosition = GameInfo.CurrentDungeon.TransformPosition(
             dungeonPosition, false, true, true

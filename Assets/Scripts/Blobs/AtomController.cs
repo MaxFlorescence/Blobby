@@ -59,7 +59,7 @@ public class AtomController : MonoBehaviour
     /// <summary>
     ///     <tt>true</tt> iff this atom is a center atom. This disables drip particles.
     /// </summary>
-    private bool centerAtom = false;
+    public bool centerAtom = false;
 
     //----------------------------------------------------------------------------------------------
     // DEBUG MODE
@@ -224,7 +224,7 @@ public class AtomController : MonoBehaviour
     /// <returns>
     ///     <tt>false</tt> iff the object is a boundary object.
     /// </returns>
-    bool NotBounds(GameObject obj)
+    private bool NotBounds(GameObject obj)
     {
         return !obj.CompareTag("Bounds");
     }

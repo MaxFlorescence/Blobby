@@ -5,8 +5,12 @@ using UnityEngine;
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
+[RequireComponent(typeof(Squisher))]
 public class BlobController : MonoBehaviour, IControllable
 {
+    public Vector3 Position => transform.position;
+    public Vector3 Velocity => atoms.CenterRigidbody.velocity;
+
     //----------------------------------------------------------------------------------------------
     // INPUT
     //----------------------------------------------------------------------------------------------
@@ -97,7 +101,6 @@ public class BlobController : MonoBehaviour, IControllable
     //----------------------------------------------------------------------------------------------
     // AUDIO
     //----------------------------------------------------------------------------------------------
-    private AudioSource audioSource;
     /// <summary>
     ///     Makes squishy noises on collisions.
     /// </summary>
@@ -125,14 +128,14 @@ public class BlobController : MonoBehaviour, IControllable
     {
         GameInfo.SetControlledBlob(this);
 
-        createBlob = transform.parent.GetComponentInChildren<CreateBlob>();
+        Squisher = GetComponent<Squisher>();
+        meshController = GetComponentInChildren<CreateBlob>();
         blobMesh = createBlob.gameObject.GetComponent<MeshRenderer>();
         
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         DropletMesh = Instantiate(sphere.GetComponent<MeshFilter>().mesh);
         Destroy(sphere);
 
-        audioSource = gameObject.AddComponent<AudioSource>();
         inventory = gameObject.AddComponent<Inventory>();
         inventory.SetCapacity(CARRYING_CAPACITY);
         inventory.SetDisplayMode(DisplayMode.UI_Only);
@@ -161,21 +164,8 @@ public class BlobController : MonoBehaviour, IControllable
         Lights.Define(BlobLight.Inventory_Icon, lightComponents[1], false);
 
         SetBlobMaterials(BlobMaterial.Water, true);
-
-        SetupSounds();
     }
 
-    /// <summary>
-    ///     Create and attach the audio source components to the center atom.
-    /// </summary>
-    private void SetupSounds()
-    {
-        Squisher = centerAtom.AddComponent<Squisher>();
-        Squisher.audioSource = audioSource;
-        
-        inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
-    }
-    
     /// <summary>
     ///     Apply user input as blob character movement.
     /// </summary>
@@ -183,17 +173,13 @@ public class BlobController : MonoBehaviour, IControllable
     {
         if (GhostMode) ApplyGhostMovement();
 
-        if (!movementInputEnabled || !controlled)
-            return;
+        if (!movementInputEnabled || !controlled) return;
 
         (Vector3 forwardForce, Vector3 rightwardForce) = GetInputAxisForces();
 
         // Constrain initial movementForce to the unit disk.
         Vector3 movementForce = forwardForce + rightwardForce;
-        if (movementForce.magnitude > 1)
-        {
-            movementForce = movementForce.normalized;
-        }
+        if (movementForce.magnitude > 1) movementForce = movementForce.normalized;
         movementForce *= MOVEMENT_MULTIPLIER * (stickyMode ? STICKY_MOVEMENT_MULTIPLIER : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
@@ -259,11 +245,11 @@ public class BlobController : MonoBehaviour, IControllable
     ///     Are any of the blob's atoms touching an object?
     /// </summary>
     /// <param name="obj">
-    ///     The object to test for. If null, test if the blob is touching anything.
+    ///     The object to test for. If <tt>null</tt>, tests if anything at all is being touched.
     /// </param>
     /// <returns>
-    ///     (If object is not null) True iff the blob is touching the object.<br/>
-    ///     (If object is null) True iff the blob is touching anything.
+    ///     (If object is not <tt>null</tt>) <tt>True</tt> iff the blob is touching the object.<br/>
+    ///     (If object is <tt>null</tt>) <tt>True</tt> iff the blob is touching something.
     /// </returns>
     public bool IsTouching(GameObject obj = null)
     {        
@@ -349,7 +335,9 @@ public class BlobController : MonoBehaviour, IControllable
         GameObject inventorySelection = inventory.GetObject();
         Transform targetTransform = inventorySelection != null ?
             inventorySelection.transform : transform;
-        inventoryCamera.transform.position = targetTransform.position + INVENTORY_CAMERA_DISTANCE * Vector3.back;
+
+        inventoryCamera.transform.position = targetTransform.position
+            + INVENTORY_CAMERA_DISTANCE * Vector3.back;
         inventoryCamera.transform.LookAt(targetTransform);
     }
 
@@ -394,10 +382,7 @@ public class BlobController : MonoBehaviour, IControllable
     {
         if (0 <= i && i < STICKY_COUNT)
         {
-            if (atomStickies[i] != null)
-            {
-                atomStickies[i].GetComponent<AtomController>().Unstick();
-            }
+            if (atomStickies[i] != null) atomStickies[i].GetComponent<AtomController>().Unstick();
             atomStickies[i] = null;
         }
     }
@@ -411,10 +396,7 @@ public class BlobController : MonoBehaviour, IControllable
     public void Unstick(GameObject atom)
     {
         int index = StickyIndex(atom);
-        if (index != -1)
-        {
-            Unstick(index);
-        }
+        if (index != -1) Unstick(index);
     }
 
     /// <summary>
@@ -456,15 +438,8 @@ public class BlobController : MonoBehaviour, IControllable
 
         Vector3 translation = forwardForce + rightwardForce;
         
-        if (Input.GetButton("Jump"))
-        {
-            translation.y += 1;
-        }
-
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            translation.y -= 1;
-        }
+        if (Input.GetButton("Jump")) translation.y += 1;
+        if (Input.GetKey(KeyCode.LeftShift)) translation.y -= 1;
 
         foreach (GameObject atom in createBlob.GetAtoms())
         {
@@ -593,42 +568,10 @@ public class BlobController : MonoBehaviour, IControllable
     //----------------------------------------------------------------------------------------------
     // Getters
     //----------------------------------------------------------------------------------------------
-    /// <returns>
-    ///     <tt> Vector3 </tt> The position of the blob's center atom.
-    /// </returns>
-    public Vector3 GetPosition()
-    {
-        return centerAtom.transform.position;
-    }
-
-    /// <returns>
-    ///     <tt> Vector3 </tt> The velocity of the blob's center atom.
-    /// </returns>
-    public Vector3 GetVelocity()
-    {
-        return centerAtom.GetComponent<Rigidbody>().velocity;
-    }
 
     public bool IsSticky()
     {
         return stickyMode;
-    }
-    
-    public GameObject GetCenterAtom()
-    {
-        return centerAtom;
-    }
-
-    private HashSet<GameObject> TouchingObjects()
-    {
-        HashSet<GameObject> touchingUnion = new();
-
-        foreach (AtomController atom in atomControllers)
-        {
-            touchingUnion.UnionWith(atom.touching);
-        }
-
-        return touchingUnion;
     }
 
     //----------------------------------------------------------------------------------------------

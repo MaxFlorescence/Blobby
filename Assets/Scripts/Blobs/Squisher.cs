@@ -4,19 +4,21 @@ using UnityEngine;
 /// <summary>
 ///     A class for playing the squishy noises that a blob makes.
 /// </summary>
+[RequireComponent(typeof(AudioSource))]
 public class Squisher : MonoBehaviour
 {
     /// <summary>
     ///     The audioSource set by the corresponding blob controller.
     /// </summary>
-    public AudioSource audioSource;
+    private AudioSource audioSource;
     /// <summary>
     ///     The list of possible squish noises that can be played.
     /// </summary>
     private AudioClip[] clips;
     private const int CLIP_COUNT = 8;
 
-    void Awake() {
+    void Start() {
+        audioSource = GetComponent<AudioSource>();
         clips = new AudioClip[CLIP_COUNT];
 
         for (int i = 0; i < CLIP_COUNT; i++) {

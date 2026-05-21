@@ -70,7 +70,7 @@ public class Dungeon : MonoBehaviour
 
     void Update()
     {
-        float blobPositionY = GameInfo.ControlledBlob.GetPosition().y;
+        float blobPositionY = GameInfo.ControlledBlob.Position.y;
         UpdateActiveLevel(LevelOf(blobPositionY));
     }
 
