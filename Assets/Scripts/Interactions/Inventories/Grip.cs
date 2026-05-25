@@ -185,9 +185,9 @@ public class Grip : Interactable
     /// </param>
     protected override void OnInteract(BlobController blob)
     {
-        if (!blob.inventory.IsFull() && blob.IsSticky() && blob.inventory.CanFit(burden))
+        if (!blob.Inventory.IsFull() && blob.Sticky && blob.Inventory.CanFit(burden))
         {
-            TryJoin(blob.inventory);
+            TryJoin(blob.Inventory);
         }
     }
 

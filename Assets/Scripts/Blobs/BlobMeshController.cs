@@ -1,9 +1,10 @@
-using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 [RequireComponent(typeof(MeshFilter))]
 
+/// <summary>
+///     A class that controls the mesh for a blob.
+/// </summary>
 [RequireComponent(typeof(MeshRenderer))]
 public class BlobMeshController : MonoBehaviour
 {
@@ -21,15 +22,31 @@ public class BlobMeshController : MonoBehaviour
     /// </summary>
     public Vector3Int rightTriangle;
     
+    // ---------------------------------------------------------------------------------------------
+    // ATOMS
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The blob atoms that the mesh is attached to.
+    /// </summary>
     public AtomCollection atoms;
-
-    private Mesh mesh;
-    private MeshRenderer meshRenderer;
 
     /// <summary>
     ///    The ratio of blob mesh radius to actual blob radius.
     /// </summary>
-    private const float SCALE_FACTOR = 1.5f;
+    public float ScaleFactor { get; set; } = 1.5f;
+
+    // ---------------------------------------------------------------------------------------------
+    // MESH
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The mesh of the blob.
+    /// </summary>
+    private Mesh mesh;
+
+    /// <summary>
+    ///     The renderer of the blob's mesh.
+    /// </summary>
+    private MeshRenderer meshRenderer;
 
     /// <summary>
     ///     Maps mesh vertices <tt>i</tt> to blob atoms <tt>vertexToAtomMap[i]</tt>. This is
@@ -81,31 +98,30 @@ public class BlobMeshController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Transforms the given object such that it is positioned between the three given atom
-    ///     indices. The distance between the objects and the center object (index 0) is first
-    ///     scaled.
+    ///     Transforms the given object such that it is positioned between the three given atoms,
+    ///     and scaled away from the center atom.
     /// </summary>
-    /// <param name="eye">
+    /// <param name="cosmetic">
     ///     The object that is being transformed.
     /// </param>
-    private void SnapToTriangle(GameObject eye, Vector3Int triangle)
+    private void SnapToTriangle(GameObject cosmetic, Vector3Int triangle)
     {
-        Vector3 position = ScaledBarycenter(triangle, SCALE_FACTOR);
+        Vector3 position = ScaledBarycenter(triangle, ScaleFactor);
         Vector3 direction = NormalVector(triangle, position);
 
-        eye.transform.position = position;
-        eye.transform.LookAt(position + direction, Vector3.up);
+        cosmetic.transform.position = position;
+        cosmetic.transform.LookAt(position + direction, Vector3.up);
     }
 
     /// <summary>
-    ///     Calculates the barycenter of the triangle formed by the tips of three vectors scaled
-    ///     away from a center.
+    ///     Calculates the barycenter of the triangle formed by three atoms scaled away from the
+    ///     center atom.
     /// </summary>
     /// <param name="scale">
-    ///     The scale between the given positions and the center.
+    ///     The scale by which to multiply the barycenter position, relative to the center atom.
     /// </param>
     /// <returns>
-    ///     The barycenter of the three positions as a Vector3, scaled away from the center.
+    ///     The barycenter of the triangle as a Vector3, scaled away from the center.
     /// </returns>
     private Vector3 ScaledBarycenter(Vector3Int triangle, float scale)
     {
@@ -119,11 +135,11 @@ public class BlobMeshController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Calculates the normal vector of the triangle formed by the tips of three vectors,
-    ///     oriented away from the center.
+    ///     Calculates the normal vector of the triangle formed by three atoms, oriented away from
+    ///     the center atom.
     /// </summary>
     /// <param name="barycenter">
-    ///     The barycenter of the triangle formed by the three positions.
+    ///     The barycenter of the triangle.
     /// </param>
     /// <returns>
     ///     The normal Vector3 of the triangle.
@@ -159,14 +175,17 @@ public class BlobMeshController : MonoBehaviour
             Vector3 worldPosition = atoms[vertexToAtomMap[i]].position;
 
             // Calculate local position of mesh vertices.
-            newVertices[i] = transform.InverseTransformPoint(worldPosition) * SCALE_FACTOR;
+            newVertices[i] = transform.InverseTransformPoint(worldPosition) * ScaleFactor;
         }
 
         mesh.vertices = newVertices;
     }
 
-    public void SetMaterial(Material material)
+    /// <summary>
+    ///     Sets the materials array of the blob's mesh renderer.
+    /// </summary>
+    public void SetMaterials(params Material[] materials)
     {
-        meshRenderer.materials = new Material[] {material};
+        meshRenderer.materials = materials;
     }
 }

@@ -1,35 +1,49 @@
+/// <summary>
+///     A class defining the data for a blob's joints.
+/// </summary>
 public class BlobJointData
 {
-    public float? lengthFactor { get; private set; }
-    public float LengthFactor => (float)lengthFactor;
+    /// <summary>
+    ///     The length multiplier for each of the blob's joints.
+    /// </summary>
+    public float? LengthFactor { get; private set; }
 
-    public bool? fixedJoint { get; private set; }
-    public bool FixedJoint => (bool)fixedJoint;
+    /// <summary>
+    ///     <tt>True</tt> if the blob's joints are fixed, <tt>false</tt> if they're springs.
+    /// </summary>
+    public bool? IsFixedJoint { get; private set; }
 
-    public float? springForce { get; private set; }
-    public float SpringForce => (float)springForce;
+    /// <summary>
+    ///     The force that the blob's joints exert to maintain the connected atom's position, if
+    ///     they're springs.
+    /// </summary>
+    public float? SpringForce { get; private set; }
 
-    public float? damping { get; private set; }
-    public float Damping => (float)damping;
+    /// <summary>
+    ///     The loss of energy in the blob's joints' oscillation, if they're springs.
+    /// </summary>
+    public float? Damping { get; private set; }
 
-    public float? motionLimit { get; set; }
-    public float MotionLimit => (float)motionLimit;
+    /// <summary>
+    ///     The maximum distance that each atom of the blob can be from its connected anchor.
+    /// </summary>
+    public float? MotionLimit { get; set; }
 
-    public BlobJointData(float? lengthFactor = null, bool? fixedJoint = null,
+    public BlobJointData(float? lengthFactor = null, bool? isFixedJoint = null,
                          float? springForce = null, float? damping = null)
     {
-        this.lengthFactor = lengthFactor;
-        this.fixedJoint = fixedJoint;
-        this.springForce = springForce;
-        this.damping = damping;
+        LengthFactor = lengthFactor;
+        IsFixedJoint = isFixedJoint;
+        SpringForce = springForce;
+        Damping = damping;
 
-        if (fixedJoint == null)
+        if (isFixedJoint == null)
         {
-            motionLimit = null;
+            MotionLimit = null;
         }
-        else if (FixedJoint)
+        else if (IsFixedJoint.Value)
         {
-            motionLimit = 0;
+            MotionLimit = 0;
         }
         else
         {
@@ -40,30 +54,38 @@ public class BlobJointData
 
     public void CalculateMotionLimit()
     {
-        motionLimit = (lengthFactor + 1) ?? null;
+        MotionLimit = (LengthFactor + 1) ?? null;
     }
 
+    /// <summary>
+    ///     Overwrite this <tt>BlobJointData</tt>'s values using the non-null values of the given
+    ///     <tt>BlobJointData</tt>.
+    /// </summary>
     public void UpdateWith(BlobJointData other)
     {
-        if (other.lengthFactor != null) lengthFactor = other.lengthFactor;
-        if (other.fixedJoint != null) fixedJoint = other.fixedJoint;
-        if (other.springForce != null) springForce = other.springForce;
-        if (other.damping != null) damping = other.damping;
-        if (other.motionLimit != null) motionLimit = other.motionLimit;
+        if (other.LengthFactor != null) LengthFactor = other.LengthFactor;
+        if (other.IsFixedJoint != null) IsFixedJoint = other.IsFixedJoint;
+        if (other.SpringForce != null) SpringForce = other.SpringForce;
+        if (other.Damping != null) Damping = other.Damping;
+        if (other.MotionLimit != null) MotionLimit = other.MotionLimit;
     }
 
+    /// <returns>
+    ///     <tt>True</tt> iff all of this <tt>BlobJointData</tt>'s values are approximately equal to
+    ///     the other <tt>BlobJointData</tt>'s values. <tt>Null</tt> values are ignored.
+    /// </returns>
     public bool Approx(BlobJointData other)
     {
         return other != null
-            && (other.fixedJoint == null || fixedJoint == other.fixedJoint)
-            && (other.lengthFactor == null || (lengthFactor?.Approx(other.lengthFactor) ?? false))
-            && (other.springForce == null || (springForce?.Approx(other.springForce) ?? false))
-            && (other.damping == null || (damping?.Approx(other.damping) ?? false))
-            && (other.motionLimit == null || (motionLimit?.Approx(other.motionLimit) ?? false));
+           && (other.IsFixedJoint == null || IsFixedJoint == other.IsFixedJoint)
+           && (other.LengthFactor == null || LengthFactor.Value.Approx(other.LengthFactor))
+           && (other.SpringForce == null  || SpringForce.Value.Approx(other.SpringForce))
+           && (other.Damping == null      || Damping.Value.Approx(other.Damping))
+           && (other.MotionLimit == null  || MotionLimit.Value.Approx(other.MotionLimit));
     }
 
     public override string ToString()
     {
-        return $"BlobJointDataStruct(lengthFactor={lengthFactor}, fixedJoint={fixedJoint}, springForce={springForce}, damping={damping}, motionLimit={motionLimit})";
+        return $"BlobJointData(lengthFactor={LengthFactor}, isFixedJoint={IsFixedJoint}, springForce={SpringForce}, damping={Damping}, motionLimit={MotionLimit})";
     }
 }

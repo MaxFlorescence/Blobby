@@ -111,7 +111,7 @@ public class Cannon : Interactable, IControllable
             if (blob.GhostMode) {
                 StartInteractionCooldown(0.5f);
                 controlled = false;
-                blob.SetControlCanRelease(true);
+                blob.CanRelease = true;
                 gameObject.SetLayer(GameObjectExtensions.DEFAULT_LAYER);
                 blob = null;   
             }
@@ -129,11 +129,11 @@ public class Cannon : Interactable, IControllable
         {
             if (barrel.IsEmpty())
             { // load ammo
-                barrel.TryTakeFrom(blob.inventory);
+                barrel.TryTakeFrom(blob.Inventory);
             }
             else
             { // unload ammo
-                barrel.TryGiveTo(blob.inventory);
+                barrel.TryGiveTo(blob.Inventory);
             }
             controlCooldownTimer.Reset();
         }
@@ -153,14 +153,14 @@ public class Cannon : Interactable, IControllable
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        if (this.blob != null || !blob.IsSticky()) return;
+        if (this.blob != null || !blob.Sticky) return;
         
         Reorient();
 
         this.blob = blob;
         controlled = true;
 
-        blob.SetControlCanRelease(false);
+        blob.CanRelease = false;
         blob.SetRestrained(true, LOADED_BLOB_SIZE_FACTOR);
 
         gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
@@ -224,7 +224,7 @@ public class Cannon : Interactable, IControllable
         controlled = false;
         gameObject.SetLayer(GameObjectExtensions.DEFAULT_LAYER);
 
-        blob.SetControlCanRelease(true);
+        blob.CanRelease = true;
         blob.Teleport(exitPosition);
         blob.ApplyForces(null, exitForce, false);
 

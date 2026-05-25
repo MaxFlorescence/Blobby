@@ -9,6 +9,9 @@ using UnityEngine;
 /// </summary>
 public abstract class PriorityCamera : MonoBehaviour, IControllable
 {
+    public Vector3 Forward => transform.forward;
+    public Vector3 Right => transform.right;
+    
     /// <summary>
     ///     The maximum priority this camera can have.
     /// </summary>

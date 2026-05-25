@@ -62,12 +62,15 @@ public class AtomController : MonoBehaviour
     //----------------------------------------------------------------------------------------------
     // PARTICLES
     //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     <tt>True</tt> iff this atom is the center atom of its blob.
+    /// </summary>
     public bool centerAtom = false;
+    /// <summary>
+    ///     Particle system controlling dripping from the blob's atoms.
+    /// </summary>
     private ParticleSystem drips;
     private ParticleSystem.EmissionModule dripsEmission;
-    /// <summary>
-    ///     <tt>true</tt> iff this atom is a center atom. This disables drip particles.
-    /// </summary>
 
     //----------------------------------------------------------------------------------------------
     // DEBUG MODE
@@ -107,7 +110,7 @@ public class AtomController : MonoBehaviour
     ///     Add and configure the particle system component for dripping.
     /// </summary>
     private void SetupDripParticles()
-    {
+    { // TODO: put in prefab
         if (centerAtom) return;
 
         dripsEmission = drips.emission;
@@ -160,26 +163,8 @@ public class AtomController : MonoBehaviour
         atomRigidBody.AddForce(force, ForceMode.Force);
         atomRigidBody.AddForce(impulse, ForceMode.Impulse);
         impulse = Vector3.zero;
-
-        // UpdateDripParticles(); // Disabled to increase particles
     }
 
-    /// <summary>
-    ///     Enables/disables drip particle emission if this atom is/isn't on the underside of the
-    ///     blob.
-    /// </summary>
-    private void UpdateDripParticles()
-    {
-        if (centerAtom) return;
-
-        Vector3 direction = transform.position - blobController.Position;
-        dripsEmission.enabled = Vector3.Dot(direction, Vector3.down) > 0;
-    }
-
-    /// <summary>
-    ///     Handle activating interactable objects, grabbable objects, sticking to objects,
-    ///     and tracking the touch count.
-    /// </summary>
     void OnCollisionEnter(Collision collision)
     {
         GameObject obj = collision.gameObject;
@@ -192,6 +177,7 @@ public class AtomController : MonoBehaviour
             // touching them. This prevents players from skipping sections by moving along the boundaries.
             if (NotBounds(obj) && !touching.Contains(obj))
             {
+                // keep track of the touch count
                 if (!blobController.Inventory.Contains(obj) && atomCollider.enabled)
                 { // don't count grabbed objects as touching
                     touching.Add(obj);
@@ -210,12 +196,11 @@ public class AtomController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    ///     Keep track of the touch count.
-    /// </summary>
     void OnCollisionExit(Collision collision)
     {
         GameObject obj = collision.gameObject;
+    
+        // keep track of the touch count
         if (!blobController.atoms.Contains(obj) && NotBounds(obj) && touching.Contains(obj))
         {
             touching.Remove(obj);
@@ -328,6 +313,10 @@ public class AtomController : MonoBehaviour
         atomRigidBody.velocity = velocity;
     }
     
+    /// <summary>
+    ///     Sets the force and impulse values that will affect this atom's rigidbody on the next
+    ///     fixed update.
+    /// </summary>
     public void SetForces(Vector3? force, Vector3? impulse)
     {
         if (force.HasValue) this.force = force.Value;

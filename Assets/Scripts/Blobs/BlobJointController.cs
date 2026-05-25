@@ -27,10 +27,13 @@ public class BlobJointController : MonoBehaviour
     /// </summary>
     private AtomCollection atoms;
 
+    public BlobMeshController meshController;
+
     /// <summary>
     ///     How big each atom of the blob is.
     /// </summary>
     private const float ATOM_SCALE = 0.5f;
+
     /// <summary>
     ///     How far away from the connected anchors each atom can go when the joints are acting as
     ///     springs.
@@ -40,7 +43,14 @@ public class BlobJointController : MonoBehaviour
     //----------------------------------------------------------------------------------------------
     // JOINTS
     //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The joins that are being controlled.
+    /// </summary>
     private ConfigurableJoint[] joints;
+
+    /// <summary>
+    ///     The number of joints that are being controlled.
+    /// </summary>
     private int jointCount;
 
     /// <summary>
@@ -56,18 +66,23 @@ public class BlobJointController : MonoBehaviour
     /// <summary>
     ///     The default settings for controlled joints.
     ///     <code>
-    ///         lengthFactor = 1,
-    ///         fixedJoint = false,
-    ///         springForce = 30
+    ///         LengthFactor = 1,
+    ///         FixedJoint = false,
+    ///         SpringForce = 50,
+    ///         Damping = 0.5f,
+    ///         MotionLimit = 2f
     ///     </code>
     /// </summary>
     public readonly BlobJointData DEFAULT_JOINT_DATA = new(
         lengthFactor: 1,
-        fixedJoint: false,
+        isFixedJoint: false,
         springForce: 50,
         damping: 0.5f
     );
 
+    /// <summary>
+    ///     The last motion limit
+    /// </summary>
     private float previousMotionLimit = DEFAULT_MOTION_LIMIT;
     private readonly Timer lerpTimer = new(1);
 
@@ -75,11 +90,6 @@ public class BlobJointController : MonoBehaviour
     ///     The original anchor positions for each controlled joint.
     /// </summary>
     private Vector3[] connectedAnchors;
-
-    //----------------------------------------------------------------------------------------------
-    // MESH
-    //----------------------------------------------------------------------------------------------
-    private float meshScale = 1.5f;
 
     void Awake()
     {
@@ -95,7 +105,8 @@ public class BlobJointController : MonoBehaviour
 
     /// <summary>
     ///     Manually sets the anchor positions of all controlled joints to be the positions of each
-    ///     respective connected body.
+    ///     respective connected body. Also sets the damping factors, spring forces, and linear
+    ///     motion limits of the joints.
     /// </summary>
     private void InitializeJoints()
     {
@@ -109,9 +120,9 @@ public class BlobJointController : MonoBehaviour
             connectedAnchors[i] = to.transform.InverseTransformPoint(from.position);
             joints[i].connectedAnchor = connectedAnchors[i];
 
-            joints[i].SetAllDampers(Data.Damping);
-            joints[i].SetAllSpringForces(Data.SpringForce);
-            joints[i].SetLinearLimit(Data.MotionLimit);
+            joints[i].SetAllDampers(Data.Damping.Value);
+            joints[i].SetAllSpringForces(Data.SpringForce.Value);
+            joints[i].SetLinearLimit(Data.MotionLimit.Value);
         }
     }
 
@@ -121,15 +132,15 @@ public class BlobJointController : MonoBehaviour
 
         if (lerpTimer.Update(0, TimerMode.Pulse))
         {
-            previousMotionLimit = Data.MotionLimit;
-            updateLinearLimit = Data.MotionLimit;
+            previousMotionLimit = Data.MotionLimit.Value;
+            updateLinearLimit = Data.MotionLimit.Value;
         }
         else if (lerpTimer.Running)
         {
             updateLinearLimit = lerpTimer.RemainingProgress() * previousMotionLimit
-                                   + lerpTimer.Progress() * Data.MotionLimit;
+                                   + lerpTimer.Progress() * Data.MotionLimit.Value;
         }
-        else if (previousMotionLimit != Data.MotionLimit)
+        else if (previousMotionLimit != Data.MotionLimit.Value)
         {
             lerpTimer.Reset();
         }
@@ -155,26 +166,28 @@ public class BlobJointController : MonoBehaviour
     /// </param>
     public void SetJointProperties(BlobJointData jointData = null, bool snap = false)
     {
-        jointData ??= DEFAULT_JOINT_DATA;
+        if (lerpTimer.Running) return;
 
+        jointData ??= DEFAULT_JOINT_DATA;
         if (Data.Approx(jointData)) return;
-        if (jointData.lengthFactor != null && Data.LengthFactor > jointData.lengthFactor)
+
+        if (jointData.LengthFactor != null && Data.LengthFactor.Value > jointData.LengthFactor)
         {
             ClipSeparatedAtoms();
         }
         
         Data.UpdateWith(jointData);
         
-        if (!Data.FixedJoint || snap) previousMotionLimit = snap ? 0 : DEFAULT_MOTION_LIMIT;
+        if (!Data.IsFixedJoint.Value || snap) previousMotionLimit = snap ? 0 : DEFAULT_MOTION_LIMIT;
 
         for (int i = 0; i < jointCount; i++)
         {
-            joints[i].connectedAnchor = Data.LengthFactor * connectedAnchors[i];
-            joints[i].SetAllSpringForces(Data.SpringForce);
+            joints[i].connectedAnchor = Data.LengthFactor.Value * connectedAnchors[i];
+            joints[i].SetAllSpringForces(Data.SpringForce.Value);
             joints[i].SetLinearLimit(previousMotionLimit);
         }
 
-        meshScale = 1f + ATOM_SCALE/Data.LengthFactor;
+        meshController.ScaleFactor = 1f + ATOM_SCALE/Data.LengthFactor.Value;
     }
 
     /// <summary>
