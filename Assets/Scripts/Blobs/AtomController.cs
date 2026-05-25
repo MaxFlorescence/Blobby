@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -14,8 +13,17 @@ public class AtomController : MonoBehaviour
     //----------------------------------------------------------------------------------------------
     // COMPONENTS
     //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The controller of this atom's blob.
+    /// </summary>
     public BlobController blobController;
+    /// <summary>
+    ///     The rigidbody of this atom.
+    /// </summary>
     private Rigidbody atomRigidBody;
+    /// <summary>
+    ///     The collider of this atom.
+    /// </summary>
     private Collider atomCollider;
 
     //----------------------------------------------------------------------------------------------
@@ -33,7 +41,7 @@ public class AtomController : MonoBehaviour
     ///     Set of objects that this atom is currently colliding with. Movement input only registers 
     ///     if this is non-empty.
     /// </summary>
-    public HashSet<GameObject> touching = new HashSet<GameObject>();
+    public HashSet<GameObject> touching = new();
 
     //----------------------------------------------------------------------------------------------
     // STICKING
@@ -54,30 +62,32 @@ public class AtomController : MonoBehaviour
     //----------------------------------------------------------------------------------------------
     // PARTICLES
     //----------------------------------------------------------------------------------------------
+    public bool centerAtom = false;
     private ParticleSystem drips;
     private ParticleSystem.EmissionModule dripsEmission;
     /// <summary>
     ///     <tt>true</tt> iff this atom is a center atom. This disables drip particles.
     /// </summary>
-    public bool centerAtom = false;
 
     //----------------------------------------------------------------------------------------------
     // DEBUG MODE
     //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The renderer for the atom's mesh.
+    /// </summary>
     private MeshRenderer atomMeshRenderer;
-    private Material[] atomMaterials;
-    private Material[] stickyMaterials;
+    /// <summary>
+    ///     The materials for the atom's mesh when its not sticking to anything.
+    /// </summary>
+    public Material[] atomMaterials;
+    /// <summary>
+    ///     The materials for the atom's mesh when its sticking to something.
+    /// </summary>
+    public Material[] stickyMaterials;
 
     void Awake() {
         drips = gameObject.AddComponent<ParticleSystem>();
         drips.Stop();
-
-        atomMaterials = new Material[] {Resources.Load<Material>(
-            Path.Combine(FileUtilities.BLOB_MATERIALS, "EyeSclera")
-        )};
-        stickyMaterials = new Material[] {Resources.Load<Material>(
-            Path.Combine(FileUtilities.BASIC_MATERIALS, "Highlighted")
-        )};
     }
 
     void Start()
@@ -86,6 +96,8 @@ public class AtomController : MonoBehaviour
         atomCollider = GetComponent<Collider>();
         atomMeshRenderer = GetComponent<MeshRenderer>();
         atomMeshRenderer.materials = atomMaterials;
+
+        gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
 
         SetupDripParticles();
         SetVisible(false);
@@ -160,7 +172,7 @@ public class AtomController : MonoBehaviour
     {
         if (centerAtom) return;
 
-        Vector3 direction = transform.position - blobController.transform.position;
+        Vector3 direction = transform.position - blobController.Position;
         dripsEmission.enabled = Vector3.Dot(direction, Vector3.down) > 0;
     }
 
@@ -172,7 +184,7 @@ public class AtomController : MonoBehaviour
     {
         GameObject obj = collision.gameObject;
 
-        if (!blobController.IsAtom(obj))
+        if (!blobController.atoms.Contains(obj))
         { // do nothing special when colliding with other atoms
             blobController.Squisher.Squish();
 
@@ -180,7 +192,7 @@ public class AtomController : MonoBehaviour
             // touching them. This prevents players from skipping sections by moving along the boundaries.
             if (NotBounds(obj) && !touching.Contains(obj))
             {
-                if (!blobController.inventory.Contains(obj) && atomCollider.enabled)
+                if (!blobController.Inventory.Contains(obj) && atomCollider.enabled)
                 { // don't count grabbed objects as touching
                     touching.Add(obj);
                 }
@@ -204,7 +216,7 @@ public class AtomController : MonoBehaviour
     void OnCollisionExit(Collision collision)
     {
         GameObject obj = collision.gameObject;
-        if (!blobController.IsAtom(obj) && NotBounds(obj) && touching.Contains(obj))
+        if (!blobController.atoms.Contains(obj) && NotBounds(obj) && touching.Contains(obj))
         {
             touching.Remove(obj);
         }
@@ -297,10 +309,6 @@ public class AtomController : MonoBehaviour
     //----------------------------------------------------------------------------------------------
     // Getters
     //----------------------------------------------------------------------------------------------
-    public BlobController GetBlobController()
-    {
-        return blobController;
-    }
     
     public bool IsSticking()
     {
@@ -320,24 +328,15 @@ public class AtomController : MonoBehaviour
         atomRigidBody.velocity = velocity;
     }
     
-    public void SetForce(Vector3 force)
+    public void SetForces(Vector3? force, Vector3? impulse)
     {
-        this.force = force;
-    }
-    
-    public void SetImpulse(Vector3 impulse)
-    {
-        this.impulse = impulse;
+        if (force.HasValue) this.force = force.Value;
+        if (impulse.HasValue) this.impulse = impulse.Value;
     }
     
     public void SetVisible(bool visible)
     {
         atomMeshRenderer.enabled = visible;
-    }
-    
-    public void SetAsCenterAtom(bool isCenterAtom)
-    {
-        centerAtom = isCenterAtom;
     }
     
     /// <summary>

@@ -1,44 +1,57 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
+[RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Squisher))]
 public class BlobController : MonoBehaviour, IControllable
 {
-    public Vector3 Position => transform.position;
-    public Vector3 Velocity => atoms.CenterRigidbody.velocity;
-
     //----------------------------------------------------------------------------------------------
-    // INPUT
+    // MOTION
     //----------------------------------------------------------------------------------------------
-    private Vector3 jumpDirection = Vector3.up;
-    private bool jumpOnNextFixedUpdate = false;
-    private const float JUMP_MULTIPLIER = 8f;
-    private bool movementInputEnabled = true;
-    private const float MOVEMENT_MULTIPLIER = 10f;
     public bool controlled { get; set; } = false;
+    /// <summary>
+    ///     The position of the blob's transform.
+    /// </summary>
+    public Vector3 Position => transform.position;
+    /// <summary>
+    ///     The velocity of the blob's rigidbody.
+    /// </summary>
+    public Vector3 Velocity => atoms.CenterRigidbody.velocity;
+    /// <summary>
+    ///     Iff <tt>true</tt>, allows the player to control the blob's movement.
+    /// </summary>
+    private bool movementInputEnabled = true;
+    /// <summary>
+    ///     Multiplier for the blob's movement speed.
+    /// </summary>
+    private const float MOVEMENT_MULTIPLIER = 10f;
+    /// <summary>
+    ///     Iff <tt>true</tt>, cause the blob to jump on the next fixed update, then reset.
+    /// </summary>
+    private bool jumpOnNextFixedUpdate = false;
+    /// <summary>
+    ///     Multiplier for the blob's jump power.
+    /// </summary>
+    private const float JUMP_MULTIPLIER = 8f;
+    /// <summary>
+    ///     The direction that the blob jumps in.
+    /// </summary>
+    private readonly Vector3 JUMP_DIRECTION = Vector3.up;
 
     //----------------------------------------------------------------------------------------------
     // STRUCTURE
     //----------------------------------------------------------------------------------------------
-    private CreateBlob createBlob;
     /// <summary>
-    ///     Quick reference for <tt>blobAtoms[0]</tt>.
+    ///     The atoms that comprise this blob.
     /// </summary>
-    private GameObject centerAtom;
-    private int numAtoms;
-    private AtomController[] atomControllers;
+    public AtomCollection atoms;
+    
     /// <summary>
-    ///     Holds the blob's spring length factor constant.
+    ///     Controls the joints that hold this blob together.
     /// </summary>
-    private bool springsLocked = false;
-    /// <summary>
-    ///     The factors by which the blob can shrink or grow from its original size (1f).
-    /// </summary>
-    private readonly float[] SIZE_FACTORS = {0.5f, 1f, 1.5f, 2.5f};
+    public BlobJointController jointController;
 
     //----------------------------------------------------------------------------------------------
     // STICKING
@@ -59,7 +72,10 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Indicates if atoms can become sticky. If <tt>false</tt>, no atoms are sticky.
     /// </summary>
-    private bool stickyMode = false;
+    public bool Sticky { get; private set; } = false;
+    /// <summary>
+    ///     Additional multiplier applied to movement speed while the blob is sticking to something.
+    /// </summary>
     private const float STICKY_MOVEMENT_MULTIPLIER = 1.2f;
 
     //----------------------------------------------------------------------------------------------
@@ -68,7 +84,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     The list of gameObjects carried by the blob.
     /// </summary>
-    public Inventory inventory;
+    public Inventory Inventory { get; private set; }
     /// <summary>
     ///     How much burden the blob can carry in its inventory.
     /// </summary>
@@ -84,19 +100,27 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     The player can cause the blob to drop a held object iff this is <tt>true</tt>.
     /// </summary>
-    private bool controlCanRelease = true;
+    public bool CanRelease { get; set; } = true;
 
     //----------------------------------------------------------------------------------------------
     // VISUALS
     //----------------------------------------------------------------------------------------------
-    private MeshRenderer blobMesh;
+    /// <summary>
+    ///     Controls the mesh for this blob.
+    /// </summary>
+    private BlobMeshController meshController;
+    /// <summary>
+    ///     Defines behaviors of the blob that depend on its material type.
+    /// </summary>
     public BlobMaterial Material { get; private set; }
+    /// <summary>
+    ///     The mesh to use for the blob's droplet particles.
+    /// </summary>
     public Mesh DropletMesh { get; private set; }
     /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
     /// </summary>
-    public BlobLightController Lights { get; private set; }= new();
-    public bool AtomsVisible { get; private set; } = false;
+    public BlobLightController Lights { get; private set; } = new();
 
     //----------------------------------------------------------------------------------------------
     // AUDIO
@@ -121,7 +145,13 @@ public class BlobController : MonoBehaviour, IControllable
     //----------------------------------------------------------------------------------------------
     // GHOST MODE
     //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     <tt>True</tt> iff the blob is currently in ghost mode.
+    /// </summary>
     public bool GhostMode { get; private set; } = false;
+    /// <summary>
+    ///     Multiplier for the blob's flying speed while in ghost mode.
+    /// </summary>
     private const float GHOST_SPEED = 0.5f;
 
     void Awake()
@@ -129,46 +159,31 @@ public class BlobController : MonoBehaviour, IControllable
         GameInfo.SetControlledBlob(this);
 
         Squisher = GetComponent<Squisher>();
-        meshController = GetComponentInChildren<CreateBlob>();
-        blobMesh = createBlob.gameObject.GetComponent<MeshRenderer>();
+        meshController = GetComponentInChildren<BlobMeshController>();
         
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         DropletMesh = Instantiate(sphere.GetComponent<MeshFilter>().mesh);
         Destroy(sphere);
 
-        inventory = gameObject.AddComponent<Inventory>();
-        inventory.SetCapacity(CARRYING_CAPACITY);
-        inventory.SetDisplayMode(DisplayMode.UI_Only);
+        Inventory = gameObject.AddComponent<Inventory>();
+        Inventory.SetCapacity(CARRYING_CAPACITY);
+        Inventory.SetDisplayMode(DisplayMode.UI_Only);
     }
 
     void Start()
     {
-        numAtoms = createBlob.GetAtoms().Length;
-        centerAtom = createBlob.GetAtoms()[0];
-
-        atomControllers = new AtomController[numAtoms];
-
-        for (int i = 0; i < numAtoms; i++)
-        {
-            atomControllers[i] = createBlob.GetAtoms()[i].AddComponent<AtomController>();
-            atomControllers[i].blobController = this;
-        }
-        atomControllers[0].GetComponent<AtomController>().SetAsCenterAtom(true);
-
-        inventoryCamera = transform.parent.GetComponentsInChildren<Camera>()[0];
+        inventoryCamera = transform.GetComponentInParents<Camera>(true);
         inventoryCamera.enabled = true;
+        Inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
 
-        // TODO: order of elements in array unclear
-        Light[] lightComponents = transform.parent.GetComponentsInChildren<Light>();
+        // TODO: use data struct and set manually in inspector
+        Light[] lightComponents = transform.GetComponentsInParents<Light>();
         Lights.Define(BlobLight.Material_Glow, lightComponents[0], false);
         Lights.Define(BlobLight.Inventory_Icon, lightComponents[1], false);
 
         SetBlobMaterials(BlobMaterial.Water, true);
     }
 
-    /// <summary>
-    ///     Apply user input as blob character movement.
-    /// </summary>
     void FixedUpdate()
     {
         if (GhostMode) ApplyGhostMovement();
@@ -180,11 +195,12 @@ public class BlobController : MonoBehaviour, IControllable
         // Constrain initial movementForce to the unit disk.
         Vector3 movementForce = forwardForce + rightwardForce;
         if (movementForce.magnitude > 1) movementForce = movementForce.normalized;
-        movementForce *= MOVEMENT_MULTIPLIER * (stickyMode ? STICKY_MOVEMENT_MULTIPLIER : 1);
+        movementForce *= MOVEMENT_MULTIPLIER * (Sticky ? STICKY_MOVEMENT_MULTIPLIER : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
         // so detect the keypress in Update() and perform the action in FixedUpdate().
-        Vector3 jumpForce = jumpOnNextFixedUpdate ? (JUMP_MULTIPLIER * jumpDirection) : Vector3.zero;
+        Vector3 jumpForce = jumpOnNextFixedUpdate ? (JUMP_MULTIPLIER * JUMP_DIRECTION)
+                                                  : Vector3.zero;
         jumpOnNextFixedUpdate = false;
 
         ApplyForces(movementForce, jumpForce, true);
@@ -199,10 +215,12 @@ public class BlobController : MonoBehaviour, IControllable
     /// </returns>
     private (Vector3, Vector3) GetInputAxisForces() {
         // Ensure forward/rightward movement occurs in the horizontal plane.
-        Vector3 forwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.forward, Vector3.up).normalized;
+        Vector3 forwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.Forward, Vector3.up)
+                                      .normalized;
         forwardForce *= Input.GetAxis("Vertical");
 
-        Vector3 rightwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.transform.right, Vector3.up).normalized;
+        Vector3 rightwardForce = Vector3.ProjectOnPlane(GameInfo.ControlledCamera.Right, Vector3.up)
+                                        .normalized;
         rightwardForce *= Input.GetAxis("Horizontal");
 
         return (forwardForce, rightwardForce);
@@ -228,17 +246,7 @@ public class BlobController : MonoBehaviour, IControllable
             impulse = Vector3.zero;
         }
 
-        foreach (AtomController atom in atomControllers)
-        {
-            if (force.HasValue)
-            {
-                atom.SetForce(force.Value);
-            }
-            if (impulse.HasValue)
-            {
-                atom.SetImpulse(impulse.Value);
-            }
-        }
+        atoms.SetAllForces(force, impulse);
     }
 
     /// <summary>
@@ -253,7 +261,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </returns>
     public bool IsTouching(GameObject obj = null)
     {        
-        if (obj == null && stickyMode)
+        if (obj == null && Sticky)
         {
             for (int i = 0; i < STICKY_COUNT; i++)
             {
@@ -261,12 +269,7 @@ public class BlobController : MonoBehaviour, IControllable
             }
         }
 
-        foreach (AtomController atom in atomControllers)
-        {
-            if (atom.IsTouching(obj)) return true;
-        }
-
-        return false;
+        return atoms.AreAnyTouching(obj);
     }
 
     /// <summary>
@@ -276,53 +279,84 @@ public class BlobController : MonoBehaviour, IControllable
     {
         MoveInventoryCamera();
 
-        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.Paused) return;
+        if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.Paused)
+            return;
 
-        if (controlCanRelease && Input.GetKeyDown(KeyCode.Q)) inventory.TryDrop();
+        HandleInventoryControls();
+
+        HandleMovementControls();
+
+        HandleDebugControls();
+    }
+
+    /// <summary>
+    ///     Allow the player to control inventory dropping and selection.
+    /// </summary>
+    private void HandleInventoryControls()
+    {
+        if (CanRelease && Input.GetKeyDown(KeyCode.Q)) Inventory.TryDrop();
 
         float mouseScroll = Input.mouseScrollDelta.y;
-        if (mouseScroll != 0) inventory.SelectNextNonEmptyObject(mouseScroll > 0);
+        if (mouseScroll != 0) Inventory.SelectNextNonEmptyObject(mouseScroll > 0);
+    }
 
-        if (movementInputEnabled)
+    /// <summary>
+    ///     Allow the player to control blob jumping, stickiness, and size.
+    /// </summary>
+    private void HandleMovementControls()
+    {
+        if (!movementInputEnabled) return;
+        
+        if (Input.GetButtonDown("Jump")) jumpOnNextFixedUpdate = true;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift)) SetStickyMode(true);
+        if (Input.GetKeyUp(KeyCode.LeftShift)) SetStickyMode(false);
+
+        // left mouse shrinks, right mouse grows
+        if (Input.GetMouseButton(0))
         {
-            if (Input.GetButtonDown("Jump")) jumpOnNextFixedUpdate = true;
-            if (Input.GetKeyDown(KeyCode.LeftShift)) SetStickyMode(true);
-            if (Input.GetKeyUp(KeyCode.LeftShift)) SetStickyMode(false);
-
-            // left mouse shrinks, right mouse grows
-            if (Input.GetMouseButton(0))
-            {
-                TrySetSpringLengths(size: 0);
-            }
-            else if (Input.GetMouseButton(1))
-            {
-                TrySetSpringLengths(size: 2);
-            }
-            else
-            {
-                TrySetSpringLengths(size: 1);
-            }
+            jointController.TrySetJointProperties(new(BlobSize.Small));
         }
+        else if (Input.GetMouseButton(1))
+        {
+            jointController.TrySetJointProperties(new(BlobSize.Large));
+        }
+        else
+        {
+            jointController.TrySetJointProperties(new(BlobSize.Medium));
+        }
+    }
 
-        SetAtomsVisible(GameInfo.DebugMode);
+    /// <summary>
+    ///     Allow the player to control ghost mode and blob material when in debug mode.
+    /// </summary>
+    private void HandleDebugControls()
+    {
+        atoms.SetAllVisible(GameInfo.DebugMode);
 
         if (!GameInfo.DebugMode) return;
         
-        if (Input.GetKeyDown(KeyCode.G)) ToggleGhostMode();
+        if (Input.GetKeyDown(KeyCode.G)) {
+            ToggleGhostMode();
+            GameInfo.AlertSystem.Send($"Ghost mode is now {(GhostMode ? "on" : "off")}");
+        }
 
         if (Input.GetKey(KeyCode.M))
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 SetBlobMaterials(BlobMaterial.Water);
+                GameInfo.AlertSystem.Send($"Set material to Water");
             }
             else if (Input.GetKeyDown(KeyCode.Alpha2))
             {
                 SetBlobMaterials(BlobMaterial.Lava);
+                GameInfo.AlertSystem.Send($"Set material to Lava");
             }
             else if (Input.GetKeyDown(KeyCode.Alpha3))
             {
                 SetBlobMaterials(BlobMaterial.Honey);
+                GameInfo.AlertSystem.Send($"Set material to Honey");
             }
         }
     }
@@ -332,7 +366,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     private void MoveInventoryCamera()
     {
-        GameObject inventorySelection = inventory.GetObject();
+        GameObject inventorySelection = Inventory.GetObject();
         Transform targetTransform = inventorySelection != null ?
             inventorySelection.transform : transform;
 
@@ -356,7 +390,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </returns>
     public bool TrySticking(GameObject atom, GameObject obj)
     {
-        if (stickyMode && StickyIndex(atom) == -1
+        if (Sticky && StickyIndex(atom) == -1
             && obj.TryGetComponent<Rigidbody>(out var objRigidbody)
             && !obj.CompareTag("No Sticky"))
         {
@@ -417,10 +451,10 @@ public class BlobController : MonoBehaviour, IControllable
         return -1;
     }
 
-/// <summary>
-///     Enables/disables ghost mode for the blob. Ghost mode disables gravity and enables flying
-///     and clipping.
-/// </summary>
+    /// <summary>
+    ///     Enables/disables ghost mode for the blob. Ghost mode disables gravity and enables flying
+    ///     and clipping.
+    /// </summary>
     private void ToggleGhostMode()
     {
         GhostMode = !GhostMode;
@@ -441,24 +475,7 @@ public class BlobController : MonoBehaviour, IControllable
         if (Input.GetButton("Jump")) translation.y += 1;
         if (Input.GetKey(KeyCode.LeftShift)) translation.y -= 1;
 
-        foreach (GameObject atom in createBlob.GetAtoms())
-        {
-            atom.transform.position += GHOST_SPEED * translation;
-        }
-    }
-
-    /// <summary>
-    ///     Enable/disable gravity for the blob character.
-    /// </summary>
-    /// <param name="gravity">
-    ///     If true, enables gravity. Disables otherwise.
-    /// </param>
-    public void SetGravity(bool gravity)
-    {
-        foreach (AtomController atom in atomControllers)
-        {
-            atom.SetGravity(gravity);
-        }
+        atoms.TranslateAll(GHOST_SPEED * translation);
     }
 
     /// <summary>
@@ -485,12 +502,7 @@ public class BlobController : MonoBehaviour, IControllable
     {
         SetStickyMode(false);
         StopMovement();
-        Vector3 translation = newPosition - centerAtom.transform.position;
-
-        foreach (GameObject atom in createBlob.GetAtoms())
-        {
-            atom.transform.position += translation;
-        }
+        atoms.TranslateAll(newPosition - atoms.Center.position);
     }
 
     /// <summary>
@@ -508,21 +520,21 @@ public class BlobController : MonoBehaviour, IControllable
     public void SetRestrained(bool enabled, float springOverrideFactor = 1f, float delaySpringUnlock = 0f)
     {
         SetMovementInputEnabled(!enabled, enabled ? 0 : 0.5f);
-        SetGravity(!enabled);
+        atoms.SetAllGravity(!enabled);
         if (enabled)
         {
-            SetColliders(false);
+            atoms.SetColliders(false);
             SetStickyMode(false);
             StopMovement();
-            createBlob.SetJointProperties(springOverrideFactor, false, true);
-            LockSprings(true);
+            jointController.SetJointProperties(new(springOverrideFactor, true), true);
+            jointController.Locked = true;
         }
         else
         {
-            SetColliders(true, 0.1f);
-            this.DelayedExecute(delaySpringUnlock, () => LockSprings(false));
+            this.DelayedExecute(0.1f, () => atoms.SetColliders(true));
+            this.DelayedExecute(delaySpringUnlock, () => jointController.Locked = false);
         }
-        HoldCenterAtom(enabled);
+        atoms.FreezeCenter(enabled);
     }
 
     /// <summary>
@@ -530,48 +542,8 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     public void StopMovement()
     {
-        foreach (AtomController atom in atomControllers)
-        {
-            atom.SetVelocity(Vector3.zero);
-        }
+        atoms.SetVelocities(Vector3.zero);
         ApplyForces(Vector3.zero, Vector3.zero, false);
-    }
-
-    /// <summary>
-    ///     Hold the blob's center atom in place or release it.
-    /// </summary>
-    /// <param name="hold">
-    ///     <tt>true</tt> to begin holding the center atom, <tt>false</tt> to release it.
-    /// </param>
-    public void HoldCenterAtom(bool hold)
-    {
-        Rigidbody centerAtomRigidbody = centerAtom.GetComponent<Rigidbody>();
-        centerAtomRigidbody.constraints = hold ?
-            RigidbodyConstraints.FreezePosition :
-            RigidbodyConstraints.None;
-    }
-
-    /// <summary>
-    ///     Return true if the given object is one of this blob's atoms.
-    /// </summary>
-    /// <param name="obj">
-    ///     The GameObject to check.
-    /// </param>
-    /// <returns>
-    ///     <tt>true</tt> iff the object is one of this blob's atoms.
-    /// </returns>
-    public bool IsAtom(GameObject obj)
-    {
-        return createBlob.GetAtoms().Contains(obj);
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // Getters
-    //----------------------------------------------------------------------------------------------
-
-    public bool IsSticky()
-    {
-        return stickyMode;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -585,68 +557,13 @@ public class BlobController : MonoBehaviour, IControllable
     /// </param>
     private void SetStickyMode(bool enable)
     {
-        stickyMode = enable;
-        if (!stickyMode)
+        Sticky = enable;
+        if (!Sticky)
         {
             for (int i = 0; i < STICKY_COUNT; i++)
             {
                 Unstick(i);
             }
-        }
-    }
-    
-    public void LockSprings(bool enabled)
-    {
-        springsLocked = enabled;
-    }
-
-    /// <summary>
-    ///     Sets the spring lengths of the blob if they are unlocked. Otherwise does nothing.
-    /// </summary>
-    /// <param name="factor">
-    ///     The new spring length factor to use.
-    /// </param>
-    /// <param name="immediately">
-    ///     If <tt>true</tt>, force the blob's atoms to snap to their equilibrium positions
-    ///     immediately.
-    /// </param>
-    /// <returns>
-    ///     <tt>True</tt> iff the spring lengths were successfully updated.
-    /// </returns>
-    public bool TrySetSpringLengths(int size = 1, bool immediately = false)
-    {
-        float factor = SIZE_FACTORS[size];
-        if (springsLocked || createBlob.GetSpringLengthFactor() == factor) return false;
-        
-        createBlob.SetJointProperties(factor, true, immediately);
-        return true;
-    }
-    
-    /// <summary>
-    ///     Enables/disables each atom's collider in this blob.
-    /// </summary>
-    /// <param name="enable">
-    ///     Enables atom colliders iff this is <tt>True</tt>.
-    /// </param>
-    public void SetColliders(bool enabled, float delay = 0)
-    {
-        this.DelayedExecute(delay, () =>
-        {
-            foreach (AtomController atom in atomControllers)
-            {
-                atom.SetCollider(enabled);
-            }
-        });
-    }
-
-    private void SetAtomsVisible(bool visible)
-    {
-        if (AtomsVisible == visible) return;
-        AtomsVisible = visible;
-
-        foreach (AtomController atom in atomControllers)
-        {
-            atom.SetVisible(visible);
         }
     }
 
@@ -664,23 +581,13 @@ public class BlobController : MonoBehaviour, IControllable
 
         bool glow = newBlobMaterials.Has(BlobMaterialProperties.Glowing);
         Lights.Set(BlobLight.Material_Glow, glow, true);
-        createBlob.SetJointProperties(1, !newBlobMaterials.Has(BlobMaterialProperties.Solid), false);
+        jointController.SetJointProperties(
+            new(1, newBlobMaterials.Has(BlobMaterialProperties.Solid)),
+            false
+        );
 
-        blobMesh.materials = new Material[] {newBlobMaterials.Body()};
-
-        Material dropMaterial = newBlobMaterials.Drops();
-        foreach (AtomController atom in atomControllers)
-        {
-            atom.SetDropletMaterial(dropMaterial);
-        }
-    }
-
-    /// <summary>
-    ///     Enables/disables the blob's ability to release held objects from its inventory.
-    /// </summary>
-    public void SetControlCanRelease(bool canRelease)
-    {
-        controlCanRelease = canRelease;
+        meshController.SetMaterials(newBlobMaterials.Body());
+        atoms.SetDropletMaterials(newBlobMaterials.Drops());
     }
 
     public override string ToString()
@@ -688,9 +595,9 @@ public class BlobController : MonoBehaviour, IControllable
         return $"BlobController: {name}\n"
         + $" ghostMode: {GhostMode}\n"
         + $" blobMaterials: {Material} ({Material.GetProperties()})\n"
-        + $" stickyMode: {stickyMode}\n"
-        + $" springFactor: {createBlob.GetSpringLengthFactor()}\n"
+        + $" stickyMode: {Sticky}\n"
+        + $" joints: {jointController.Data}\n"
         + $" touchingSomething: {IsTouching()}\n"
-        + $" inventory: {inventory}";
+        + $" inventory: {Inventory}";
     }
 }
