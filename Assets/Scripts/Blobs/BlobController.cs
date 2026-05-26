@@ -1,10 +1,11 @@
 using UnityEngine;
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Squisher))]
 
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(Squisher))]
+[RequireComponent(typeof(BlobLightController))]
 public class BlobController : MonoBehaviour, IControllable
 {
     //----------------------------------------------------------------------------------------------
@@ -120,7 +121,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
     /// </summary>
-    public BlobLightController Lights { get; private set; } = new();
+    public BlobLightController Lights;
 
     //----------------------------------------------------------------------------------------------
     // AUDIO
@@ -177,9 +178,10 @@ public class BlobController : MonoBehaviour, IControllable
         Inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
 
         // TODO: use data struct and set manually in inspector
-        Light[] lightComponents = transform.GetComponentsInParents<Light>();
-        Lights.Define(BlobLight.Material_Glow, lightComponents[0], false);
-        Lights.Define(BlobLight.Inventory_Icon, lightComponents[1], false);
+        // Light[] lightComponents = transform.GetComponentsInParents<Light>();
+        // Lights.Define(BlobLight.Material_Glow, lightComponents[0], false);
+        // Lights.Define(BlobLight.Inventory_Icon, lightComponents[1], false);
+        Lights = GetComponent<BlobLightController>();
 
         SetBlobMaterials(BlobMaterial.Water, true);
     }
@@ -580,7 +582,7 @@ public class BlobController : MonoBehaviour, IControllable
         Material = newBlobMaterials;
 
         bool glow = newBlobMaterials.Has(BlobMaterialProperties.Glowing);
-        Lights.Set(BlobLight.Material_Glow, glow, true);
+        Lights.SetLight(BlobLight.Material_Glow, glow, true);
         jointController.SetJointProperties(
             new(1, newBlobMaterials.Has(BlobMaterialProperties.Solid)),
             false

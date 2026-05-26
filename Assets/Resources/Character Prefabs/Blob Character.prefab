@@ -3262,6 +3262,7 @@ GameObject:
   - component: {fileID: 7640256448742409334}
   - component: {fileID: 2873991782614191886}
   - component: {fileID: 7208056373943182301}
+  - component: {fileID: 4674157935419021604}
   - component: {fileID: 4761678022056075291}
   - component: {fileID: 6786324349426165384}
   - component: {fileID: 3243862513801527552}
@@ -3412,7 +3413,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   atoms: {fileID: 8060419424119940654}
   jointController: {fileID: 8984606038317296361}
-  inventory: {fileID: 0}
+  Lights: {fileID: 0}
+--- !u!114 &4674157935419021604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6724710251463460455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84f7188ee27a27047b135106bb307548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blobLightData:
+  - blobLight: 0
+    light: {fileID: 8003601790032287812}
+    defaultState: 0
+  - blobLight: 1
+    light: {fileID: 3002277589656906369}
+    defaultState: 0
 --- !u!114 &4761678022056075291
 MonoBehaviour:
   m_ObjectHideFlags: 0
