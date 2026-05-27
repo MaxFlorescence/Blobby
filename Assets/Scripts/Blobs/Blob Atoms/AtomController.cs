@@ -18,6 +18,10 @@ public class AtomController : MonoBehaviour
     /// </summary>
     public BlobController blobController;
     /// <summary>
+    ///     The controller for how this atom's blob sticks to things.
+    /// </summary>
+    public AtomStickyController stickyController;
+    /// <summary>
     ///     The rigidbody of this atom.
     /// </summary>
     private Rigidbody atomRigidBody;
@@ -49,15 +53,7 @@ public class AtomController : MonoBehaviour
     /// <summary>
     ///     Dynamically created joint to allow this atom to be stuck to an object.
     /// </summary>
-    private SpringJoint stickyJoint;
-    /// <summary>
-    ///     Spring constant for when the atom sticks to an object.
-    /// </summary>
-    private const float STICKY_STRENGTH = 1000;
-    /// <summary>
-    ///     Force needed to break the joint between a sticky atom and an object.
-    /// </summary>
-    private const float BREAK_FORCE = 500;
+    public SpringJoint StickyJoint { get; set; }
 
     //----------------------------------------------------------------------------------------------
     // PARTICLES
@@ -190,7 +186,7 @@ public class AtomController : MonoBehaviour
                 
                 if (interactableObj == null || interactableObj.GetInteractionEnabled())
                 {
-                    blobController.TrySticking(gameObject, obj);
+                    stickyController.TrySticking(this, collision.rigidbody);
                 }
             }
         }
@@ -248,56 +244,11 @@ public class AtomController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Create a new spring joint to stick this atom to the <tt>obj</tt>.
-    /// </summary>
-    /// <param name="obj">
-    ///     The object to stick this atom to.
-    /// </param>
-    public void StickTo(Rigidbody obj)
-    {
-        atomMeshRenderer.materials = stickyMaterials;
-
-        stickyJoint = gameObject.AddComponent<SpringJoint>();
-        stickyJoint.connectedBody = obj;
-
-        stickyJoint.enableCollision = true;
-        stickyJoint.spring = STICKY_STRENGTH;
-        stickyJoint.breakForce = BREAK_FORCE;
-
-        // manually set anchor positions
-        stickyJoint.autoConfigureConnectedAnchor = false;
-        stickyJoint.anchor = Vector3.zero;
-        stickyJoint.connectedAnchor = obj.transform.InverseTransformPoint(transform.position);
-    }
-
-    /// <summary>
-    ///     Destroy the spring joint sticking this atom to an object.
-    /// </summary>
-    public void Unstick()
-    {
-        if (IsSticking())
-        {
-            atomMeshRenderer.materials = atomMaterials;
-            Destroy(stickyJoint);
-        }
-    }
-
-    /// <summary>
     ///     Makes sure the blob controller unsticks if the sticky joint for this atom breaks.
     /// </summary>
     void OnJointBreak(float breakForce)
     {
-        atomMeshRenderer.materials = atomMaterials;
-        blobController.Unstick(gameObject);
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // Getters
-    //----------------------------------------------------------------------------------------------
-    
-    public bool IsSticking()
-    {
-        return stickyJoint != null;
+        stickyController.Unstick(this);
     }
     
     //----------------------------------------------------------------------------------------------

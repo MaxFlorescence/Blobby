@@ -153,7 +153,7 @@ public class Cannon : Interactable, IControllable
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        if (this.blob != null || !blob.Sticky) return;
+        if (this.blob != null || !blob.stickies.Sticky) return;
         
         Reorient();
 
@@ -228,7 +228,7 @@ public class Cannon : Interactable, IControllable
         blob.Teleport(exitPosition);
         blob.ApplyForces(null, exitForce, false);
 
-        blob.SetRestrained(false, delaySpringUnlock: 0.25f);
+        blob.SetRestrained(false);//, delaySpringUnlock: 0.25f);
 
         blob = null;
         AllowFreeRotation(true);

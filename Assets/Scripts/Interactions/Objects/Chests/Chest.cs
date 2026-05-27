@@ -81,7 +81,7 @@ public class Chest : Grip
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        if (blob.Sticky && chestState != ChestState.Open_Full)
+        if (blob.stickies.Sticky && chestState != ChestState.Open_Full)
         {
             base.OnInteract(blob);
         }
@@ -100,7 +100,7 @@ public class Chest : Grip
                     chestState = empty? ChestState.Open_Empty : ChestState.Open_Full;
                     break;
                 case ChestState.Open_Full:
-                    if (blob.Sticky) {
+                    if (blob.stickies.Sticky) {
                         Loot(blob);
                         chestState = ChestState.Open_Empty;
                         break;

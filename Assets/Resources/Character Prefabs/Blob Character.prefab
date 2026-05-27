@@ -254,10 +254,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 23d36b93e16046f4a9a687e94e6bc09c, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 55ffd529712f4184b88a4cc921c5241b, type: 2}
 --- !u!153 &5012520953583193495
 ConfigurableJoint:
@@ -917,10 +918,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 250caccd67a31f541a929dd2ab680eaf, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 1d24c34ea28fd7a4db36ce6acf04c028, type: 2}
 --- !u!153 &6327278866803846415
 ConfigurableJoint:
@@ -1337,10 +1339,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 53306dc275b639443a15daa483fc28f7, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: eb3199f5040cd4a4bbc2a13d188d5169, type: 2}
 --- !u!153 &2390546134769786993
 ConfigurableJoint:
@@ -1455,6 +1458,7 @@ GameObject:
   - component: {fileID: 4208460266541034376}
   - component: {fileID: 8060419424119940654}
   - component: {fileID: 8984606038317296361}
+  - component: {fileID: 3672983498610557751}
   m_Layer: 0
   m_Name: Atoms
   m_TagString: Untagged
@@ -1529,6 +1533,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meshController: {fileID: 4303720870675017801}
+--- !u!114 &3672983498610557751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3150998734811691863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8ba140a0676a944e9eedf8e8d04232f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3305523840643272493
 GameObject:
   m_ObjectHideFlags: 0
@@ -1677,10 +1693,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: a023c47809c3dc3488d309a7261c37a7, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 78dfcf7d7ebcd144f922503406061708, type: 2}
 --- !u!153 &4265374800667368825
 ConfigurableJoint:
@@ -1932,10 +1949,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: ce980e3fe2610524caa2d622329bb9ab, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 30fa64bd03cb64949b1544cd0b792050, type: 2}
 --- !u!153 &2010404650469715796
 ConfigurableJoint:
@@ -2187,10 +2205,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 99fbe52df5f651540ade4f0496989b5d, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 43288616c9f56d84bb972b80fb873753, type: 2}
 --- !u!153 &4264654477351668801
 ConfigurableJoint:
@@ -2513,10 +2532,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 49513094b36593b4ba6b1dfe1422610b, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 0502ee3cc942a6744976ff868823e71e, type: 2}
 --- !u!153 &314223603168724419
 ConfigurableJoint:
@@ -2886,10 +2906,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 014bb17091379d445b20967f06279dd5, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: b0f89d9e1987f104eb025776efffe5c4, type: 2}
 --- !u!153 &3377237717715328982
 ConfigurableJoint:
@@ -3141,10 +3162,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 6c5b0303f21cc0742934ac682fcb883a, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: b46670ea63a0cd44b86dfa40b7d475ff, type: 2}
 --- !u!153 &777749719060507428
 ConfigurableJoint:
@@ -3262,9 +3284,9 @@ GameObject:
   - component: {fileID: 7640256448742409334}
   - component: {fileID: 2873991782614191886}
   - component: {fileID: 7208056373943182301}
+  - component: {fileID: 6786324349426165384}
   - component: {fileID: 4674157935419021604}
   - component: {fileID: 4761678022056075291}
-  - component: {fileID: 6786324349426165384}
   - component: {fileID: 3243862513801527552}
   - component: {fileID: 2733601739259164822}
   - component: {fileID: 7826069618055879302}
@@ -3412,8 +3434,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   atoms: {fileID: 8060419424119940654}
-  jointController: {fileID: 8984606038317296361}
-  Lights: {fileID: 0}
+  joints: {fileID: 8984606038317296361}
+  stickies: {fileID: 3672983498610557751}
+--- !u!114 &6786324349426165384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6724710251463460455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149559c2463c0ac46b30cc71199079af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &4674157935419021604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3446,23 +3480,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 1
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 30614303c6e4e0241826be61fc78b688, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 200562deb6e9f4f4db8fb0a434b8f487, type: 2}
---- !u!114 &6786324349426165384
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6724710251463460455}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 149559c2463c0ac46b30cc71199079af, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!82 &3243862513801527552
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5053,10 +5076,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 712e3a5805800e24e93173c4385345f8, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: 17cd55433017a2e4bb9df616a7b165f0, type: 2}
 --- !u!153 &737788992835745643
 ConfigurableJoint:
@@ -5716,10 +5740,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: e3f9ea0eb22587f418701a22aae1ebc4, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: bcab9883e4c455a42a27db26b6a8c68b, type: 2}
 --- !u!153 &2534747402741105417
 ConfigurableJoint:
@@ -5971,10 +5996,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
-  atomMaterials:
+  dullMaterials:
   - {fileID: 2100000, guid: 4f893d8690920b84da136ddb0a972274, type: 2}
-  stickyMaterials:
+  neonMaterials:
   - {fileID: 2100000, guid: d5a4cd9061f10c34b9c41197e2084706, type: 2}
 --- !u!153 &8161900627551262849
 ConfigurableJoint:

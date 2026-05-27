@@ -59,22 +59,9 @@ public class BlobController : MonoBehaviour, IControllable
     // STICKING
     //----------------------------------------------------------------------------------------------
     /// <summary>
-    ///     How many atoms can be sticky at once.
+    ///     Controls the sticking behavior of this blob.
     /// </summary>
-    private const int STICKY_COUNT = 2;
-    /// <summary>
-    ///     Index of the last sticky atom, or null if fewer than <tt>STICKY_COUNT</tt> atoms are
-    ///     currently sticky.
-    /// </summary>
-    private int stickyHead = 0;
-    /// <summary>
-    ///     Circular buffer of capacity <tt>STICKY_COUNT</tt> for holding sticky atoms.
-    /// </summary>
-    private readonly GameObject[] atomStickies = new GameObject[STICKY_COUNT];
-    /// <summary>
-    ///     Indicates if atoms can become sticky. If <tt>false</tt>, no atoms are sticky.
-    /// </summary>
-    public bool Sticky { get; private set; } = false;
+    public AtomStickyController stickies;
     /// <summary>
     ///     Additional multiplier applied to movement speed while the blob is sticking to something.
     /// </summary>
@@ -193,7 +180,7 @@ public class BlobController : MonoBehaviour, IControllable
         // Constrain initial movementForce to the unit disk.
         Vector3 movementForce = forwardForce + rightwardForce;
         if (movementForce.magnitude > 1) movementForce = movementForce.normalized;
-        movementForce *= MOVEMENT_MULTIPLIER * (Sticky ? STICKY_MOVEMENT_MULTIPLIER : 1);
+        movementForce *= MOVEMENT_MULTIPLIER * (stickies.Sticky ? STICKY_MOVEMENT_MULTIPLIER : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
         // so detect the keypress in Update() and perform the action in FixedUpdate().
@@ -259,13 +246,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </returns>
     public bool IsTouching(GameObject obj = null)
     {        
-        if (obj == null && Sticky)
-        {
-            for (int i = 0; i < STICKY_COUNT; i++)
-            {
-                if (atomStickies[i] != null) return true;
-            }
-        }
+        if (obj == null && stickies.IsSticking()) return true;
 
         return atoms.AreAnyTouching(obj);
     }
@@ -284,6 +265,8 @@ public class BlobController : MonoBehaviour, IControllable
 
         HandleMovementControls();
 
+        HandleStickyControls();
+
         HandleSizeControls();
 
         HandleDebugControls();
@@ -301,18 +284,28 @@ public class BlobController : MonoBehaviour, IControllable
     }
 
     /// <summary>
-    ///     Allow the player to control blob jumping, stickiness, and size.
+    ///     Allow the player to control blob jumping.
     /// </summary>
     private void HandleMovementControls()
     {
         if (!movementInputEnabled) return;
         
         if (Input.GetButtonDown("Jump")) jumpOnNextFixedUpdate = true;
-
-        if (Input.GetKeyDown(KeyCode.LeftShift)) TrySetStickyMode(true);
-        if (Input.GetKeyUp(KeyCode.LeftShift)) TrySetStickyMode(false);
     }
 
+    /// <summary>
+    ///     Allow the player to control blob stickiness.
+    /// </summary>
+    private void HandleStickyControls() {
+        if (Material.HasAny(BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Sticky)) return;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift)) stickies.SetValue(true);
+        if (Input.GetKeyUp(KeyCode.LeftShift)) stickies.SetValue(false);
+    }
+
+    /// <summary>
+    ///     Allow the player to control blob size.
+    /// </summary>
     private void HandleSizeControls() {
         if (Material.HasAll(BlobMaterialProperties.Solid)) return;
 
@@ -418,82 +411,6 @@ public class BlobController : MonoBehaviour, IControllable
     }
 
     /// <summary>
-    ///     Try making the <tt>atom</tt> stick to the <tt>obj</tt>. If the <tt>atomStickies</tt>
-    ///     buffer is at capacity, replace the oldest sticky atom.
-    /// </summary>
-    /// <param name="atom">
-    ///     The atom to make sticky.
-    /// </param>
-    /// <param name="obj">
-    ///     The game object to stick the <tt>atom</tt> to.
-    /// </param>
-    /// <returns>
-    ///     <tt>true</tt> if successful, <tt>false</tt> otherwise.
-    /// </returns>
-    public bool TrySticking(GameObject atom, GameObject obj)
-    {
-        if (Sticky && StickyIndex(atom) == -1
-            && obj.TryGetComponent<Rigidbody>(out var objRigidbody)
-            && !obj.CompareTag("No Sticky"))
-        {
-            Unstick(stickyHead);
-            atom.GetComponent<AtomController>().StickTo(objRigidbody);
-
-            atomStickies[stickyHead] = atom;
-            stickyHead = (stickyHead + 1) % STICKY_COUNT;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///     Unstick the atom at index <tt>i</tt>, if present.
-    /// </summary>
-    /// <param name="i">
-    ///     The index to remove.
-    /// </param>
-    private void Unstick(int i)
-    {
-        if (0 <= i && i < STICKY_COUNT)
-        {
-            if (atomStickies[i] != null) atomStickies[i].GetComponent<AtomController>().Unstick();
-            atomStickies[i] = null;
-        }
-    }
-
-    /// <summary>
-    ///     Unstick the given <tt>atom</tt>, if it's sticky.
-    /// </summary>
-    /// <param name="atom">
-    ///     The atom to remove.
-    /// </param>
-    public void Unstick(GameObject atom)
-    {
-        int index = StickyIndex(atom);
-        if (index != -1) Unstick(index);
-    }
-
-    /// <summary>
-    ///     Returns the index of the given <tt>atom</tt> in the <tt>atomStickies</tt> buffer.
-    /// </summary>
-    /// <param name="atom">
-    ///     The atom to search for.
-    /// </param>
-    /// <returns>
-    ///     The index of the <tt>atom</tt>, if present, -1 if not.
-    /// </returns>
-    private int StickyIndex(GameObject atom)
-    {
-        for (int i = 0; i < STICKY_COUNT; i++)
-        {
-            if (atom == atomStickies[i]) return i;
-        }
-        return -1;
-    }
-
-    /// <summary>
     ///     Enables/disables ghost mode for the blob. Ghost mode disables gravity and enables flying
     ///     and clipping.
     /// </summary>
@@ -542,7 +459,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </param>
     public void Teleport(Vector3 newPosition)
     {
-        SetStickyMode(false);
+        stickies.UnstickAll();
         StopMovement();
         atoms.TranslateAll(newPosition - atoms.Center.position);
     }
@@ -567,12 +484,13 @@ public class BlobController : MonoBehaviour, IControllable
         if (enabled)
         {
             atoms.SetColliders(false);
-            SetStickyMode(false);
+            stickies.SetOverride(false);
             StopMovement();
             joints.SetOverride(new(springOverrideFactor, true, snap: true));
         }
         else
         {
+            stickies.ClearOverride();
             this.DelayedExecute(0.1f, () => atoms.SetColliders(true));
             joints.ClearOverride();
             // this.DelayedExecute(delaySpringUnlock, () => jointController.Locked = false);
@@ -592,24 +510,6 @@ public class BlobController : MonoBehaviour, IControllable
     //----------------------------------------------------------------------------------------------
     // Setters
     //----------------------------------------------------------------------------------------------
-    /// <summary>
-    ///     Change the sticky mode of the blob.
-    /// </summary>
-    /// <param name="enable">
-    ///     Enables sicky mode iff this is <tt>True</tt>.
-    /// </param>
-    private void SetStickyMode(bool enable)
-    {
-        Sticky = enable;
-        if (!Sticky)
-        {
-            for (int i = 0; i < STICKY_COUNT; i++)
-            {
-                Unstick(i);
-            }
-        }
-    }
-
     /// <summary>
     ///     Set the materials for the blob's body and droplets. This affects the blobs properties.
     /// </summary>
@@ -631,6 +531,15 @@ public class BlobController : MonoBehaviour, IControllable
         joints.SetValue(new(
             isFixedJoint: newBlobMaterials.HasAll(BlobMaterialProperties.Solid)
         ));
+        
+        if (newBlobMaterials.HasAll(BlobMaterialProperties.Sticky))
+        {
+            stickies.SetValue(true);
+        }
+        else if (newBlobMaterials.HasAll(BlobMaterialProperties.Non_Stick))
+        {
+            stickies.SetValue(false);
+        }
 
         meshController.SetMaterials(newBlobMaterials.Body());
         atoms.SetDropletMaterials(newBlobMaterials.Drops());
@@ -641,7 +550,7 @@ public class BlobController : MonoBehaviour, IControllable
         return $"BlobController: {name}\n"
         + $" ghostMode: {GhostMode}\n"
         + $" blobMaterials: {Material} ({Material.GetProperties()})\n"
-        + $" stickyMode: {Sticky}\n"
+        + $" stickyMode: {stickies.Sticky}\n"
         + $" joints: {joints}\n"
         + $" touchingSomething: {IsTouching()}\n"
         + $" inventory: {Inventory}";
