@@ -341,6 +341,12 @@ public class BlobController : MonoBehaviour, IControllable
             GameInfo.AlertSystem.Send($"Blob is now {(Restrained ? "restrained" : "free")}");
         }
 
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            GameInfo.ToggleSlowMotion();
+            GameInfo.AlertSystem.Send($"Slow motion {(GameInfo.SlowMotion ? "enabled" : "disabled")}");
+        }
+
         if (Input.GetKey(KeyCode.M))
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))

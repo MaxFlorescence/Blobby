@@ -1,3 +1,5 @@
+using UnityEngine;
+
 /// <summary>
 ///     The different states that the game can be in.
 /// </summary>
@@ -52,4 +54,13 @@ public static class GameInfo
     }
 
     public static AlertSystem AlertSystem { get; set; } = null;
+
+    public static bool SlowMotion { get; private set; } = false;
+    public static void ToggleSlowMotion()
+    {
+        if (GameStatus == GameState.Paused) return;
+        
+        SlowMotion = !SlowMotion;
+        Time.timeScale = SlowMotion ? 0.1f : 1f;
+    }
 }
