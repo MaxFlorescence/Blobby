@@ -37,17 +37,20 @@ public enum BlobMaterialProperties
     Wet_Transition  = 0b_0000_0000_0000_1000_0000,
     Conductive      = 0b_0000_0000_0001_0000_0000,
     Magnetic        = 0b_0000_0000_0010_0000_0000,
-    Slippery        = 0b_0000_0000_0100_0000_0000,
+    Non_Stick       = 0b_0000_0000_0100_0000_0000,
     Sticky          = 0b_0000_0000_1000_0000_0000,
     Sweet           = 0b_0000_0001_0000_0000_0000,
     Light           = 0b_0000_0010_0000_0000_0000,
     Heavy           = 0b_0000_0100_0000_0000_0000,
     Solid           = 0b_0000_1000_0000_0000_0000,
     Bouncy          = 0b_0001_0000_0000_0000_0000,
+    Low_Friction    = 0b_0010_0000_0000_0000_0000,
+
+    Slippery = Low_Friction | Non_Stick,
     Watery = Can_Extinguish | Cold_Transition | Conductive,
     Icy = Can_Extinguish | Can_Freeze | Solid | Slippery | Heat_Transition,
     Firey = Can_Ignite | Glowing | Wet_Transition | Cold_Transition,
-    Viscous = Sticky | Heavy,
+    Slimy = Sticky | Heavy,
     Oily = Heat_Transition | Slippery
 }
 
@@ -75,7 +78,7 @@ public static class BlobMaterialExtensions
         )},
         {BlobMaterial.Rock,  new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Heavy
-            | BlobMaterialProperties.Heat_Transition,
+            | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Heat_Transition,
             FileUtilities.MISSING_MATERIAL
         )},
 
@@ -99,17 +102,17 @@ public static class BlobMaterialExtensions
         )},
 
         {BlobMaterial.Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
-            BlobMaterialProperties.Viscous | BlobMaterialProperties.Sweet
+            BlobMaterialProperties.Slimy | BlobMaterialProperties.Sweet
             | BlobMaterialProperties.Cold_Transition | BlobMaterialProperties.Can_Extinguish
             | BlobMaterialProperties.Heat_Transition,
             Path.Combine(FileUtilities.BLOB_MATERIALS, "HoneyJelly")
         )},
         {BlobMaterial.Burning_Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
-            BlobMaterialProperties.Viscous | BlobMaterialProperties.Firey,
+            BlobMaterialProperties.Slimy | BlobMaterialProperties.Firey,
             FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Crystal_Honey, new BlobMaterialDataStruct( // TODO: add body/drop materials
-            BlobMaterialProperties.Viscous | BlobMaterialProperties.Sweet
+            BlobMaterialProperties.Slimy | BlobMaterialProperties.Sweet
             | BlobMaterialProperties.Solid | BlobMaterialProperties.Heat_Transition,
             FileUtilities.MISSING_MATERIAL
         )},
@@ -148,7 +151,7 @@ public static class BlobMaterialExtensions
         )},
         {BlobMaterial.Aerogel, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Light
-            | BlobMaterialProperties.Wet_Transition,
+            | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Wet_Transition,
             FileUtilities.MISSING_MATERIAL
         )}
     };
