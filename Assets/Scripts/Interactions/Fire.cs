@@ -88,11 +88,11 @@ public class Fire : Interactable
     {
         bool interacted = false;
 
-        if (blob.Material.Has(BlobMaterialProperties.Can_Ignite)) {
+        if (blob.Material.HasAll(BlobMaterialProperties.Can_Ignite)) {
             Ignite();
             interacted = true;
         }
-        else if (blob.Material.Has(BlobMaterialProperties.Can_Extinguish)) 
+        else if (blob.Material.HasAll(BlobMaterialProperties.Can_Extinguish)) 
         {
             Extinguish();
             interacted = true;

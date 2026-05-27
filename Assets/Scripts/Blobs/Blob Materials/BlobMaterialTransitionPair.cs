@@ -13,13 +13,16 @@ public readonly struct BlobMaterialTransitionPair
     ///     The blob material that the warmer material transitions to when exposed to cold.
     /// </summary>
     public readonly BlobMaterial toMaterial;
+    /// <summary>
+    ///     The properties that cause the <tt>fromMaterial</tt> to transition to the <tt>toMaterial</tt>.
+    /// </summary>
     public readonly BlobMaterialProperties transitionProperties;
 
     public BlobMaterialTransitionPair(BlobMaterial fromMaterial,
                                       BlobMaterialProperties transitionProperties,
                                       BlobMaterial toMaterial)
     {
-        Assert.IsTrue(fromMaterial.Has(transitionProperties), $"{fromMaterial} does not have all of [{transitionProperties}]!");
+        Assert.IsTrue(fromMaterial.HasAll(transitionProperties), $"{fromMaterial} does not have all of [{transitionProperties}]!");
         this.fromMaterial = fromMaterial;
         this.toMaterial = toMaterial;
         this.transitionProperties = transitionProperties;

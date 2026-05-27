@@ -1,10 +1,10 @@
 using UnityEngine;
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(Squisher))]
 
 /// <summary>
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Squisher))]
 [RequireComponent(typeof(BlobLightController))]
 public class BlobController : MonoBehaviour, IControllable
 {
@@ -40,6 +40,7 @@ public class BlobController : MonoBehaviour, IControllable
     ///     The direction that the blob jumps in.
     /// </summary>
     private readonly Vector3 JUMP_DIRECTION = Vector3.up;
+    public bool Restrained { get; private set; } = false;
 
     //----------------------------------------------------------------------------------------------
     // STRUCTURE
@@ -52,7 +53,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Controls the joints that hold this blob together.
     /// </summary>
-    public BlobJointController jointController;
+    public BlobJointController joints;
 
     //----------------------------------------------------------------------------------------------
     // STICKING
@@ -154,7 +155,6 @@ public class BlobController : MonoBehaviour, IControllable
     ///     Multiplier for the blob's flying speed while in ghost mode.
     /// </summary>
     private const float GHOST_SPEED = 0.5f;
-    public bool Restrained { get; private set; } = false;
 
     void Awake()
     {
@@ -177,11 +177,6 @@ public class BlobController : MonoBehaviour, IControllable
         inventoryCamera = transform.GetComponentInParents<Camera>(true);
         inventoryCamera.enabled = true;
         Inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
-
-        // TODO: use data struct and set manually in inspector
-        // Light[] lightComponents = transform.GetComponentsInParents<Light>();
-        // Lights.Define(BlobLight.Material_Glow, lightComponents[0], false);
-        // Lights.Define(BlobLight.Inventory_Icon, lightComponents[1], false);
         Lights = GetComponent<BlobLightController>();
 
         SetBlobMaterials(BlobMaterial.Water, true);
@@ -319,20 +314,20 @@ public class BlobController : MonoBehaviour, IControllable
     }
 
     private void HandleSizeControls() {
-        if (Material.Has(BlobMaterialProperties.Solid)) return;
+        if (Material.HasAll(BlobMaterialProperties.Solid)) return;
 
         // left mouse shrinks, right mouse grows
         if (Input.GetMouseButton(0))
         {
-            jointController.SetValue(new(BlobSize.Small));
+            joints.SetValue(new(BlobSize.Small));
         }
         else if (Input.GetMouseButton(1))
         {
-            jointController.SetValue(new(BlobSize.Large));
+            joints.SetValue(new(BlobSize.Large));
         }
         else
         {
-            jointController.SetValue(new(BlobSize.Medium));
+            joints.SetValue(new(BlobSize.Medium));
         }
     }
 
@@ -341,8 +336,6 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     private void HandleDebugControls()
     {
-        atoms.SetAllVisible(GameInfo.DebugMode);
-
         if (!GameInfo.DebugMode) return;
         
         if (Input.GetKeyDown(KeyCode.G)) {
@@ -369,8 +362,43 @@ public class BlobController : MonoBehaviour, IControllable
             }
             else if (Input.GetKeyDown(KeyCode.Alpha3))
             {
+                SetBlobMaterials(BlobMaterial.Acid);
+                GameInfo.AlertSystem.Send($"Set material to Acid");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                SetBlobMaterials(BlobMaterial.Oil);
+                GameInfo.AlertSystem.Send($"Set material to Oil");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
                 SetBlobMaterials(BlobMaterial.Honey);
                 GameInfo.AlertSystem.Send($"Set material to Honey");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha6))
+            {
+                SetBlobMaterials(BlobMaterial.Soda);
+                GameInfo.AlertSystem.Send($"Set material to Soda");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha7))
+            {
+                SetBlobMaterials(BlobMaterial.Liquid_Nitrogen);
+                GameInfo.AlertSystem.Send($"Set material to Liquid_Nitrogen");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha8))
+            {
+                SetBlobMaterials(BlobMaterial.Ferrofluid);
+                GameInfo.AlertSystem.Send($"Set material to Ferrofluid");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha9))
+            {
+                SetBlobMaterials(BlobMaterial.Rubber);
+                GameInfo.AlertSystem.Send($"Set material to Rubber");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha0))
+            {
+                SetBlobMaterials(BlobMaterial.Aerogel);
+                GameInfo.AlertSystem.Send($"Set material to Aerogel");
             }
         }
     }
@@ -531,7 +559,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <param name="delaySpringUnlock">
     ///     The amount of time (in seconds) to delay before unlocking the blob's springs.
     /// </param>
-    public void SetRestrained(bool enabled, float springOverrideFactor = 1f, float delaySpringUnlock = 0f)
+    public void SetRestrained(bool enabled, float springOverrideFactor = 1f)//, float delaySpringUnlock = 0f)
     {
         Restrained = enabled;
         SetMovementInputEnabled(!enabled, enabled ? 0 : 0.5f);
@@ -541,12 +569,12 @@ public class BlobController : MonoBehaviour, IControllable
             atoms.SetColliders(false);
             SetStickyMode(false);
             StopMovement();
-            jointController.SetOverride(new(springOverrideFactor, true, snap: true));
+            joints.SetOverride(new(springOverrideFactor, true, snap: true));
         }
         else
         {
             this.DelayedExecute(0.1f, () => atoms.SetColliders(true));
-            jointController.ClearOverride();
+            joints.ClearOverride();
             // this.DelayedExecute(delaySpringUnlock, () => jointController.Locked = false);
         }
         atoms.FreezeCenter(enabled);
@@ -594,11 +622,15 @@ public class BlobController : MonoBehaviour, IControllable
 
         Material = newBlobMaterials;
 
-        bool glow = newBlobMaterials.Has(BlobMaterialProperties.Glowing);
-        Lights.SetLight(BlobLight.Material_Glow, glow, true);
+        Lights.SetLight(
+            BlobLight.Material_Glow,
+            newBlobMaterials.HasAll(BlobMaterialProperties.Glowing),
+            true
+        );
 
-        bool solid = newBlobMaterials.Has(BlobMaterialProperties.Solid);
-        jointController.SetValue(new(isFixedJoint: solid));
+        joints.SetValue(new(
+            isFixedJoint: newBlobMaterials.HasAll(BlobMaterialProperties.Solid)
+        ));
 
         meshController.SetMaterials(newBlobMaterials.Body());
         atoms.SetDropletMaterials(newBlobMaterials.Drops());
@@ -610,7 +642,7 @@ public class BlobController : MonoBehaviour, IControllable
         + $" ghostMode: {GhostMode}\n"
         + $" blobMaterials: {Material} ({Material.GetProperties()})\n"
         + $" stickyMode: {Sticky}\n"
-        + $" joints: {jointController}\n"
+        + $" joints: {joints}\n"
         + $" touchingSomething: {IsTouching()}\n"
         + $" inventory: {Inventory}";
     }

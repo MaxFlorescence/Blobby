@@ -78,15 +78,15 @@ public class AtomController : MonoBehaviour
     /// <summary>
     ///     The renderer for the atom's mesh.
     /// </summary>
-    private MeshRenderer atomMeshRenderer;
+    private MeshRenderer meshRenderer;
     /// <summary>
     ///     The materials for the atom's mesh when its not sticking to anything.
     /// </summary>
-    public Material[] atomMaterials;
+    public Material[] dullMaterials;
     /// <summary>
     ///     The materials for the atom's mesh when its sticking to something.
     /// </summary>
-    public Material[] stickyMaterials;
+    public Material[] neonMaterials;
 
     void Awake() {
         drips = gameObject.AddComponent<ParticleSystem>();
@@ -97,8 +97,8 @@ public class AtomController : MonoBehaviour
     {
         atomRigidBody = GetComponent<Rigidbody>();
         atomCollider = GetComponent<Collider>();
-        atomMeshRenderer = GetComponent<MeshRenderer>();
-        atomMeshRenderer.materials = atomMaterials;
+        meshRenderer = GetComponent<MeshRenderer>();
+        Highlight(false);
 
         gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
 
@@ -325,7 +325,15 @@ public class AtomController : MonoBehaviour
     
     public void SetVisible(bool visible)
     {
-        atomMeshRenderer.enabled = visible;
+        meshRenderer.enabled = visible;
+    }
+
+    /// <summary>
+    ///     Highlight or unhighlight the atom. This is only visible in debug mode.
+    /// </summary>
+    public void Highlight(bool highlight)
+    {
+        meshRenderer.materials = highlight ? neonMaterials : dullMaterials;
     }
     
     /// <summary>

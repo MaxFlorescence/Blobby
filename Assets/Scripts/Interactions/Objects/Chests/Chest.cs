@@ -38,6 +38,7 @@ public class Chest : Grip
     ///     <tt>True</tt> iff the chest is open.
     /// </summary>
     private bool opened = false;
+    private static readonly int CHEST_OPENED = Animator.StringToHash("chestOpened");
 
     // ---------------------------------------------------------------------------------------------
     // CONTENTS
@@ -110,7 +111,7 @@ public class Chest : Grip
                     chestState = ChestState.Closed;
                     break;
             }
-            animator.SetBool("chestOpened", opened);
+            animator.SetBool(CHEST_OPENED, opened);
             StartInteractionCooldown(1, false);
         }
     }

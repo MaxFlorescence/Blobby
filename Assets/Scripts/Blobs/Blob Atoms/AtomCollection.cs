@@ -70,6 +70,11 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         Transforms = (from a in atoms select a.GetComponent<Transform>()).ToArray();
     }
 
+    void Update()
+    {
+        SetAllVisible(GameInfo.DebugMode);
+    }
+
     public IEnumerator GetEnumerator()
     {
         foreach (Transform atom in atoms) yield return atom;

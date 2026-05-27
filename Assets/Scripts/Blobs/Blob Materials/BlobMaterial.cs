@@ -181,7 +181,7 @@ public static class BlobMaterialExtensions
     }
 
     /// <summary>
-    ///     Tests if the given blob material has the given properties.
+    ///     Tests if the given blob material has all of the given properties.
     /// </summary>
     /// <param name="blobMaterial">
     ///     The blob material whose properties to test.
@@ -192,18 +192,15 @@ public static class BlobMaterialExtensions
     /// <returns>
     ///     <tt>True</tt> iff the blob material has all of the requested properties.
     /// </returns>
-    public static bool Has(this BlobMaterial blobMaterial, BlobMaterialProperties properties)
+    public static bool HasAll(this BlobMaterial blobMaterial, BlobMaterialProperties properties)
     {
         return MaterialToData[blobMaterial].properties.Includes(properties);
     }
 
     /// <summary>
-    ///     Tests if the given blob material has the given properties.
+    ///     Tests if the given blob material has all of the given properties.
     /// </summary>
-    /// <param name="blobMaterial">
-    ///     The blob material whose properties to test.
-    /// </param>
-    /// <param name="properties">
+    /// <param name="other">
     ///     The properties to test for.
     /// </param>
     /// <returns>
@@ -212,6 +209,37 @@ public static class BlobMaterialExtensions
     public static bool Includes(this BlobMaterialProperties properties, BlobMaterialProperties other)
     {
         return (properties & other) == other;
+    }
+
+    /// <summary>
+    ///     Tests if the given blob material has any of the given properties.
+    /// </summary>
+    /// <param name="blobMaterial">
+    ///     The blob material whose properties to test.
+    /// </param>
+    /// <param name="properties">
+    ///     The properties to test for.
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the blob material has any of the requested properties.
+    /// </returns>
+    public static bool HasAny(this BlobMaterial blobMaterial, BlobMaterialProperties properties)
+    {
+        return MaterialToData[blobMaterial].properties.Intersects(properties);
+    }
+
+    /// <summary>
+    ///     Tests if the given blob material has any of the given properties.
+    /// </summary>
+    /// <param name="other">
+    ///     The properties to test for.
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the blob material has any of the requested properties.
+    /// </returns>
+    public static bool Intersects(this BlobMaterialProperties properties, BlobMaterialProperties other)
+    {
+        return (properties & other) > 0;
     }
 
     /// <summary>
@@ -263,7 +291,7 @@ public static class BlobMaterialExtensions
     /// </returns>
     public static BlobMaterial TransistionsTo(this BlobMaterial fromMaterial, BlobMaterialProperties transitionProperty)
     {
-        if (!fromMaterial.Has(transitionProperty)) return fromMaterial;
+        if (!fromMaterial.HasAll(transitionProperty)) return fromMaterial;
 
         foreach (BlobMaterialTransitionPair transition in MaterialTransitions)
         {
