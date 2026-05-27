@@ -35,6 +35,11 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     /// </summary>
     public Rigidbody[] Rigidbodies { get; private set; }
 
+    /// <summary>
+    ///     The transforms of each atom in this collection.
+    /// </summary>
+    public Transform[] Transforms { get; private set; }
+
     // ---------------------------------------------------------------------------------------------
     // CENTER ATOM
     // ---------------------------------------------------------------------------------------------
@@ -53,10 +58,16 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     /// </summary>
     public Rigidbody CenterRigidbody => Rigidbodies[0];
 
+    /// <summary>
+    ///     The rigidbody of this collection's center atom.
+    /// </summary>
+    public Transform CenterTransform => Transforms[0];
+
     void Awake()
     {
         Controllers = (from a in atoms select a.GetComponent<AtomController>()).ToArray();
         Rigidbodies = (from a in atoms select a.GetComponent<Rigidbody>()).ToArray();
+        Transforms = (from a in atoms select a.GetComponent<Transform>()).ToArray();
     }
 
     public IEnumerator GetEnumerator()
@@ -136,6 +147,14 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         }
     }
 
+    public void ForEach(Action<Transform> action)
+    {
+        foreach (Transform atom in Transforms)
+        {
+            action(atom);
+        }
+    }
+
     public void SetAllGravity(bool gravity)
     {
         ForEach(atom => atom.SetGravity(gravity));
@@ -148,7 +167,7 @@ public class AtomCollection : MonoBehaviour, IEnumerable
 
     public void TranslateAll(Vector3 translation)
     {
-        ForEach(atom => atom.position += translation);
+        ForEach((Transform atom) => atom.position += translation);
     }
 
     public void SetAllForces(Vector3? force, Vector3? impulse)
