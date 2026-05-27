@@ -289,6 +289,8 @@ public class BlobController : MonoBehaviour, IControllable
 
         HandleMovementControls();
 
+        HandleSizeControls();
+
         HandleDebugControls();
     }
 
@@ -312,8 +314,12 @@ public class BlobController : MonoBehaviour, IControllable
         
         if (Input.GetButtonDown("Jump")) jumpOnNextFixedUpdate = true;
 
-        if (Input.GetKeyDown(KeyCode.LeftShift)) SetStickyMode(true);
-        if (Input.GetKeyUp(KeyCode.LeftShift)) SetStickyMode(false);
+        if (Input.GetKeyDown(KeyCode.LeftShift)) TrySetStickyMode(true);
+        if (Input.GetKeyUp(KeyCode.LeftShift)) TrySetStickyMode(false);
+    }
+
+    private void HandleSizeControls() {
+        if (Material.Has(BlobMaterialProperties.Solid)) return;
 
         // left mouse shrinks, right mouse grows
         if (Input.GetMouseButton(0))
