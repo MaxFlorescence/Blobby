@@ -121,7 +121,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
     /// </summary>
-    public BlobLightController Lights;
+    public BlobLightController Lights { get; private set; }
 
     //----------------------------------------------------------------------------------------------
     // AUDIO
@@ -154,6 +154,7 @@ public class BlobController : MonoBehaviour, IControllable
     ///     Multiplier for the blob's flying speed while in ghost mode.
     /// </summary>
     private const float GHOST_SPEED = 0.5f;
+    public bool Restrained { get; private set; } = false;
 
     void Awake()
     {
@@ -317,15 +318,15 @@ public class BlobController : MonoBehaviour, IControllable
         // left mouse shrinks, right mouse grows
         if (Input.GetMouseButton(0))
         {
-            jointController.TrySetJointProperties(new(BlobSize.Small));
+            jointController.SetValue(new(BlobSize.Small));
         }
         else if (Input.GetMouseButton(1))
         {
-            jointController.TrySetJointProperties(new(BlobSize.Large));
+            jointController.SetValue(new(BlobSize.Large));
         }
         else
         {
-            jointController.TrySetJointProperties(new(BlobSize.Medium));
+            jointController.SetValue(new(BlobSize.Medium));
         }
     }
 
@@ -341,6 +342,11 @@ public class BlobController : MonoBehaviour, IControllable
         if (Input.GetKeyDown(KeyCode.G)) {
             ToggleGhostMode();
             GameInfo.AlertSystem.Send($"Ghost mode is now {(GhostMode ? "on" : "off")}");
+        }
+        
+        if (Input.GetKeyDown(KeyCode.R)) {
+            SetRestrained(!Restrained);
+            GameInfo.AlertSystem.Send($"Blob is now {(Restrained ? "restrained" : "free")}");
         }
 
         if (Input.GetKey(KeyCode.M))
@@ -521,6 +527,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// </param>
     public void SetRestrained(bool enabled, float springOverrideFactor = 1f, float delaySpringUnlock = 0f)
     {
+        Restrained = enabled;
         SetMovementInputEnabled(!enabled, enabled ? 0 : 0.5f);
         atoms.SetAllGravity(!enabled);
         if (enabled)
@@ -528,13 +535,13 @@ public class BlobController : MonoBehaviour, IControllable
             atoms.SetColliders(false);
             SetStickyMode(false);
             StopMovement();
-            jointController.SetJointProperties(new(springOverrideFactor, true), true);
-            jointController.Locked = true;
+            jointController.SetOverride(new(springOverrideFactor, true, snap: true));
         }
         else
         {
             this.DelayedExecute(0.1f, () => atoms.SetColliders(true));
-            this.DelayedExecute(delaySpringUnlock, () => jointController.Locked = false);
+            jointController.ClearOverride();
+            // this.DelayedExecute(delaySpringUnlock, () => jointController.Locked = false);
         }
         atoms.FreezeCenter(enabled);
     }
@@ -583,10 +590,9 @@ public class BlobController : MonoBehaviour, IControllable
 
         bool glow = newBlobMaterials.Has(BlobMaterialProperties.Glowing);
         Lights.SetLight(BlobLight.Material_Glow, glow, true);
-        jointController.SetJointProperties(
-            new(1, newBlobMaterials.Has(BlobMaterialProperties.Solid)),
-            false
-        );
+
+        bool solid = newBlobMaterials.Has(BlobMaterialProperties.Solid);
+        jointController.SetValue(new(isFixedJoint: solid));
 
         meshController.SetMaterials(newBlobMaterials.Body());
         atoms.SetDropletMaterials(newBlobMaterials.Drops());
@@ -598,7 +604,7 @@ public class BlobController : MonoBehaviour, IControllable
         + $" ghostMode: {GhostMode}\n"
         + $" blobMaterials: {Material} ({Material.GetProperties()})\n"
         + $" stickyMode: {Sticky}\n"
-        + $" joints: {jointController.Data}\n"
+        + $" joints: {jointController}\n"
         + $" touchingSomething: {IsTouching()}\n"
         + $" inventory: {Inventory}";
     }

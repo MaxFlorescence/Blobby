@@ -29,13 +29,16 @@ public class BlobJointData
     /// </summary>
     public float? MotionLimit { get; set; }
 
+    public bool Snap { get; private set; }
+
     public BlobJointData(float? lengthFactor = null, bool? isFixedJoint = null,
-                         float? springForce = null, float? damping = null)
+                         float? springForce = null, float? damping = null, bool snap = false)
     {
         LengthFactor = lengthFactor;
         IsFixedJoint = isFixedJoint;
         SpringForce = springForce;
         Damping = damping;
+        Snap = snap;
 
         if (isFixedJoint == null)
         {
@@ -49,12 +52,11 @@ public class BlobJointData
         {
             CalculateMotionLimit();
         }
-        
     }
 
     public void CalculateMotionLimit()
     {
-        MotionLimit = (LengthFactor + 1) ?? null;
+        MotionLimit = (LengthFactor + 1) ?? -1;
     }
 
     /// <summary>
@@ -67,7 +69,17 @@ public class BlobJointData
         if (other.IsFixedJoint != null) IsFixedJoint = other.IsFixedJoint;
         if (other.SpringForce != null) SpringForce = other.SpringForce;
         if (other.Damping != null) Damping = other.Damping;
-        if (other.MotionLimit != null) MotionLimit = other.MotionLimit;
+        Snap = other.Snap;
+        
+        if (other.MotionLimit == null) return;
+        if (other.MotionLimit < 0)
+        {
+            CalculateMotionLimit();
+        }
+        else
+        {
+            MotionLimit = other.MotionLimit;
+        }
     }
 
     /// <returns>
@@ -84,8 +96,19 @@ public class BlobJointData
            && (other.MotionLimit == null  || MotionLimit.Value.Approx(other.MotionLimit));
     }
 
+    public BlobJointData Copy()
+    {
+        return new(LengthFactor, IsFixedJoint, SpringForce, Damping, Snap);
+    }
+
     public override string ToString()
     {
-        return $"BlobJointData(lengthFactor={LengthFactor}, isFixedJoint={IsFixedJoint}, springForce={SpringForce}, damping={Damping}, motionLimit={MotionLimit})";
+        string result = $"BlobJointData(";
+        if (LengthFactor.HasValue) result += $"LengthFactor={LengthFactor}, ";
+        if (IsFixedJoint.HasValue) result += $"IsFixedJoint={IsFixedJoint}, ";
+        if (SpringForce.HasValue) result += $"SpringForce={SpringForce}, ";
+        if (Damping.HasValue) result += $"Damping={Damping}, ";
+        if (MotionLimit.HasValue) result += $"MotionLimit={MotionLimit}, ";
+        return result + $"snap={Snap})";
     }
 }

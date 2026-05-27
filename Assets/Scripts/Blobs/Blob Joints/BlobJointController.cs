@@ -17,7 +17,7 @@ public static class BlobSize
 ///     A class that controls all the configurable joints for a blob.
 /// </summary>
 [RequireComponent(typeof(AtomCollection))]
-public class BlobJointController : MonoBehaviour
+public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
 {
     //----------------------------------------------------------------------------------------------
     // ATOMS
@@ -52,16 +52,12 @@ public class BlobJointController : MonoBehaviour
     ///     The number of joints that are being controlled.
     /// </summary>
     private int jointCount;
-
-    /// <summary>
-    ///     Iff <tt>true</tt>, prevents the controlled joints' properties from being altered.
-    /// </summary>
-    public bool Locked { get; set; } = false;
     
     /// <summary>
     ///     The current data applied to each of the controlled joints.
     /// </summary>
-    public BlobJointData Data { get; private set; }
+    private BlobJointData Data { get; set; }
+    private BlobJointData SavedData { get; set; } = null;
 
     /// <summary>
     ///     The default settings for controlled joints.
@@ -164,11 +160,8 @@ public class BlobJointController : MonoBehaviour
     /// <param name="snap">
     ///     Iff <tt>true</tt>, force the joint to immediately change length.
     /// </param>
-    public void SetJointProperties(BlobJointData jointData = null, bool snap = false)
+    private void SetJointData(BlobJointData jointData)
     {
-        if (lerpTimer.Running) return;
-
-        jointData ??= DEFAULT_JOINT_DATA;
         if (Data.Approx(jointData)) return;
 
         if (jointData.LengthFactor != null && Data.LengthFactor.Value > jointData.LengthFactor)
@@ -177,8 +170,8 @@ public class BlobJointController : MonoBehaviour
         }
         
         Data.UpdateWith(jointData);
-        
-        if (!Data.IsFixedJoint.Value || snap) previousMotionLimit = snap ? 0 : DEFAULT_MOTION_LIMIT;
+
+        if (!Data.IsFixedJoint.Value || Data.Snap) previousMotionLimit = Data.Snap ? 0 : DEFAULT_MOTION_LIMIT;
 
         for (int i = 0; i < jointCount; i++)
         {
@@ -188,21 +181,6 @@ public class BlobJointController : MonoBehaviour
         }
 
         meshController.ScaleFactor = 1f + ATOM_SCALE/Data.LengthFactor.Value;
-    }
-
-    /// <summary>
-    ///     Modifies all controlled joints, if this joint controller is not locked.
-    /// </summary>
-    /// <param name="jointData">
-    ///     The joint data to apply to all joints. If <tt>null</tt>, then
-    ///     <tt>BlobJointController.DEFAULT_JOINT_DATA</tt> is used.
-    /// </param>
-    /// <param name="snap">
-    ///     Iff <tt>true</tt>, force the joint to immediately change length.
-    /// </param>
-    public void TrySetJointProperties(BlobJointData jointData = null, bool snap = false)
-    {
-        if (!Locked) SetJointProperties(jointData, snap);
     }
 
     /// <summary>
@@ -234,5 +212,36 @@ public class BlobJointController : MonoBehaviour
                 this.DelayedExecute(0.5f, () => atomController.SetCollider(true));
             }
         }
+    }
+
+    public void SetValue(BlobJointData newData)
+    {
+        if (SavedData == null)
+        {
+            SetJointData(newData);
+        }
+        else
+        {
+            SavedData.UpdateWith(newData);
+        }
+    }
+
+    public void SetOverride(BlobJointData newData)
+    {
+        SavedData = Data.Copy();
+        SetJointData(newData);
+    }
+
+    public void ClearOverride()
+    {
+        if (SavedData == null) return;
+
+        SetJointData(SavedData);
+        SavedData = null;
+    }
+
+    public override string ToString()
+    {
+        return Data.ToString();
     }
 }
