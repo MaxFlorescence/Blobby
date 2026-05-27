@@ -50,8 +50,7 @@ public enum BlobMaterialProperties
     Watery = Can_Extinguish | Cold_Transition | Conductive,
     Icy = Can_Extinguish | Can_Freeze | Solid | Slippery | Heat_Transition,
     Firey = Can_Ignite | Glowing | Wet_Transition | Cold_Transition,
-    Slimy = Sticky | Heavy,
-    Oily = Heat_Transition | Slippery
+    Slimy = Sticky | Heavy
 }
 
 public static class BlobMaterialExtensions
@@ -79,7 +78,7 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Rock,  new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Heavy
             | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Heat_Transition,
-            FileUtilities.MISSING_MATERIAL
+            Path.Combine(FileUtilities.DUNGEON_MATERIALS, "Dungeon Stone")
         )},
 
         {BlobMaterial.Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
@@ -92,7 +91,7 @@ public static class BlobMaterialExtensions
         )},
 
         {BlobMaterial.Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
-            BlobMaterialProperties.Oily,
+            BlobMaterialProperties.Heat_Transition | BlobMaterialProperties.Slippery,
             FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Burning_Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
@@ -141,14 +140,15 @@ public static class BlobMaterialExtensions
 
         {BlobMaterial.Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy
-            | BlobMaterialProperties.Heat_Transition,
+            | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Heat_Transition,
             FileUtilities.MISSING_MATERIAL
         )},
         {BlobMaterial.Burning_Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy
-            | BlobMaterialProperties.Firey,
+            | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Firey,
             FileUtilities.MISSING_MATERIAL
         )},
+        
         {BlobMaterial.Aerogel, new BlobMaterialDataStruct( // TODO: add body/drop materials
             BlobMaterialProperties.Solid | BlobMaterialProperties.Light
             | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Wet_Transition,

@@ -12,7 +12,8 @@ public static class FileUtilities
     public static readonly string DUNGEON_MATERIALS = Path.Combine(MATERIALS, "Dungeon Materials");
     public static readonly string BLOB_MATERIALS    = Path.Combine(MATERIALS, "Blob Materials");
     public static readonly string BASIC_MATERIALS   = Path.Combine(MATERIALS, "Basic Materials");
-    public static readonly string MISSING_MATERIAL  = Path.Combine(BASIC_MATERIALS, "MISSING");
+    public static readonly string DEBUG_MATERIALS   = Path.Combine(MATERIALS, "Debug Materials");
+    public static readonly string MISSING_MATERIAL  = Path.Combine(DEBUG_MATERIALS, "MISSING");
     public static readonly string IMAGES            = "Images";
     public static readonly string MINIMAP_ICONS     = Path.Combine(IMAGES, "Minimap Icons");
     public static readonly string DUNGEON_PREFABS   = "Dungeon Prefabs";
