@@ -165,7 +165,7 @@ public class BlobController : MonoBehaviour, IControllable
         inventoryCamera.enabled = true;
         Inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
         Lights = GetComponent<BlobLightController>();
-
+        
         SetBlobMaterials(BlobMaterial.Water, true);
     }
 
@@ -179,7 +179,7 @@ public class BlobController : MonoBehaviour, IControllable
 
         // Constrain initial movementForce to the unit disk.
         Vector3 movementForce = forwardForce + rightwardForce;
-        if (movementForce.magnitude > 1) movementForce = movementForce.normalized;
+        if (movementForce.sqrMagnitude > 1) movementForce = movementForce.normalized;
         movementForce *= MOVEMENT_MULTIPLIER * (stickies.Sticky ? STICKY_MOVEMENT_MULTIPLIER : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
@@ -467,7 +467,7 @@ public class BlobController : MonoBehaviour, IControllable
     {
         stickies.UnstickAll();
         StopMovement();
-        atoms.TranslateAll(newPosition - atoms.Center.position);
+        atoms.TranslateAll(newPosition - atoms.CenterTransform.position);
     }
 
     /// <summary>

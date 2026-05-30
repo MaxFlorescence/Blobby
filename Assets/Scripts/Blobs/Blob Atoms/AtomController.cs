@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 ///    This class defines the behavior of each individual atom in the blob.
@@ -8,7 +10,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
-public class AtomController : MonoBehaviour
+public class AtomController : MonoBehaviour, IOverridable<Vector3>
 {
     //----------------------------------------------------------------------------------------------
     // COMPONENTS
@@ -17,6 +19,7 @@ public class AtomController : MonoBehaviour
     ///     The controller of this atom's blob.
     /// </summary>
     public BlobController blobController;
+    public AtomCollection atoms;
     /// <summary>
     ///     The controller for how this atom's blob sticks to things.
     /// </summary>
@@ -46,6 +49,22 @@ public class AtomController : MonoBehaviour
     ///     if this is non-empty.
     /// </summary>
     public HashSet<GameObject> touching = new();
+
+    private Vector3? overrideVertex = null;
+
+    private Vector3? vertexCache = null;
+    
+    public Vector3 GetVertex() {
+        if (overrideVertex == null) return transform.position;
+
+        vertexCache ??= atoms.CenterTransform.TransformPoint(overrideVertex.Value);
+        return vertexCache.Value;
+    }
+
+    public void ClearVertexCache()
+    {
+        vertexCache = null;
+    }
 
     //----------------------------------------------------------------------------------------------
     // STICKING
@@ -254,6 +273,12 @@ public class AtomController : MonoBehaviour
     //----------------------------------------------------------------------------------------------
     // Setters
     //----------------------------------------------------------------------------------------------
+    public void Translate(Vector3 translation)
+    {
+        transform.position += translation;
+        if (atomRigidBody.interpolation != RigidbodyInterpolation.None) Physics.SyncTransforms();
+    }
+    
     public void SetGravity(bool gravity)
     {
         atomRigidBody.useGravity = gravity;
@@ -313,5 +338,23 @@ public class AtomController : MonoBehaviour
         atomCollider.enabled = enabled;
 
         if (!enabled) touching.Clear();
+    }
+
+    /// <summary>
+    ///     Not Implemented.
+    /// </summary>
+    public void SetValue(Vector3 newValue)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetOverride(Vector3 newOverride)
+    {
+        overrideVertex = newOverride;
+    }
+
+    public void ClearOverride()
+    {
+        overrideVertex = null;
     }
 }

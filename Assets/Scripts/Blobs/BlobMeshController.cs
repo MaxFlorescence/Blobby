@@ -1,10 +1,9 @@
 using UnityEngine;
-using UnityEngine.Assertions;
-[RequireComponent(typeof(MeshFilter))]
 
 /// <summary>
 ///     A class that controls the mesh for a blob.
 /// </summary>
+[RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 public class BlobMeshController : MonoBehaviour
 {
@@ -97,6 +96,11 @@ public class BlobMeshController : MonoBehaviour
         SnapToTriangle(rightEye, rightTriangle);
     }
 
+    void FixedUpdate()
+    {
+        atoms.ClearAllVertexCaches();
+    }
+
     /// <summary>
     ///     Transforms the given object such that it is positioned between the three given atoms,
     ///     and scaled away from the center atom.
@@ -126,9 +130,9 @@ public class BlobMeshController : MonoBehaviour
     private Vector3 ScaledBarycenter(Vector3Int triangle, float scale)
     {
         Vector3 barycenter = (
-            atoms[triangle.x].position +
-            atoms[triangle.y].position +
-            atoms[triangle.z].position
+            atoms.Controllers[triangle.x].GetVertex() +
+            atoms.Controllers[triangle.y].GetVertex() +
+            atoms.Controllers[triangle.z].GetVertex()
         ) / 3;
 
         return (barycenter - transform.position) * scale + transform.position;
@@ -146,8 +150,8 @@ public class BlobMeshController : MonoBehaviour
     /// </returns>
     private Vector3 NormalVector(Vector3Int triangle, Vector3 barycenter)
     {
-        Vector3 dirXY = atoms[triangle.y].position - atoms[triangle.x].position;
-        Vector3 dirXZ = atoms[triangle.z].position - atoms[triangle.x].position;
+        Vector3 dirXY = atoms.Controllers[triangle.y].GetVertex() - atoms.Controllers[triangle.x].GetVertex();
+        Vector3 dirXZ = atoms.Controllers[triangle.z].GetVertex() - atoms.Controllers[triangle.x].GetVertex();
 
         Vector3 normal = Vector3.Cross(dirXY, dirXZ).normalized;
 
@@ -171,8 +175,7 @@ public class BlobMeshController : MonoBehaviour
 
         for (int i = 0; i < newVertices.Length; i++)
         {
-            Assert.AreNotEqual(0, vertexToAtomMap[i], $"{i}");
-            Vector3 worldPosition = atoms[vertexToAtomMap[i]].position;
+            Vector3 worldPosition = atoms.Controllers[vertexToAtomMap[i]].GetVertex();
 
             // Calculate local position of mesh vertices.
             newVertices[i] = transform.InverseTransformPoint(worldPosition) * ScaleFactor;

@@ -72,6 +72,6 @@ public static class Vector3Extensions
 
     public static bool Approx(this Vector3 vector, Vector3 other, float epsilon = 1e-3f)
     {
-        return (vector - other).magnitude.Approx(0);
+        return (vector - other).sqrMagnitude.Approx(0);
     }
 }

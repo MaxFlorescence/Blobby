@@ -34,12 +34,6 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
     /// </summary>
     private const float ATOM_SCALE = 0.5f;
 
-    /// <summary>
-    ///     How far away from the connected anchors each atom can go when the joints are acting as
-    ///     springs.
-    /// </summary>
-    private const float DEFAULT_MOTION_LIMIT = 2f;
-
     //----------------------------------------------------------------------------------------------
     // JOINTS
     //----------------------------------------------------------------------------------------------
@@ -79,17 +73,19 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
     /// <summary>
     ///     The last motion limit
     /// </summary>
-    private float previousMotionLimit = DEFAULT_MOTION_LIMIT;
+    private float previousMotionLimit;
     private readonly Timer lerpTimer = new(1);
 
     /// <summary>
     ///     The original anchor positions for each controlled joint.
     /// </summary>
     private Vector3[] connectedAnchors;
+    private Vector3[] vertexPositions;
 
     void Awake()
     {
         DEFAULT_JOINT_DATA.CalculateMotionLimit();
+        previousMotionLimit = DEFAULT_JOINT_DATA.MotionLimit.Value;
         Data = DEFAULT_JOINT_DATA;
 
         atoms = GetComponent<AtomCollection>();
@@ -97,6 +93,19 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
         jointCount = joints.Length;
         
         InitializeJoints();
+    }
+
+    void Start()
+    {
+        vertexPositions = new Vector3[atoms.Count];
+
+        for (int i = 0; i < jointCount; i++)
+        {
+            Transform from = joints[i].transform;
+            vertexPositions[atoms.IndexOf(from)] = atoms.CenterTransform.InverseTransformPoint(
+                from.position
+            );
+        }
     }
 
     /// <summary>
@@ -129,16 +138,26 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
         if (lerpTimer.Update(0, TimerMode.Pulse))
         {
             previousMotionLimit = Data.MotionLimit.Value;
-            updateLinearLimit = Data.MotionLimit.Value;
+
+            if (previousMotionLimit == 0) {
+                for (int i = 0; i < atoms.Count; i++)
+                {
+                    atoms.Controllers[i].SetOverride(vertexPositions[i] * Data.LengthFactor.Value);
+                }
+            }
         }
         else if (lerpTimer.Running)
         {
             updateLinearLimit = lerpTimer.RemainingProgress() * previousMotionLimit
-                                   + lerpTimer.Progress() * Data.MotionLimit.Value;
+                                + lerpTimer.Progress() * Data.MotionLimit.Value;
         }
         else if (previousMotionLimit != Data.MotionLimit.Value)
         {
             lerpTimer.Reset();
+        }
+        else if (Data.MotionLimit.Value > 0)
+        {
+            atoms.ForEach(atom => atom.ClearOverride());
         }
 
         if (updateLinearLimit >= 0)
@@ -162,7 +181,7 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
     /// </param>
     private void SetJointData(BlobJointData jointData)
     {
-        if (Data.Approx(jointData)) return;
+        if (jointData == null || Data.Approx(jointData) || lerpTimer.Running) return;
 
         if (jointData.LengthFactor != null && Data.LengthFactor.Value > jointData.LengthFactor)
         {
@@ -171,8 +190,9 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
         
         Data.UpdateWith(jointData);
 
-        if (!Data.IsFixedJoint.Value || Data.Snap) previousMotionLimit = Data.Snap ? 0 : DEFAULT_MOTION_LIMIT;
-
+        if (!Data.IsFixedJoint.Value || Data.Snap) previousMotionLimit = Data.Snap ? 0
+            : DEFAULT_JOINT_DATA.MotionLimit.Value;
+        
         for (int i = 0; i < jointCount; i++)
         {
             joints[i].connectedAnchor = Data.LengthFactor.Value * connectedAnchors[i];
@@ -194,7 +214,7 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
         for (int i = 1; i < atoms.Count; i++)
         {
             Vector3 atomPosition = atoms[i].position;
-            Vector3 differenceVector = atoms.Center.position - atomPosition;
+            Vector3 differenceVector = atoms.CenterTransform.position - atomPosition;
             
             bool hitSomething = Physics.Raycast(
                 atomPosition,

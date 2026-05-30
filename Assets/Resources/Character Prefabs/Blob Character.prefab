@@ -254,6 +254,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -918,6 +919,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -1339,6 +1341,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -1506,7 +1509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a07e159fe08b6a94894053d98701a810, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  atoms:
+  Transforms:
   - {fileID: 6275475069428000223}
   - {fileID: 9144977099447009055}
   - {fileID: 5807257514286422722}
@@ -1693,6 +1696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -1949,6 +1953,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -2205,6 +2210,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -2532,6 +2538,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -2906,6 +2913,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -3162,6 +3170,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -3418,7 +3427,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!114 &7208056373943182301
@@ -3480,6 +3489,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 1
   dullMaterials:
@@ -5076,6 +5086,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -5740,6 +5751,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:
@@ -5996,6 +6008,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobController: {fileID: 7208056373943182301}
+  atoms: {fileID: 8060419424119940654}
   stickyController: {fileID: 3672983498610557751}
   centerAtom: 0
   dullMaterials:

@@ -35,7 +35,11 @@ public class MainCameraController : PriorityCamera
     /// <summary>
     ///     Custom epsilon to determine if the last position is close to the current position.
     /// </summary>
-    private const float EPSILON = 1E-2f;
+    private const float CAMERA_DISTANCE_EPSILON = 1E-1f;
+    /// <summary>
+    ///     Correction factor to make a mouse sensitivity of 100% feel good.
+    /// </summary>
+    private const float SENSITIVITY_CORRECTION = 0.5f;
 
     void Awake()
     {
@@ -70,7 +74,7 @@ public class MainCameraController : PriorityCamera
             // rotate about axis perpendicular to mouse movement by angle proportional to mouse speed
             Vector3 axis = 10 * (transform.up * deltaX - transform.right * deltaY);
             float angle = axis.magnitude * GameInfo.Options.GetFloat(OptionName.MouseSensitivity) *
-                          Time.deltaTime * Mathf.Rad2Deg;
+                          Time.deltaTime * Mathf.Rad2Deg * SENSITIVITY_CORRECTION;
 
             targetOffset = Quaternion.AngleAxis(angle, axis) * targetOffset;
 
@@ -104,7 +108,7 @@ public class MainCameraController : PriorityCamera
             return;
 
         transform.position = CollideCamera() + trackedTransform.position;
-        if ((transform.position - lastPosition).magnitude < EPSILON)
+        if (transform.position.Approx(lastPosition, CAMERA_DISTANCE_EPSILON))
         {
             // reduce shaking if the camera is not moving much
             transform.position = (transform.position + lastPosition) /  2;

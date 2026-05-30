@@ -11,16 +11,16 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     /// <summary>
     ///     The atoms belonging to this collection.
     /// </summary>
-    public Transform[] atoms;
+    public Transform[] Transforms;
 
     public Transform this[int i] {
-        get => atoms[i];
+        get => Transforms[i];
     }
 
     /// <summary>
     ///     The number of atoms in this collection.
     /// </summary>
-    public int Count => atoms.Length;
+    public int Count => Transforms.Length;
 
     // ---------------------------------------------------------------------------------------------
     // COMPONENTS
@@ -35,18 +35,13 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     /// </summary>
     public Rigidbody[] Rigidbodies { get; private set; }
 
-    /// <summary>
-    ///     The transforms of each atom in this collection.
-    /// </summary>
-    public Transform[] Transforms { get; private set; }
-
     // ---------------------------------------------------------------------------------------------
     // CENTER ATOM
     // ---------------------------------------------------------------------------------------------
     /// <summary>
     ///     The atom at the center of the blob.
     /// </summary>
-    public Transform Center => atoms[0];
+    public Transform CenterTransform => Transforms[0];
 
     /// <summary>
     ///     The atom controller of this collection's center atom.
@@ -58,16 +53,10 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     /// </summary>
     public Rigidbody CenterRigidbody => Rigidbodies[0];
 
-    /// <summary>
-    ///     The rigidbody of this collection's center atom.
-    /// </summary>
-    public Transform CenterTransform => Transforms[0];
-
     void Awake()
     {
-        Controllers = (from a in atoms select a.GetComponent<AtomController>()).ToArray();
-        Rigidbodies = (from a in atoms select a.GetComponent<Rigidbody>()).ToArray();
-        Transforms = (from a in atoms select a.GetComponent<Transform>()).ToArray();
+        Controllers = (from a in Transforms select a.GetComponent<AtomController>()).ToArray();
+        Rigidbodies = (from a in Transforms select a.GetComponent<Rigidbody>()).ToArray();
     }
 
     void Update()
@@ -77,7 +66,7 @@ public class AtomCollection : MonoBehaviour, IEnumerable
 
     public IEnumerator GetEnumerator()
     {
-        foreach (Transform atom in atoms) yield return atom;
+        foreach (Transform atom in Transforms) yield return atom;
     }
 
     /// <param name="obj">
@@ -100,7 +89,7 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     /// </returns>
     public bool Contains(Transform trans)
     {
-        return atoms.Contains(trans);
+        return Transforms.Contains(trans);
     }
     
     /// <summary>
@@ -134,6 +123,24 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         }
 
         return false;
+    }
+
+    /// <typeparam name="T">
+    ///     One of <tt>Transform</tt>, <tt>Rigidbody</tt>, or <tt>AtomController</tt>.
+    /// </typeparam>
+    /// <param name="atom"></param>
+    /// <returns>
+    ///     The index of the atom with the specified component.
+    /// </returns>
+    public int IndexOf<T>(T atom)
+    {
+        return atom switch
+        {
+            Transform => Array.IndexOf(Transforms, atom),
+            Rigidbody => Array.IndexOf(Rigidbodies, atom),
+            AtomController => Array.IndexOf(Controllers, atom),
+            _ => -1
+        };
     }
 
     public void ForEach(Action<AtomController> action)
@@ -172,7 +179,7 @@ public class AtomCollection : MonoBehaviour, IEnumerable
 
     public void TranslateAll(Vector3 translation)
     {
-        ForEach((Transform atom) => atom.position += translation);
+        ForEach((AtomController atom) => atom.Translate(translation));
     }
 
     public void SetAllForces(Vector3? force, Vector3? impulse)
@@ -193,5 +200,10 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     public void SetColliders(bool enabled)
     {
         ForEach(atom => atom.SetCollider(enabled));
+    }
+
+    public void ClearAllVertexCaches()
+    {
+        ForEach(atom => atom.ClearVertexCache());
     }
 }
