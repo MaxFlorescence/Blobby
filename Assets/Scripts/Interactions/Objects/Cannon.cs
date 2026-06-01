@@ -55,10 +55,6 @@ public class Cannon : Interactable, IControllable
     ///     The name of the audio clip to play when ammo is loaded into the cannon.
     /// </summary>
     private const string LOAD_AUDIO = "cannon_load";
-    /// <summary>
-    ///     The factor by which a loaded blob is squished to fit into the cannon.
-    /// </summary>
-    private const float LOADED_BLOB_SIZE_FACTOR = 0.3f;
 
     //----------------------------------------------------------------------------------------------
     // FIRING  
@@ -153,7 +149,7 @@ public class Cannon : Interactable, IControllable
     /// </summary>
     protected override void OnInteract(BlobController blob)
     {
-        if (this.blob != null || !blob.stickies.Sticky) return;
+        if (this.blob != null || !Input.GetKey(KeyCode.LeftShift)) return;
         
         Reorient();
 
@@ -161,7 +157,7 @@ public class Cannon : Interactable, IControllable
         controlled = true;
 
         blob.CanRelease = false;
-        blob.SetRestrained(true, LOADED_BLOB_SIZE_FACTOR);
+        blob.SetRestrained(true, BlobSize.Small);
 
         gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
         SetInteractionEnabled(false);
