@@ -3469,11 +3469,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84f7188ee27a27047b135106bb307548, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blobLightData:
-  - blobLight: 0
+  blobLights:
+  - blobLightType: 0
     light: {fileID: 8003601790032287812}
     defaultState: 0
-  - blobLight: 1
+  - blobLightType: 1
     light: {fileID: 3002277589656906369}
     defaultState: 0
 --- !u!114 &4761678022056075291

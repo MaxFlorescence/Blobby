@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Squisher))]
-[RequireComponent(typeof(BlobLightController))]
+[RequireComponent(typeof(BlobLightCollection))]
 public class BlobController : MonoBehaviour, IControllable
 {
     //----------------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
     /// </summary>
-    public BlobLightController Lights { get; private set; }
+    public BlobLightCollection Lights { get; private set; }
 
     //----------------------------------------------------------------------------------------------
     // AUDIO
@@ -164,7 +164,7 @@ public class BlobController : MonoBehaviour, IControllable
         inventoryCamera = transform.GetComponentInParents<Camera>(true);
         inventoryCamera.enabled = true;
         Inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
-        Lights = GetComponent<BlobLightController>();
+        Lights = GetComponent<BlobLightCollection>();
         
         SetBlobMaterials(BlobMaterial.Water, true);
     }
@@ -536,10 +536,8 @@ public class BlobController : MonoBehaviour, IControllable
 
         Material = newBlobMaterials;
 
-        Lights.SetLight(
-            BlobLight.Material_Glow,
-            newBlobMaterials.HasAll(BlobMaterialProperties.Glowing),
-            true
+        Lights[BlobLightType.Material_Glow].SetValue(
+            newBlobMaterials.HasAll(BlobMaterialProperties.Glowing)
         );
 
         joints.SetValue(new(
