@@ -104,8 +104,7 @@ public class MainCameraController : PriorityCamera
     ///     Offset camera from the tracked object's position, then look at it.
     /// </summary>
     private void MoveCamera() {
-        if (trackedTransform == null)
-            return;
+        if (trackedTransform == null) return;
 
         transform.position = CollideCamera() + trackedTransform.position;
         if (transform.position.Approx(lastPosition, CAMERA_DISTANCE_EPSILON))

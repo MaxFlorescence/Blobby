@@ -63,6 +63,11 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     /// </summary>
     private Vector3? vertexCache = null;
 
+    /// <summary>
+    ///     The vertex calculated before the vertexCache was, if it exists.
+    /// </summary>
+    private Vector3? lastVertexCache = null;
+
     public bool IsOverridden { get => overrideVertex != null; }
 
     //----------------------------------------------------------------------------------------------
@@ -268,7 +273,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     {
         stickyController.Unstick(this);
     }
-    
+
     //----------------------------------------------------------------------------------------------
     // Getters & Setters
     //----------------------------------------------------------------------------------------------
@@ -280,7 +285,15 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     public Vector3 GetVertex() {
         if (overrideVertex == null) return transform.position;
 
-        vertexCache ??= atoms.CenterTransform.TransformPoint(overrideVertex.Value);
+        if (vertexCache == null)
+        {
+            vertexCache = atoms.CenterTransform.TransformPoint(overrideVertex.Value);
+            if (lastVertexCache != null)
+            {
+                vertexCache = (lastVertexCache + vertexCache) / 2;
+            }
+        }
+        
         return vertexCache.Value;
     }
 
@@ -289,6 +302,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     /// </summary>
     public void ClearVertexCache()
     {
+        lastVertexCache = vertexCache;
         vertexCache = null;
     }
     
