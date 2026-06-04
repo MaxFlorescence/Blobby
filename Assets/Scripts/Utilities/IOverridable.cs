@@ -1,6 +1,11 @@
 public interface IOverridable<T>
 {
     /// <summary>
+    ///     <tt>True</tt> iff this <tt>IOverridable</tt> is currently being overridden.
+    /// </summary>
+    public abstract bool IsOverridden { get; }
+
+    /// <summary>
     ///     Set the value of this <tt>IOverridable</tt>. If the value is currently being overridden,
     ///     the change will occur once overriding stops.
     /// </summary>

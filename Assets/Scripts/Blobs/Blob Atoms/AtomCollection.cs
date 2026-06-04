@@ -53,10 +53,39 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     /// </summary>
     public Rigidbody CenterRigidbody => Rigidbodies[0];
 
+    //----------------------------------------------------------------------------------------------
+    // MESH
+    //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The scale of this collection's atoms.
+    /// </summary>
+    public float AtomScale { get; private set; }
+    
+    /// <summary>
+    ///     The starting positions of this collection's atoms.
+    /// </summary>
+    public Vector3[] StartingPositions { get; set; }
+
+    /// <summary>
+    ///     The shortest distance between the center atom's starting position and any other atom's
+    ///     position.
+    /// </summary>
+    public float DefaultLength { get; set;}
+
     void Awake()
     {
         Controllers = (from a in Transforms select a.GetComponent<AtomController>()).ToArray();
         Rigidbodies = (from a in Transforms select a.GetComponent<Rigidbody>()).ToArray();
+
+        AtomScale = CenterTransform.localScale.x;
+        StartingPositions = new Vector3[Count];
+
+        foreach ((int i, Transform atom) in Transforms.Enumerate())
+        {
+            StartingPositions[i] = CenterTransform.InverseTransformPoint(atom.position);
+        }
+        
+        DefaultLength = StartingPositions[1].magnitude;
     }
 
     void Update()
@@ -167,6 +196,30 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         }
     }
 
+    public void ForEach(Action<int, AtomController> action)
+    {
+        foreach ((int i, AtomController atom) in Controllers.Enumerate())
+        {
+            action(i, atom);
+        }
+    }
+
+    public void ForEach(Action<int, Rigidbody> action)
+    {
+        foreach ((int i, Rigidbody atom) in Rigidbodies.Enumerate())
+        {
+            action(i, atom);
+        }
+    }
+
+    public void ForEach(Action<int, Transform> action)
+    {
+        foreach ((int i, Transform atom) in Transforms.Enumerate())
+        {
+            action(i, atom);
+        }
+    }
+
     public void SetAllGravity(bool gravity)
     {
         ForEach(atom => atom.SetGravity(gravity));
@@ -205,5 +258,25 @@ public class AtomCollection : MonoBehaviour, IEnumerable
     public void ClearAllVertexCaches()
     {
         ForEach(atom => atom.ClearVertexCache());
+    }
+
+    public bool AreOverridden()
+    {
+        return CenterController.IsOverridden;
+    }
+
+    public void ClearOverrides()
+    {
+        ForEach(atom => atom.ClearOverride());
+    }
+
+    public void SetOverrides(float lengthFactor)
+    {
+        ForEach((i, atom) => atom.SetOverride(StartingPositions[i] * lengthFactor));
+    }
+
+    public Vector3 GetVertex(int i)
+    {
+        return Controllers[i].GetVertex();
     }
 }

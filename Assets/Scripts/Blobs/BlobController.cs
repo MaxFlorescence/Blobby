@@ -349,55 +349,63 @@ public class BlobController : MonoBehaviour, IControllable
 
         if (Input.GetKey(KeyCode.M))
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            if (Input.GetKeyDown(KeyCode.Keypad1))
             {
                 SetBlobMaterials(BlobMaterial.Water);
-                GameInfo.AlertSystem.Send($"Set material to Water");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            else if (Input.GetKeyDown(KeyCode.Keypad2))
             {
                 SetBlobMaterials(BlobMaterial.Lava);
-                GameInfo.AlertSystem.Send($"Set material to Lava");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
+            else if (Input.GetKeyDown(KeyCode.Keypad3))
             {
                 SetBlobMaterials(BlobMaterial.Acid);
-                GameInfo.AlertSystem.Send($"Set material to Acid");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha4))
+            else if (Input.GetKeyDown(KeyCode.Keypad4))
             {
                 SetBlobMaterials(BlobMaterial.Oil);
-                GameInfo.AlertSystem.Send($"Set material to Oil");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha5))
+            else if (Input.GetKeyDown(KeyCode.Keypad5))
             {
                 SetBlobMaterials(BlobMaterial.Honey);
-                GameInfo.AlertSystem.Send($"Set material to Honey");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha6))
+            else if (Input.GetKeyDown(KeyCode.Keypad6))
             {
                 SetBlobMaterials(BlobMaterial.Soda);
-                GameInfo.AlertSystem.Send($"Set material to Soda");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha7))
+            else if (Input.GetKeyDown(KeyCode.Keypad7))
             {
                 SetBlobMaterials(BlobMaterial.Liquid_Nitrogen);
-                GameInfo.AlertSystem.Send($"Set material to Liquid_Nitrogen");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha8))
+            else if (Input.GetKeyDown(KeyCode.Keypad8))
             {
                 SetBlobMaterials(BlobMaterial.Ferrofluid);
-                GameInfo.AlertSystem.Send($"Set material to Ferrofluid");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha9))
+            else if (Input.GetKeyDown(KeyCode.Keypad9))
             {
                 SetBlobMaterials(BlobMaterial.Rubber);
-                GameInfo.AlertSystem.Send($"Set material to Rubber");
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha0))
+            else if (Input.GetKeyDown(KeyCode.Keypad0))
             {
                 SetBlobMaterials(BlobMaterial.Aerogel);
-                GameInfo.AlertSystem.Send($"Set material to Aerogel");
+            }
+            else if (Input.GetKeyDown(KeyCode.KeypadDivide))
+            {
+                SetBlobMaterials(BlobMaterialExtensions.TransistionsTo(
+                    Material, BlobMaterialProperties.Cold_Transition
+                ));
+            }
+            else if (Input.GetKeyDown(KeyCode.KeypadMultiply))
+            {
+                SetBlobMaterials(BlobMaterialExtensions.TransistionsTo(
+                    Material, BlobMaterialProperties.Heat_Transition
+                ));
+            }
+            else if (Input.GetKeyDown(KeyCode.KeypadMinus))
+            {
+                SetBlobMaterials(BlobMaterialExtensions.TransistionsTo(
+                    Material, BlobMaterialProperties.Wet_Transition
+                ));
             }
         }
     }
@@ -549,6 +557,8 @@ public class BlobController : MonoBehaviour, IControllable
 
         meshController.SetMaterials(newBlobMaterials.Body());
         atoms.SetDropletMaterials(newBlobMaterials.Drops());
+
+        if (GameInfo.DebugMode) GameInfo.AlertSystem.Send($"Set material to {newBlobMaterials}");
     }
 
     public override string ToString()

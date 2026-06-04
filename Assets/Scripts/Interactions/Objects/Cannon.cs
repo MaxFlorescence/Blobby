@@ -157,7 +157,7 @@ public class Cannon : Interactable, IControllable
         controlled = true;
 
         blob.CanRelease = false;
-        blob.SetRestrained(true, BlobSize.Small);
+        blob.SetRestrained(true, BlobSize.Tiny);
 
         gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
         SetInteractionEnabled(false);

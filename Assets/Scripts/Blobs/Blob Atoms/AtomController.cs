@@ -50,21 +50,20 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     /// </summary>
     public HashSet<GameObject> touching = new();
 
+    //----------------------------------------------------------------------------------------------
+    // MESH
+    //----------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The location of this atom's vertex. If null, then use the atom's position instead.
+    /// </summary>
     private Vector3? overrideVertex = null;
 
+    /// <summary>
+    ///     The previously calculated vertex for this atom, if it exists.
+    /// </summary>
     private Vector3? vertexCache = null;
-    
-    public Vector3 GetVertex() {
-        if (overrideVertex == null) return transform.position;
 
-        vertexCache ??= atoms.CenterTransform.TransformPoint(overrideVertex.Value);
-        return vertexCache.Value;
-    }
-
-    public void ClearVertexCache()
-    {
-        vertexCache = null;
-    }
+    public bool IsOverridden { get => overrideVertex != null; }
 
     //----------------------------------------------------------------------------------------------
     // STICKING
@@ -271,8 +270,28 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     }
     
     //----------------------------------------------------------------------------------------------
-    // Setters
+    // Getters & Setters
     //----------------------------------------------------------------------------------------------
+    
+    /// <returns>
+    ///     The ideal world location for this atom. The blob mesh should use this value to deform
+    ///     itself.
+    /// </returns>
+    public Vector3 GetVertex() {
+        if (overrideVertex == null) return transform.position;
+
+        vertexCache ??= atoms.CenterTransform.TransformPoint(overrideVertex.Value);
+        return vertexCache.Value;
+    }
+
+    /// <summary>
+    ///     Clears the previously calculated vertex.
+    /// </summary>
+    public void ClearVertexCache()
+    {
+        vertexCache = null;
+    }
+    
     public void Translate(Vector3 translation)
     {
         transform.position += translation;

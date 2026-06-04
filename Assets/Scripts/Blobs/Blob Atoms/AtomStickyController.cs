@@ -6,34 +6,48 @@ using UnityEngine;
 public class AtomStickyController : MonoBehaviour, IOverridable<bool>
 {
     //----------------------------------------------------------------------------------------------
-    // STICKING
+    // STICKY JOINTS
     //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     How many atoms can be sticky at once.
     /// </summary>
     private const int STICKY_COUNT = 2;
+
     /// <summary>
     ///     Spring constant for when the atom sticks to an object.
     /// </summary>
     private const float STICKY_STRENGTH = 1000;
+
     /// <summary>
     ///     Force needed to break the joint between a sticky atom and an object.
     /// </summary>
     private const float BREAK_FORCE = 500;
+
     /// <summary>
     ///     Index of the last sticky atom, or null if fewer than <tt>STICKY_COUNT</tt> atoms are
     ///     currently sticky.
     /// </summary>
     private int stickyHead = 0;
+
     /// <summary>
     ///     Circular buffer of capacity <tt>STICKY_COUNT</tt> for holding sticky atoms.
     /// </summary>
     private readonly AtomController[] atomStickies = new AtomController[STICKY_COUNT];
+
+    //----------------------------------------------------------------------------------------------
+    // ENABLING/DISABLING
+    //----------------------------------------------------------------------------------------------
     /// <summary>
     ///     Indicates if atoms can become sticky. If <tt>false</tt>, no atoms are sticky.
     /// </summary>
     public bool Sticky { get; private set; } = false;
+
+    /// <summary>
+    ///     Stores a saved sticky state during overrides.
+    /// </summary>
     private bool? savedSticky = null;
+
+    public bool IsOverridden { get => savedSticky != null; }
 
     /// <summary>
     ///     Try making the <tt>atom</tt> stick to the <tt>obj</tt>. If the <tt>atomStickies</tt>

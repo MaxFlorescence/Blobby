@@ -32,7 +32,7 @@ public class BlobMeshController : MonoBehaviour
     /// <summary>
     ///    The ratio of blob mesh radius to actual blob radius.
     /// </summary>
-    public float ScaleFactor { get; set; } = 1.5f;
+    public float ScaleFactor { get; set; }
 
     // ---------------------------------------------------------------------------------------------
     // MESH
@@ -110,7 +110,7 @@ public class BlobMeshController : MonoBehaviour
     /// </param>
     private void SnapToTriangle(GameObject cosmetic, Vector3Int triangle)
     {
-        Vector3 position = ScaledBarycenter(triangle, ScaleFactor);
+        Vector3 position = ScaledBarycenter(triangle);
         Vector3 direction = NormalVector(triangle, position);
 
         cosmetic.transform.position = position;
@@ -121,21 +121,18 @@ public class BlobMeshController : MonoBehaviour
     ///     Calculates the barycenter of the triangle formed by three atoms scaled away from the
     ///     center atom.
     /// </summary>
-    /// <param name="scale">
-    ///     The scale by which to multiply the barycenter position, relative to the center atom.
-    /// </param>
     /// <returns>
     ///     The barycenter of the triangle as a Vector3, scaled away from the center.
     /// </returns>
-    private Vector3 ScaledBarycenter(Vector3Int triangle, float scale)
+    private Vector3 ScaledBarycenter(Vector3Int triangle)
     {
         Vector3 barycenter = (
-            atoms.Controllers[triangle.x].GetVertex() +
-            atoms.Controllers[triangle.y].GetVertex() +
-            atoms.Controllers[triangle.z].GetVertex()
+            atoms.GetVertex(triangle.x) +
+            atoms.GetVertex(triangle.y) +
+            atoms.GetVertex(triangle.z)
         ) / 3;
 
-        return (barycenter - transform.position) * scale + transform.position;
+        return (barycenter - transform.position) * ScaleFactor + transform.position;
     }
 
     /// <summary>
@@ -150,8 +147,8 @@ public class BlobMeshController : MonoBehaviour
     /// </returns>
     private Vector3 NormalVector(Vector3Int triangle, Vector3 barycenter)
     {
-        Vector3 dirXY = atoms.Controllers[triangle.y].GetVertex() - atoms.Controllers[triangle.x].GetVertex();
-        Vector3 dirXZ = atoms.Controllers[triangle.z].GetVertex() - atoms.Controllers[triangle.x].GetVertex();
+        Vector3 dirXY = atoms.GetVertex(triangle.y) - atoms.GetVertex(triangle.x);
+        Vector3 dirXZ = atoms.GetVertex(triangle.z) - atoms.GetVertex(triangle.x);
 
         Vector3 normal = Vector3.Cross(dirXY, dirXZ).normalized;
 
@@ -175,7 +172,7 @@ public class BlobMeshController : MonoBehaviour
 
         for (int i = 0; i < newVertices.Length; i++)
         {
-            Vector3 worldPosition = atoms.Controllers[vertexToAtomMap[i]].GetVertex();
+            Vector3 worldPosition = atoms.GetVertex(vertexToAtomMap[i]);
 
             // Calculate local position of mesh vertices.
             newVertices[i] = transform.InverseTransformPoint(worldPosition) * ScaleFactor;
@@ -190,5 +187,16 @@ public class BlobMeshController : MonoBehaviour
     public void SetMaterials(params Material[] materials)
     {
         meshRenderer.materials = materials;
+    }
+
+    /// <summary>
+    ///     Determines what the mesh's scale should be to cover all of the blob's atoms.
+    /// </summary>
+    /// <param name="lengthScaleFactor">
+    ///     The scale factor currently applied to the blob's joints.
+    /// </param>
+    public void CalculateScaleFactor(float lengthScaleFactor)
+    {
+        ScaleFactor = 1 + 3 * atoms.AtomScale / (2 * lengthScaleFactor * atoms.DefaultLength);
     }
 }

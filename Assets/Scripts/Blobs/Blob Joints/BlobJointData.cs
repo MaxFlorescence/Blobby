@@ -4,6 +4,10 @@
 public class BlobJointData
 {
     /// <summary>
+    ///     The minimum allowed motion limit for blob joints.
+    /// </summary>
+    public static readonly float MINIMUM_MOTION_LIMIT = 0.01f;
+    /// <summary>
     ///     The length multiplier for each of the blob's joints.
     /// </summary>
     public float? LengthFactor { get; private set; }
@@ -40,13 +44,13 @@ public class BlobJointData
         Damping = damping;
         Snap = snap;
 
-        if (isFixedJoint == null)
+        if (isFixedJoint == null && lengthFactor == null)
         {
             MotionLimit = null;
         }
-        else if (IsFixedJoint.Value)
+        else if (isFixedJoint != null && IsFixedJoint.Value)
         {
-            MotionLimit = 0;
+            MotionLimit = MINIMUM_MOTION_LIMIT;
         }
         else
         {
@@ -54,9 +58,12 @@ public class BlobJointData
         }
     }
 
+    /// <summary>
+    ///     Uses the joint data's length factor to calculate what its motion limit should be.
+    /// </summary>
     public void CalculateMotionLimit()
     {
-        MotionLimit = (LengthFactor + 1) ?? -1;
+        MotionLimit = LengthFactor ?? -1;
     }
 
     /// <summary>
