@@ -103,10 +103,6 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     public BlobMaterial Material { get; private set; }
     /// <summary>
-    ///     The mesh to use for the blob's droplet particles.
-    /// </summary>
-    public Mesh DropletMesh { get; private set; }
-    /// <summary>
     ///     Light sources attached to the blob, paired with flags indicating their default states.
     /// </summary>
     public BlobLightCollection Lights { get; private set; }
@@ -149,10 +145,6 @@ public class BlobController : MonoBehaviour, IControllable
 
         Squisher = GetComponent<Squisher>();
         meshController = GetComponentInChildren<BlobMeshController>();
-        
-        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        DropletMesh = Instantiate(sphere.GetComponent<MeshFilter>().mesh);
-        Destroy(sphere);
 
         Inventory = gameObject.AddComponent<Inventory>();
         Inventory.SetCapacity(CARRYING_CAPACITY);
@@ -554,7 +546,7 @@ public class BlobController : MonoBehaviour, IControllable
         }
 
         meshController.SetMaterials(newBlobMaterials.Body());
-        atoms.SetDropletMaterials(newBlobMaterials.Drops());
+        atoms.SetParticleMaterials(newBlobMaterials.Drops());
 
         if (GameInfo.DebugMode) GameInfo.AlertSystem.Send($"Set material to {newBlobMaterials}");
     }

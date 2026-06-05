@@ -245,9 +245,11 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         ForEach(atom => atom.SetVisible(visible));
     }
 
-    public void SetDropletMaterials(Material material)
+    public void SetParticleMaterials(Material material)
     {
-        ForEach(atom => atom.SetDropletMaterial(material));
+        ForEach(atom => {
+            if (atom.ParticleController != null) atom.ParticleController.SetMaterial(material);
+        });
     }
 
     public void SetColliders(bool enabled)

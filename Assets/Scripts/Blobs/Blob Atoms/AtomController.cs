@@ -85,11 +85,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     ///     <tt>True</tt> iff this atom is the center atom of its blob.
     /// </summary>
     public bool centerAtom = false;
-    /// <summary>
-    ///     Particle system controlling dripping from the blob's atoms.
-    /// </summary>
-    private ParticleSystem drips;
-    private ParticleSystem.EmissionModule dripsEmission;
+    public AtomParticleController ParticleController;
 
     //----------------------------------------------------------------------------------------------
     // DEBUG MODE
@@ -108,8 +104,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     public Material[] neonMaterials;
 
     void Awake() {
-        drips = gameObject.AddComponent<ParticleSystem>();
-        drips.Stop();
+        gameObject.TryGetComponent(out ParticleController);
     }
 
     void Start()
@@ -119,59 +114,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
         meshRenderer = GetComponent<MeshRenderer>();
         Highlight(false);
 
-        gameObject.SetLayer(GameObjectExtensions.IGNORE_CAMERA_LAYER);
-
-        SetupDripParticles();
         SetVisible(false);
-    }
-
-    /// <summary>
-    ///     Add and configure the particle system component for dripping.
-    /// </summary>
-    private void SetupDripParticles()
-    { // TODO: put in prefab
-        if (centerAtom) return;
-
-        dripsEmission = drips.emission;
-        dripsEmission.rateOverTime = 0.25f;
-        dripsEmission.enabled = true;
-
-        var main = drips.main;
-        main.startLifetime = 2;
-        main.loop = true;
-        main.duration = 4;
-        main.simulationSpace = ParticleSystemSimulationSpace.World;
-        main.startSpeed = 0;
-        main.gravityModifier = 1;
-        main.startDelay = Random.Range(0f, 4f);
-
-        var collision = drips.collision;
-        collision.enabled = true;
-        collision.type = ParticleSystemCollisionType.World;
-        collision.collidesWith = LayerMask.GetMask("Default");
-        collision.dampen = 1;
-        collision.bounce = 0;
-
-        var sizeOverLifetime = drips.sizeOverLifetime;
-        sizeOverLifetime.enabled = true;
-        AnimationCurve curve = new();
-        curve.AddKey(0.00f, 1.00f);
-        curve.AddKey(1.00f, 0.00f);
-        sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1, curve);
-
-        if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
-        {
-            renderer.renderMode = ParticleSystemRenderMode.Mesh;
-            renderer.mesh = blobController.DropletMesh;
-            renderer.alignment = ParticleSystemRenderSpace.Velocity;
-        }
-
-        var inheritVelocity = drips.inheritVelocity;
-        inheritVelocity.enabled = true;
-        inheritVelocity.mode = ParticleSystemInheritVelocityMode.Initial;
-        inheritVelocity.curveMultiplier = 1.5f;
-
-        drips.Play();
     }
 
     /// <summary>
@@ -343,21 +286,6 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     public void Highlight(bool highlight)
     {
         meshRenderer.materials = highlight ? neonMaterials : dullMaterials;
-    }
-    
-    /// <summary>
-    ///     Change the material of each droplet particle.
-    /// <param name="material">
-    ///     The material to change to.
-    /// </param>
-    public void SetDropletMaterial(Material material)
-    {
-        if (centerAtom) return;
-
-        if (drips.TryGetComponent<ParticleSystemRenderer>(out var renderer))
-        {
-            renderer.material = material;
-        }
     }
     
     /// <summary>
