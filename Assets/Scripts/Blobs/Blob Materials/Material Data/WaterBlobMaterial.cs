@@ -1,0 +1,15 @@
+public class WaterBlobMaterial : BlobMaterialDataClass
+{
+    public override BlobMaterialProperties Properties => BlobMaterialProperties.Watery;
+
+    public WaterBlobMaterial() : base(
+        bodyMaterial:"WaterJelly",
+        particleMesh: "icosahedron"
+    )
+    {
+        Transitions = new (BlobMaterialProperties, BlobMaterial)[]
+        {
+            (BlobMaterialProperties.Cold_Transition, BlobMaterial.Ice)
+        };
+    }
+}

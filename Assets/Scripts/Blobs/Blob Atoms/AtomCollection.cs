@@ -245,7 +245,7 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         ForEach(atom => atom.SetVisible(visible));
     }
 
-    public void SetParticles(AtomParticleDataStruct particleData)
+    public void SetParticles((AtomParticleBehaviorStruct, Material, Mesh) particleData)
     {
         ForEach(atom => {
             if (atom.ParticleController != null) atom.ParticleController.SetParticles(particleData);

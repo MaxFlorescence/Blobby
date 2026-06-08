@@ -1,8 +1,8 @@
-using UnityEngine;
-
-public  struct AtomParticleDataStruct
+public  struct AtomParticleBehaviorStruct
 {
-    public  bool useGravity;
+    public bool emission;
+
+    public  float gravity;
 
     public  float startSpeed;
 
@@ -10,19 +10,15 @@ public  struct AtomParticleDataStruct
 
     public  float radius;
 
-    public  Vector3 rotation;
-
     public  bool alignToDirection;
 
     public  bool inheritVelocity;
 
     public  float initialSize;
+
+    public  float persistTime;
+
     public  float fadeTime;
 
     public  bool collision;
-
-    public  bool useMesh;
-    public  string mesh;
-
-    public  string material;
 }

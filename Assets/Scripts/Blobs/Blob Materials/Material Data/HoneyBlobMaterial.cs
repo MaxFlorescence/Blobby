@@ -1,0 +1,18 @@
+public class HoneyBlobMaterial : BlobMaterialDataClass
+{
+    public override BlobMaterialProperties Properties => BlobMaterialProperties.Slimy
+        | BlobMaterialProperties.Sweet | BlobMaterialProperties.Cold_Transition
+        | BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Heat_Transition;
+
+    public HoneyBlobMaterial() : base(
+        bodyMaterial:"HoneyJelly",
+        particleMesh: "icosahedron"
+    )
+    {
+        Transitions = new (BlobMaterialProperties, BlobMaterial)[]
+        {
+            (BlobMaterialProperties.Heat_Transition, BlobMaterial.Burning_Honey),
+            (BlobMaterialProperties.Cold_Transition, BlobMaterial.Crystal_Honey),
+        };
+    }
+}

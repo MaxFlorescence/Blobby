@@ -383,19 +383,19 @@ public class BlobController : MonoBehaviour, IControllable
             }
             else if (Input.GetKeyDown(KeyCode.KeypadDivide))
             {
-                SetBlobMaterials(BlobMaterialExtensions.TransistionsTo(
+                SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Cold_Transition
                 ));
             }
             else if (Input.GetKeyDown(KeyCode.KeypadMultiply))
             {
-                SetBlobMaterials(BlobMaterialExtensions.TransistionsTo(
+                SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Heat_Transition
                 ));
             }
             else if (Input.GetKeyDown(KeyCode.KeypadMinus))
             {
-                SetBlobMaterials(BlobMaterialExtensions.TransistionsTo(
+                SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Wet_Transition
                 ));
             }
@@ -545,8 +545,8 @@ public class BlobController : MonoBehaviour, IControllable
             stickies.SetValue(false);
         }
 
-        meshController.SetMaterials(newBlobMaterials.Body());
-        atoms.SetParticles(newBlobMaterials.Drops());
+        meshController.SetMaterials(newBlobMaterials.BodyMaterial());
+        atoms.SetParticles(newBlobMaterials.ParticleData());
 
         if (GameInfo.DebugMode) GameInfo.AlertSystem.Send($"Set material to {newBlobMaterials}");
     }
@@ -555,7 +555,7 @@ public class BlobController : MonoBehaviour, IControllable
     {
         return $"BlobController: {name}\n"
         + $" ghostMode: {GhostMode}\n"
-        + $" blobMaterials: {Material} ({Material.GetProperties()})\n"
+        + $" blobMaterials: {Material} ({Material.Properties()})\n"
         + $" stickyMode: {stickies.Sticky}\n"
         + $" joints: {joints}\n"
         + $" touchingSomething: {IsTouching()}\n"

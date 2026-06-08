@@ -39,7 +39,7 @@ public class TransitionCatalyst : Interactable
     protected override void OnInteractionCooldownEnd()
     {
         if (transitionTarget != null && transitionTarget.IsTouching(gameObject)) {
-            transitionTarget.SetBlobMaterials(BlobMaterialExtensions.TransistionsTo(
+            transitionTarget.SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                 transitionTarget.Material, transitionProperty
             ));
         }

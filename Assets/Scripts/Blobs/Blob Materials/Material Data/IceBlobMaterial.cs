@@ -1,0 +1,16 @@
+public class IceBlobMaterial : BlobMaterialDataClass
+{
+    public override AtomParticleBehaviorStruct ParticleBehavior => SPARKLE_BEHAVIOR;
+    public override BlobMaterialProperties Properties => BlobMaterialProperties.Icy;
+
+    public IceBlobMaterial() : base(
+        bodyMaterial: "IceJelly",
+        particleMaterial: "Snowflake"
+    )
+    {
+        Transitions = new (BlobMaterialProperties, BlobMaterial)[]
+        {
+            (BlobMaterialProperties.Heat_Transition, BlobMaterial.Water)
+        };
+    }
+}
