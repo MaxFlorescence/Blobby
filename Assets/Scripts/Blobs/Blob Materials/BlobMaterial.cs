@@ -167,9 +167,9 @@ public static class BlobMaterialExtensions
     /// <returns>
     ///     The droplet material associated with the given blob material.
     /// </returns>
-    public static Material Drops(this BlobMaterial blobMaterial)
+    public static AtomParticleDataStruct Drops(this BlobMaterial blobMaterial)
     {
-        return MaterialToData[blobMaterial].dropletMaterial;
+        return MaterialToData[blobMaterial].particles;
     }
 
     /// <returns>

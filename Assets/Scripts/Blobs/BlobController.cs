@@ -546,7 +546,7 @@ public class BlobController : MonoBehaviour, IControllable
         }
 
         meshController.SetMaterials(newBlobMaterials.Body());
-        atoms.SetParticleMaterials(newBlobMaterials.Drops());
+        atoms.SetParticles(newBlobMaterials.Drops());
 
         if (GameInfo.DebugMode) GameInfo.AlertSystem.Send($"Set material to {newBlobMaterials}");
     }
