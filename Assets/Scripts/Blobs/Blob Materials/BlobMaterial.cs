@@ -9,13 +9,13 @@ public enum BlobMaterial
 {
     Water, Ice,
     Lava, Rock,
-    Acid, Frozen_Acid,
-    Oil, Burning_Oil,
     Honey, Burning_Honey, Crystal_Honey,
     Soda, Frozen_Soda,
+    Acid, Frozen_Acid,
+    Oil, Burning_Oil,
+    Rubber, Burning_Rubber,
     Liquid_Nitrogen,
     Ferrofluid,
-    Rubber, Burning_Rubber,
     Aerogel
 }
 
