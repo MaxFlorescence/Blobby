@@ -3,6 +3,8 @@ using UnityEngine;
 
 public abstract class BlobMaterialDataClass
 {
+    public static readonly MissingBlobMaterial MISSING_BLOB_MATERIAL = new();
+    
     private static readonly Mesh ICOSAHEDRON;
     private static readonly Mesh SOFT_CUBE;
     protected static readonly AtomParticleBehaviorStruct DROPLET_BEHAVIOR = new() {
@@ -62,12 +64,12 @@ public abstract class BlobMaterialDataClass
     /// <summary>
     ///     The properties of this material.
     /// </summary>
-    public virtual BlobMaterialProperties Properties { get; }
+    public virtual BlobMaterialProperties Properties { get; } = BlobMaterialProperties.None;
 
     /// <summary>
     ///     The material that is applied to the blob's droplets.
     /// </summary>
-    public virtual AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
+    public virtual AtomParticleBehaviorStruct ParticleBehavior => NONE_BEHAVIOR;
 
     public virtual (BlobMaterialProperties, BlobMaterial)[] Transitions { get; protected set; } = {};
 

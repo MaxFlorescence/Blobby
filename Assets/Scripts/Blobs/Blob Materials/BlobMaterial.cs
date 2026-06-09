@@ -59,13 +59,24 @@ public static class BlobMaterialExtensions
     /// </summary>
     private static readonly Dictionary<BlobMaterial, BlobMaterialDataClass> MaterialToData = new()
     {
-        {BlobMaterial.Water,         new WaterBlobMaterial()},
-        {BlobMaterial.Ice,           new IceBlobMaterial()},
-        {BlobMaterial.Lava,          new LavaBlobMaterial()},
-        {BlobMaterial.Rock,          new RockBlobMaterial()},
-        {BlobMaterial.Honey,         new HoneyBlobMaterial()},
-        {BlobMaterial.Burning_Honey, new BurningHoneyBlobMaterial()},
-        {BlobMaterial.Crystal_Honey, new CrystalHoneyBlobMaterial()},
+        {BlobMaterial.Water,           new WaterBlobMaterial()},
+        {BlobMaterial.Ice,             new IceBlobMaterial()},
+        {BlobMaterial.Lava,            new LavaBlobMaterial()},
+        {BlobMaterial.Rock,            new RockBlobMaterial()},
+        {BlobMaterial.Honey,           new HoneyBlobMaterial()},
+        {BlobMaterial.Burning_Honey,   new BurningHoneyBlobMaterial()},
+        {BlobMaterial.Crystal_Honey,   new CrystalHoneyBlobMaterial()},
+        {BlobMaterial.Soda,            BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Frozen_Soda,     BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Acid,            BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Frozen_Acid,     BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Oil,             BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Burning_Oil,     BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Rubber,          BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Burning_Rubber,  BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Liquid_Nitrogen, BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Ferrofluid,      BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
+        {BlobMaterial.Aerogel,         BlobMaterialDataClass.MISSING_BLOB_MATERIAL}
 
         // {BlobMaterial.Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Watery | BlobMaterialProperties.Can_Dissolve,

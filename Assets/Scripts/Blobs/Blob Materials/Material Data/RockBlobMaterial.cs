@@ -1,9 +1,10 @@
 public class RockBlobMaterial : BlobMaterialDataClass
 {
-    public override AtomParticleBehaviorStruct ParticleBehavior => DUST_BEHAVIOR;
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Solid
         | BlobMaterialProperties.Heavy | BlobMaterialProperties.Non_Stick
         | BlobMaterialProperties.Heat_Transition;
+        
+    public override AtomParticleBehaviorStruct ParticleBehavior => DUST_BEHAVIOR;
 
     public RockBlobMaterial() : base(
         bodyMaterial: "Dungeon Stone",

@@ -1,9 +1,9 @@
 public class BurningHoneyBlobMaterial : BlobMaterialDataClass
 {
-    public override AtomParticleBehaviorStruct ParticleBehavior => FLAME_BEHAVIOR;
-
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Slimy
         | BlobMaterialProperties.Firey;
+        
+    public override AtomParticleBehaviorStruct ParticleBehavior => FLAME_BEHAVIOR;
 
     public BurningHoneyBlobMaterial() : base(
         bodyMaterial:"HoneyJelly",

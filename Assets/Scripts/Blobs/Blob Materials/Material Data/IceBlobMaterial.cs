@@ -1,7 +1,8 @@
 public class IceBlobMaterial : BlobMaterialDataClass
 {
-    public override AtomParticleBehaviorStruct ParticleBehavior => SPARKLE_BEHAVIOR;
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Icy;
+    
+    public override AtomParticleBehaviorStruct ParticleBehavior => SPARKLE_BEHAVIOR;
 
     public IceBlobMaterial() : base(
         bodyMaterial: "IceJelly",

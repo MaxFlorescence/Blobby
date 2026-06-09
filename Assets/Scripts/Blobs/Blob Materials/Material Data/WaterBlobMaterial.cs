@@ -1,6 +1,8 @@
 public class WaterBlobMaterial : BlobMaterialDataClass
 {
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Watery;
+    
+    public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 
     public WaterBlobMaterial() : base(
         bodyMaterial:"WaterJelly",

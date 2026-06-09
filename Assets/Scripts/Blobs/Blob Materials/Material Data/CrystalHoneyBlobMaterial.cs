@@ -1,6 +1,5 @@
 public class CrystalHoneyBlobMaterial : BlobMaterialDataClass
 {
-    public override AtomParticleBehaviorStruct ParticleBehavior => NONE_BEHAVIOR;
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Slimy
         | BlobMaterialProperties.Sweet | BlobMaterialProperties.Solid
         | BlobMaterialProperties.Heat_Transition;
