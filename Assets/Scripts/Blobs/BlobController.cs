@@ -545,6 +545,12 @@ public class BlobController : MonoBehaviour, IControllable
             stickies.SetValue(false);
         }
 
+        int newStickyCount = newBlobMaterials.HasAll(
+            BlobMaterialProperties.Solid | BlobMaterialProperties.Sticky
+        ) ? 1 : 2;
+        stickies.Resize(newStickyCount);
+        stickies.BreakForceMultiplier = 3 - newStickyCount;
+
         meshController.SetMaterials(newBlobMaterials.BodyMaterial());
         atoms.SetParticles(newBlobMaterials.ParticleData());
 

@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 
 /// <summary>
 ///     A class that controls stickiness for the atoms of a blob.
 /// </summary>
+[RequireComponent(typeof(AtomCollection))]
 public class AtomStickyController : MonoBehaviour, IOverridable<bool>
 {
     //----------------------------------------------------------------------------------------------
@@ -11,7 +13,7 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     /// <summary>
     ///     How many atoms can be sticky at once.
     /// </summary>
-    private const int STICKY_COUNT = 2;
+    private int stickyCount = 2;
 
     /// <summary>
     ///     Spring constant for when the atom sticks to an object.
@@ -22,6 +24,7 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     ///     Force needed to break the joint between a sticky atom and an object.
     /// </summary>
     private const float BREAK_FORCE = 500;
+    public float BreakForceMultiplier { get; set; } = 1;
 
     /// <summary>
     ///     Index of the last sticky atom, or null if fewer than <tt>STICKY_COUNT</tt> atoms are
@@ -29,10 +32,12 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     /// </summary>
     private int stickyHead = 0;
 
+    private AtomCollection atoms;
+
     /// <summary>
     ///     Circular buffer of capacity <tt>STICKY_COUNT</tt> for holding sticky atoms.
     /// </summary>
-    private readonly AtomController[] atomStickies = new AtomController[STICKY_COUNT];
+    private AtomController[] atomStickies;
 
     //----------------------------------------------------------------------------------------------
     // ENABLING/DISABLING
@@ -49,6 +54,12 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
 
     public bool IsOverridden { get => savedSticky != null; }
 
+    void Awake()
+    {
+        atoms = GetComponent<AtomCollection>();
+        atomStickies = new AtomController[atoms.Count - 1];
+    }
+
     /// <summary>
     ///     Try making the <tt>atom</tt> stick to the <tt>obj</tt>. If the <tt>atomStickies</tt>
     ///     buffer is at capacity, replace the oldest sticky atom.
@@ -64,21 +75,21 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     /// </returns>
     public bool TrySticking(AtomController atom, Rigidbody rigidbody)
     {
-        if (Sticky && StickyIndex(atom) == -1
+        if (Sticky && StickyIndex(atom) == -1 && rigidbody != null
             && !rigidbody.gameObject.CompareTag("No Sticky"))
         {
             Unstick(stickyHead);
             atom.Highlight(true);
 
             atomStickies[stickyHead] = atom;
-            stickyHead = (stickyHead + 1) % STICKY_COUNT;
+            stickyHead = (stickyHead + 1) % stickyCount;
 
             atom.StickyJoint = atom.gameObject.AddComponent<SpringJoint>();
             atom.StickyJoint.connectedBody = rigidbody;
 
             atom.StickyJoint.enableCollision = true;
             atom.StickyJoint.spring = STICKY_STRENGTH;
-            atom.StickyJoint.breakForce = BREAK_FORCE;
+            atom.StickyJoint.breakForce = BREAK_FORCE * BreakForceMultiplier;
 
             // manually set anchor positions
             atom.StickyJoint.autoConfigureConnectedAnchor = false;
@@ -99,9 +110,9 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     /// <param name="i">
     ///     The index to remove.
     /// </param>
-    private void Unstick(int i)
+    private void Unstick(int i, bool andCompact = true)
     {
-        if (0 <= i && i < STICKY_COUNT)
+        if (0 <= i && i < stickyCount)
         {
             if (atomStickies[i] != null) {
                 atomStickies[i].Highlight(false);
@@ -109,6 +120,47 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
             }
             atomStickies[i] = null;
         }
+
+        if (i != stickyHead && andCompact) Compact();
+    }
+
+    private void Compact()
+    {
+        int? k = null;
+
+        for (int i = 0; i < stickyCount; i++)
+        {
+            int ii = (stickyHead - 1 - i + stickyCount) % stickyCount;
+            
+            if (atomStickies[ii] == null)
+            {
+                k ??= ii;
+            }
+            else
+            {
+                if (k == null) continue;
+
+                atomStickies[k.Value] = atomStickies[ii];
+                atomStickies[ii] = null;
+                k = (k - 1 + stickyCount) % stickyCount;
+            }
+        }
+    }
+
+    private void BulkUnstick(int count, bool andCompact = true)
+    {
+        count = count.Clamp(0, stickyCount);
+        if (count == stickyCount) {
+            UnstickAll();
+            return;
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            Unstick((stickyHead + i) % stickyCount, false);
+        }
+
+        if (andCompact) Compact();
     }
 
     /// <summary>
@@ -127,10 +179,12 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     ///     Unstick all currently sticky <tt>atom</tt>s.
     /// </summary>
     public void UnstickAll() {
-        for (int i = 0; i < STICKY_COUNT; i++)
+        for (int i = 0; i < stickyCount; i++)
         {
-            Unstick(i);
+            Unstick(i, false);
         }
+
+        stickyHead = 0;
     }
 
     /// <summary>
@@ -144,7 +198,7 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     /// </returns>
     private int StickyIndex(AtomController atom)
     {
-        for (int i = 0; i < STICKY_COUNT; i++)
+        for (int i = 0; i < stickyCount; i++)
         {
             if (atom == atomStickies[i]) return i;
         }
@@ -170,12 +224,42 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     {
         if (!Sticky) return false;
         
-        for (int i = 0; i < STICKY_COUNT; i++)
-        {
-            if (atomStickies[i] != null) return true;
-        }
+        if (atomStickies[(stickyHead - 1 + stickyCount) % stickyCount] != null) return true;
 
         return false;
+    }
+
+    public void Resize(int newSize)
+    {
+        Assert.IsFalse(
+            newSize.OutOfBounds(0, atomStickies.Length-1),
+            $"New atom sticky size ({newSize}) out of bounds (0 - {atomStickies.Length})!"
+        );
+
+        int delta = stickyCount - newSize;
+
+        if (delta > 0)
+        {
+            BulkUnstick(delta);
+            int newStart = (stickyHead + delta) % stickyCount;
+            int shift = (newStart < stickyHead) ? newStart : (delta % stickyCount);
+
+            if (shift > 0) {
+                for (int i = newStart; i < stickyCount; i++)
+                {
+                    atomStickies[i - shift] = atomStickies[i];
+                    atomStickies[i] = null;
+                }
+            }
+
+            if (newStart <= stickyHead) stickyHead = 0;
+            stickyCount = newSize;
+        }
+        else if (delta < 0)
+        {
+            stickyCount = newSize;
+            Compact();
+        }
     }
 
     public void SetValue(bool newValue)
