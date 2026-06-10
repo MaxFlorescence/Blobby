@@ -3,6 +3,8 @@ public class HoneyBlobMaterial : BlobMaterialDataClass
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Slimy
         | BlobMaterialProperties.Sweet | BlobMaterialProperties.Cold_Transition
         | BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Heat_Transition;
+
+    public override BlobSoundDataStruct SoundData => SQUISH_SOUNDS;
         
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 

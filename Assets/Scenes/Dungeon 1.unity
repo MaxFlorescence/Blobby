@@ -634,6 +634,10 @@ PrefabInstance:
       propertyPath: m_Constraints
       value: 126
       objectReference: {fileID: 0}
+    - target: {fileID: 1451754003625081241, guid: 293c3f56f2860134d8efa82ee5ef0bd9, type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1630867528201859872, guid: 293c3f56f2860134d8efa82ee5ef0bd9, type: 3}
       propertyPath: m_LocalPosition.x
       value: -4
@@ -1445,6 +1449,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Blob Character
       objectReference: {fileID: 0}
+    - target: {fileID: 6786324349426165384, guid: ad1b2b30531bc5642ad83ed3ac4ef317, type: 3}
+      propertyPath: loopingAudioSource
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6786324349426165384, guid: ad1b2b30531bc5642ad83ed3ac4ef317, type: 3}
+      propertyPath: oneshotAudioSource
+      value: 
+      objectReference: {fileID: 1258361674}
     - target: {fileID: 7714899892984443041, guid: ad1b2b30531bc5642ad83ed3ac4ef317, type: 3}
       propertyPath: m_LocalPosition.x
       value: 107.37
@@ -2830,6 +2842,11 @@ PrefabInstance:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5335120600095136883, guid: 6e80e4864612ecd4bbc0df64fb18b30e, type: 3}
   m_PrefabInstance: {fileID: 1192038471}
+  m_PrefabAsset: {fileID: 0}
+--- !u!82 &1258361674 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 3243862513801527552, guid: ad1b2b30531bc5642ad83ed3ac4ef317, type: 3}
+  m_PrefabInstance: {fileID: 873490825}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1287475395
 GameObject:

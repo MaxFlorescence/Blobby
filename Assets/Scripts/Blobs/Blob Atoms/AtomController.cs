@@ -133,7 +133,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
 
         if (!blobController.atoms.Contains(obj))
         { // do nothing special when colliding with other atoms
-            blobController.Squisher.Squish();
+            blobController.SoundController.CollideSound();
 
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.

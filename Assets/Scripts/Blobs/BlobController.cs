@@ -4,7 +4,7 @@ using UnityEngine;
 ///     This class defines the behavior of the blob character as a whole.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(Squisher))]
+[RequireComponent(typeof(BlobSoundController))]
 [RequireComponent(typeof(BlobLightCollection))]
 public class BlobController : MonoBehaviour, IControllable
 {
@@ -113,7 +113,7 @@ public class BlobController : MonoBehaviour, IControllable
     /// <summary>
     ///     Makes squishy noises on collisions.
     /// </summary>
-    public Squisher Squisher { get; private set; }
+    public BlobSoundController SoundController { get; private set; }
     /// <summary>
     ///     The sound to play when obtaining an object.
     /// </summary>
@@ -143,7 +143,7 @@ public class BlobController : MonoBehaviour, IControllable
     {
         GameInfo.SetControlledBlob(this);
 
-        Squisher = GetComponent<Squisher>();
+        SoundController = GetComponent<BlobSoundController>();
         meshController = GetComponentInChildren<BlobMeshController>();
 
         Inventory = gameObject.AddComponent<Inventory>();
@@ -553,6 +553,8 @@ public class BlobController : MonoBehaviour, IControllable
 
         meshController.SetMaterials(newBlobMaterials.BodyMaterial());
         atoms.SetParticles(newBlobMaterials.ParticleData());
+
+        SoundController.SetClips(newBlobMaterials.SoundData());
 
         if (GameInfo.DebugMode) GameInfo.AlertSystem.Send($"Set material to {newBlobMaterials}");
     }

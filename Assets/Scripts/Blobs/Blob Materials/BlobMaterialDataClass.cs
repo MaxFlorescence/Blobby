@@ -1,12 +1,63 @@
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+///     A class for holding data related to a single blob material.
+/// </summary>
 public abstract class BlobMaterialDataClass
 {
+    // ---------------------------------------------------------------------------------------------
+    // BODY MATERIAL
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The blob material to use if a requested material doesn't exist.
+    /// </summary>
     public static readonly MissingBlobMaterial MISSING_BLOB_MATERIAL = new();
+
+    /// <summary>
+    ///     The material that is applied to the blob's body.
+    /// </summary>
+    public Material BodyMaterial { get; private set; }
+
+    /// <summary>
+    ///     The properties of this blob material.
+    /// </summary>
+    public virtual BlobMaterialProperties Properties { get; } = BlobMaterialProperties.None;
+
+    /// <summary>
+    ///     The list of (<tt>properties</tt>, <tt>material</tt>) transition pairs, where if given
+    ///     any of the corresponding <tt>properties</tt>, then the blob is transitioned to
+    ///     <tt>material</tt>.
+    /// </summary>
+    public virtual (BlobMaterialProperties, BlobMaterial)[] Transitions { get; protected set; } = {};
+
+    // ---------------------------------------------------------------------------------------------
+    // SOUNDS
+    // ---------------------------------------------------------------------------------------------
+    protected static readonly BlobSoundDataStruct NO_SOUNDS = new();
+    protected static readonly BlobSoundDataStruct SQUISH_SOUNDS = new(
+        family: "Squish",
+        collideVolume: 0.05f
+    );
     
+    public virtual BlobSoundDataStruct SoundData { get; } = NO_SOUNDS;
+    
+    // ---------------------------------------------------------------------------------------------
+    // PARTICLES
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     An icosahedron mesh.
+    /// </summary>
     private static readonly Mesh ICOSAHEDRON;
+
+    /// <summary>
+    ///     A cube mesh with beveled corners.
+    /// </summary>
     private static readonly Mesh SOFT_CUBE;
+
+    /// <summary>
+    ///     The particle behavior for liquid droplets.
+    /// </summary>
     protected static readonly AtomParticleBehaviorStruct DROPLET_BEHAVIOR = new() {
         emission = true,
         gravity = 1,
@@ -20,6 +71,10 @@ public abstract class BlobMaterialDataClass
         fadeTime = 1,
         collision = true
     };
+
+    /// <summary>
+    ///     The particle behavior for dust clouds.
+    /// </summary>
     protected static readonly AtomParticleBehaviorStruct DUST_BEHAVIOR = new() {
         emission = true,
         gravity = 1,
@@ -33,6 +88,10 @@ public abstract class BlobMaterialDataClass
         fadeTime = 0.5f,
         collision = true
     };
+    
+    /// <summary>
+    ///     The particle behavior for sparkles.
+    /// </summary>
     protected static readonly AtomParticleBehaviorStruct SPARKLE_BEHAVIOR = new() {
         emission = true,
         gravity = 0,
@@ -46,6 +105,10 @@ public abstract class BlobMaterialDataClass
         fadeTime = 1,
         collision = true
     };
+    
+    /// <summary>
+    ///     The particle behavior for flames.
+    /// </summary>
     protected static readonly AtomParticleBehaviorStruct FLAME_BEHAVIOR = new() {
         emission = true,
         gravity = -0.1f,
@@ -59,28 +122,30 @@ public abstract class BlobMaterialDataClass
         fadeTime = 0.33f,
         collision = true
     };
+
+    /// <summary>
+    ///     The particle behavior for having no particles.
+    /// </summary>
     protected static readonly AtomParticleBehaviorStruct NONE_BEHAVIOR = new() {emission = false};
 
     /// <summary>
-    ///     The properties of this material.
-    /// </summary>
-    public virtual BlobMaterialProperties Properties { get; } = BlobMaterialProperties.None;
-
-    /// <summary>
-    ///     The material that is applied to the blob's droplets.
+    ///     The behavior that is applied to the blob's particles.
     /// </summary>
     public virtual AtomParticleBehaviorStruct ParticleBehavior => NONE_BEHAVIOR;
 
-    public virtual (BlobMaterialProperties, BlobMaterial)[] Transitions { get; protected set; } = {};
-
+    /// <summary>
+    ///     The material that is applied to the blob's particles.
+    /// </summary>
     public Material ParticleMaterial { get; private set; }
+    
+    /// <summary>
+    ///     The mesh that is applied (if any) to the blob's particles.
+    /// </summary>
     public Mesh ParticleMesh { get; private set; }
 
     /// <summary>
-    ///     The material that is applied to the blob's body.
+    ///     Load static mesh resources before any instances of this class are made.
     /// </summary>
-    public Material BodyMaterial { get; private set; }
-
     static BlobMaterialDataClass()
     {
         ICOSAHEDRON = Resources.Load<GameObject>(
@@ -92,6 +157,30 @@ public abstract class BlobMaterialDataClass
         ).GetComponent<MeshFilter>().sharedMesh;
     }
 
+    /// <summary>
+    ///     Load the materials and meshes associated with this blob material.
+    /// </summary>
+    /// <param name="bodyMaterial">
+    ///     The name of the material to use for the blob's body. Defaults to 
+    ///     <tt>FileUtilities.MISSING_MATERIAL</tt>.
+    /// </param>
+    /// <param name="bodyDirectory">
+    ///     The directory in which to find the <tt>bodyMaterial</tt>. Defaults to
+    ///     <tt>FileUtilities.BLOB_MATERIALS</tt>.
+    /// </param>
+    /// <param name="particleMaterial">
+    ///     The name of the material to use for the blob's particles. Defaults to match
+    ///     <tt>bodyMaterial</tt>.
+    /// </param>
+    /// <param name="particleDirectory">
+    ///     The directory in which to find the <tt>particleMaterial</tt>. Defaults to match
+    ///     <tt>bodyDirectory</tt> if <tt>particleMaterial</tt> defaulted, otherwise defaults to
+    ///     <tt>FileUtilities.BLOB_MATERIALS</tt>.
+    /// </param>
+    /// <param name="particleMesh">
+    ///     The name of the mesh to use for the blob's particles. Defaults to the particles having
+    ///     no mesh (being billboard particles).
+    /// </param>
     public BlobMaterialDataClass(string bodyMaterial = null, string bodyDirectory = null,
                                  string particleMaterial = null, string particleDirectory = null,
                                  string particleMesh = null)

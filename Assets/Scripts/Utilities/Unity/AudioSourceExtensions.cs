@@ -14,14 +14,18 @@ public static class AudioSourceExtensions
     /// <param name="pitchBounds">
     ///     The minimum and maximum pitches that the AudioClip can play at.
     /// </param>
-    public static void PlayRandomPitchOneShot(this AudioSource audioSource, AudioClip audioClip, Vector2? pitchBounds = null)
+    /// <param name="volume">
+    ///     The volume at which to play the AudioClip at.
+    /// </param>
+    public static void PlayRandomPitchOneShot(this AudioSource audioSource, AudioClip audioClip,
+                                              Vector2? pitchBounds = null, float? volume = null)
     {
         if (audioClip == null) return;
         
         float originalPitch = audioSource.pitch;
         audioSource.pitch = Random.Range(pitchBounds?.x ?? 1, pitchBounds?.y ?? 1);
 
-        audioSource.PlayOneShot(audioClip);
+        audioSource.PlayOneShot(audioClip, volume ?? 1);
         
         audioSource.pitch = originalPitch;
     }

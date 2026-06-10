@@ -1,6 +1,8 @@
 public class LavaBlobMaterial : BlobMaterialDataClass
 {
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Firey;
+
+    public override BlobSoundDataStruct SoundData => SQUISH_SOUNDS;
     
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 

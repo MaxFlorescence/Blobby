@@ -2,7 +2,9 @@ public class BurningHoneyBlobMaterial : BlobMaterialDataClass
 {
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Slimy
         | BlobMaterialProperties.Firey;
-        
+
+    public override BlobSoundDataStruct SoundData => SQUISH_SOUNDS;
+
     public override AtomParticleBehaviorStruct ParticleBehavior => FLAME_BEHAVIOR;
 
     public BurningHoneyBlobMaterial() : base(

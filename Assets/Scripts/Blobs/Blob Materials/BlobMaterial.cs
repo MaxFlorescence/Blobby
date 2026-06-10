@@ -65,18 +65,7 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Rock,            new RockBlobMaterial()},
         {BlobMaterial.Honey,           new HoneyBlobMaterial()},
         {BlobMaterial.Burning_Honey,   new BurningHoneyBlobMaterial()},
-        {BlobMaterial.Crystal_Honey,   new CrystalHoneyBlobMaterial()},
-        {BlobMaterial.Soda,            BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Frozen_Soda,     BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Acid,            BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Frozen_Acid,     BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Oil,             BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Burning_Oil,     BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Rubber,          BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Burning_Rubber,  BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Liquid_Nitrogen, BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Ferrofluid,      BlobMaterialDataClass.MISSING_BLOB_MATERIAL},
-        {BlobMaterial.Aerogel,         BlobMaterialDataClass.MISSING_BLOB_MATERIAL}
+        {BlobMaterial.Crystal_Honey,   new CrystalHoneyBlobMaterial()}
 
         // {BlobMaterial.Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Watery | BlobMaterialProperties.Can_Dissolve,
@@ -142,7 +131,19 @@ public static class BlobMaterialExtensions
     /// </returns>
     public static Material BodyMaterial(this BlobMaterial blobMaterial)
     {
-        return MaterialToData[blobMaterial].BodyMaterial;
+        return MaterialToData.GetValueOrDefault(
+            blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
+        ).BodyMaterial;
+    }
+
+    /// <returns>
+    ///     The body material associated with the given blob material.
+    /// </returns>
+    public static BlobSoundDataStruct SoundData(this BlobMaterial blobMaterial)
+    {
+        return MaterialToData.GetValueOrDefault(
+            blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
+        ).SoundData;
     }
 
     /// <returns>
@@ -152,7 +153,9 @@ public static class BlobMaterialExtensions
         this BlobMaterial blobMaterial
     )
     {
-        BlobMaterialDataClass materialData = MaterialToData[blobMaterial];
+        BlobMaterialDataClass materialData = MaterialToData.GetValueOrDefault(
+            blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
+        );
         return (
             materialData.ParticleBehavior,
             materialData.ParticleMaterial,
@@ -165,7 +168,9 @@ public static class BlobMaterialExtensions
     /// </returns>
     public static BlobMaterialProperties Properties(this BlobMaterial blobMaterial)
     {
-        return MaterialToData[blobMaterial].Properties;
+        return MaterialToData.GetValueOrDefault(
+            blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
+        ).Properties;
     }
 
     /// <summary>
@@ -182,7 +187,9 @@ public static class BlobMaterialExtensions
     /// </returns>
     public static bool HasAll(this BlobMaterial blobMaterial, BlobMaterialProperties properties)
     {
-        return MaterialToData[blobMaterial].Properties.Includes(properties);
+        return MaterialToData.GetValueOrDefault(
+            blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
+        ).Properties.Includes(properties);
     }
 
     /// <summary>
@@ -213,7 +220,9 @@ public static class BlobMaterialExtensions
     /// </returns>
     public static bool HasAny(this BlobMaterial blobMaterial, BlobMaterialProperties properties)
     {
-        return MaterialToData[blobMaterial].Properties.Intersects(properties);
+        return MaterialToData.GetValueOrDefault(
+            blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
+        ).Properties.Intersects(properties);
     }
 
     /// <summary>
@@ -251,7 +260,9 @@ public static class BlobMaterialExtensions
 
         foreach (
             (BlobMaterialProperties properties, BlobMaterial toMaterial)
-            in MaterialToData[fromMaterial].Transitions
+            in MaterialToData.GetValueOrDefault(
+                fromMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
+            ).Transitions
         )
         {
             if (properties.Includes(transitionProperty)) return toMaterial;
