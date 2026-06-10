@@ -39,6 +39,15 @@ public abstract class BlobMaterialDataClass
         family: "Squish",
         collideVolume: 0.05f
     );
+    protected static readonly BlobSoundDataStruct RUMBLE_SOUNDS = new(
+        family: "Rumble",
+        collideVolume: 0.25f,
+        collidePitchBounds: new(0.25f, 1f)
+    );
+    protected static readonly BlobSoundDataStruct CLINK_SOUNDS = new(
+        family: "Clink",
+        collideVolume: 0.75f
+    );
     
     public virtual BlobSoundDataStruct SoundData { get; } = NO_SOUNDS;
     
