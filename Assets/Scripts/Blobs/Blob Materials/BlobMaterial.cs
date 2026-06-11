@@ -75,25 +75,8 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Rubber,          new RubberBlobMaterial()},
         {BlobMaterial.Burning_Rubber,  new BurningRubberBlobMaterial()},
         {BlobMaterial.Liquid_Nitrogen, new LiquidNitrogenBlobMaterial()},
-        {BlobMaterial.Ferrofluid,      new FerrofluidBlobMaterial()}
-
-        // {BlobMaterial.Liquid_Nitrogen, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Can_Freeze
-        //     | BlobMaterialProperties.Light,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-
-        // {BlobMaterial.Ferrofluid, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Slippery | BlobMaterialProperties.Magnetic
-        //     | BlobMaterialProperties.Conductive,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-        
-        // {BlobMaterial.Aerogel, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Solid | BlobMaterialProperties.Light
-        //     | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Wet_Transition,
-        //     FileUtilities.MISSING_MATERIAL
-        // )}
+        {BlobMaterial.Ferrofluid,      new FerrofluidBlobMaterial()},
+        {BlobMaterial.Aerogel,         new AerogelBlobMaterial()}
     };
 
     /// <returns>
