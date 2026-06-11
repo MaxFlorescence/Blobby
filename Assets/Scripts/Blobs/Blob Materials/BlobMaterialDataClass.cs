@@ -39,6 +39,11 @@ public abstract class BlobMaterialDataClass
         volume: 0.05f,
         pitchBounds: new(0.5f, 1.5f)
     );
+    protected static readonly SoundFamily DEEP_SQUISH_FAMILY = new(
+        name: "Deep Squish",
+        volume: 0.05f,
+        pitchBounds: new(0.5f, 1.5f)
+    );
     protected static readonly SoundFamily RUMBLE_FAMILY = new(
         name: "Rumble",
         volume: 0.25f,
@@ -58,6 +63,10 @@ public abstract class BlobMaterialDataClass
         name: "Dry Crunch",
         volume: 0.8f,
         pitchBounds: new(0.5f, 1.5f)
+    );
+    protected static readonly SoundFamily LAVA_SOUND = new(
+        name: "Lava",
+        volume: 0.5f
     );
     protected static readonly SoundFamily BLAZE_SOUND = new(
         name: "Blaze",

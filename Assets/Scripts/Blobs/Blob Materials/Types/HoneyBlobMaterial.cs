@@ -4,8 +4,8 @@ public class HoneyBlobMaterial : BlobMaterialDataClass
         | BlobMaterialProperties.Sweet | BlobMaterialProperties.Cold_Transition
         | BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Heat_Transition;
 
-    public override BlobSoundFamiliesStruct SoundFamilies => new(collision: SQUISH_FAMILY);
-        
+    public override BlobSoundFamiliesStruct SoundFamilies => new(collision: DEEP_SQUISH_FAMILY);
+    
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 
     public HoneyBlobMaterial() : base(

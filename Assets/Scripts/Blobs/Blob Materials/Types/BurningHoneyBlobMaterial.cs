@@ -4,7 +4,7 @@ public class BurningHoneyBlobMaterial : BlobMaterialDataClass
         | BlobMaterialProperties.Firey;
 
     public override BlobSoundFamiliesStruct SoundFamilies => new(
-        collision: SQUISH_FAMILY,
+        collision: DEEP_SQUISH_FAMILY,
         background: BLAZE_SOUND,
         toTransition: IGNITE_SOUND,
         fromTransition: EXTINGUISH_SOUND

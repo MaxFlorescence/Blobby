@@ -2,7 +2,10 @@ public class LavaBlobMaterial : BlobMaterialDataClass
 {
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Firey;
 
-    public override BlobSoundFamiliesStruct SoundFamilies => new(collision: SQUISH_FAMILY);
+    public override BlobSoundFamiliesStruct SoundFamilies => new(
+        collision: DEEP_SQUISH_FAMILY,
+        background: LAVA_SOUND
+    );
     
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 
