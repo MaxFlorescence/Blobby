@@ -67,16 +67,9 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Burning_Honey,   new BurningHoneyBlobMaterial()},
         {BlobMaterial.Crystal_Honey,   new CrystalHoneyBlobMaterial()},
         {BlobMaterial.Soda,            new SodaBlobMaterial()},
-        {BlobMaterial.Frozen_Soda,     new FrozenSodaBlobMaterial()}
-
-        // {BlobMaterial.Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Watery | BlobMaterialProperties.Can_Dissolve,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-        // {BlobMaterial.Frozen_Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Icy,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
+        {BlobMaterial.Frozen_Soda,     new FrozenSodaBlobMaterial()},
+        {BlobMaterial.Acid,            new AcidBlobMaterial()},
+        {BlobMaterial.Frozen_Acid,     new FrozenAcidBlobMaterial()}
 
         // {BlobMaterial.Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Heat_Transition | BlobMaterialProperties.Slippery,

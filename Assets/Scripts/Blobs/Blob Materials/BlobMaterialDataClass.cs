@@ -84,6 +84,10 @@ public abstract class BlobMaterialDataClass
         name: "Fizzing",
         volume: 2f
     );
+    protected static readonly SoundFamily BUBBLES_FIZZING_SOUND = new(
+        name: "Bubbles Fizzing",
+        volume: 0.5f
+    );
     
     public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new(SoundFamily.NONE);
     
