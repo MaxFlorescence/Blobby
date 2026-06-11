@@ -7,7 +7,7 @@ public class CrystalHoneyBlobMaterial : BlobMaterialDataClass
     public override BlobSoundFamiliesStruct SoundFamilies => new(collision: WET_CRUNCH_FAMILY);
 
     public CrystalHoneyBlobMaterial() : base(
-        bodyMaterial: "HoneyJelly"
+        bodyMaterial: "CrystalHoneyJelly"
     )
     {
         Transitions = new (BlobMaterialProperties, BlobMaterial)[]
