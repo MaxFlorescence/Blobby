@@ -29,4 +29,19 @@ public static class AudioSourceExtensions
         
         audioSource.pitch = originalPitch;
     }
+
+    /// <summary>
+    ///     Plays an AudioClip as specified by the given sound family.
+    /// </summary>
+    /// <param name="soundFamily">
+    ///     The sound family specifying the audio clip, pitch, and volume to play.
+    /// </param>
+    public static void PlayOneShot(this AudioSource audioSource, SoundFamily soundFamily)
+    {
+        audioSource.PlayRandomPitchOneShot(
+            soundFamily.RandomClip,
+            soundFamily.PitchBounds,
+            soundFamily.Volume
+        );
+    }
 }

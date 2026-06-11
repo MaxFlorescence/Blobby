@@ -4,7 +4,7 @@ public class RockBlobMaterial : BlobMaterialDataClass
         | BlobMaterialProperties.Heavy | BlobMaterialProperties.Non_Stick
         | BlobMaterialProperties.Heat_Transition;
 
-    public override BlobSoundDataStruct SoundData => RUMBLE_SOUNDS;
+    public override BlobSoundFamiliesStruct SoundFamilies => new(collision: RUMBLE_FAMILY);
         
     public override AtomParticleBehaviorStruct ParticleBehavior => DUST_BEHAVIOR;
 

@@ -1889,7 +1889,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80df2d885fcb4b7429db5e43249c8af4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transitionDuration: 5
+  transitionDuration: 1
   transitionProperty: 64
 --- !u!65 &984922696
 BoxCollider:
@@ -2137,7 +2137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80df2d885fcb4b7429db5e43249c8af4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transitionDuration: 5
+  transitionDuration: 1
   transitionProperty: 32
 --- !u!1001 &1080040783
 PrefabInstance:
@@ -3273,7 +3273,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80df2d885fcb4b7429db5e43249c8af4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transitionDuration: 5
+  transitionDuration: 1
   transitionProperty: 128
 --- !u!65 &1453816790
 BoxCollider:

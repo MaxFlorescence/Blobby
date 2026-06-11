@@ -2,7 +2,7 @@ public class IceBlobMaterial : BlobMaterialDataClass
 {
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Icy;
 
-    public override BlobSoundDataStruct SoundData => CLINK_CRUNCH_SOUNDS;
+    public override BlobSoundFamiliesStruct SoundFamilies => new(collision: CLINK_CRUNCH_FAMILY);
     
     public override AtomParticleBehaviorStruct ParticleBehavior => SPARKLE_BEHAVIOR;
 

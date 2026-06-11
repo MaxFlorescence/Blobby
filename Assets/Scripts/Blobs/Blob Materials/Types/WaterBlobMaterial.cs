@@ -2,7 +2,7 @@ public class WaterBlobMaterial : BlobMaterialDataClass
 {
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Watery;
 
-    public override BlobSoundDataStruct SoundData => SQUISH_SOUNDS;
+    public override BlobSoundFamiliesStruct SoundFamilies => new(collision: SQUISH_FAMILY);
     
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 

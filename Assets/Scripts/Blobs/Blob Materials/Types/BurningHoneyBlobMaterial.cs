@@ -3,7 +3,12 @@ public class BurningHoneyBlobMaterial : BlobMaterialDataClass
     public override BlobMaterialProperties Properties => BlobMaterialProperties.Slimy
         | BlobMaterialProperties.Firey;
 
-    public override BlobSoundDataStruct SoundData => SQUISH_SOUNDS;
+    public override BlobSoundFamiliesStruct SoundFamilies => new(
+        collision: SQUISH_FAMILY,
+        background: BLAZE_SOUND,
+        toTransition: IGNITE_SOUND,
+        fromTransition: EXTINGUISH_SOUND
+    );
 
     public override AtomParticleBehaviorStruct ParticleBehavior => FLAME_BEHAVIOR;
 

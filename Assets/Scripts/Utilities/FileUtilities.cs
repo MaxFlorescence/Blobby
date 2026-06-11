@@ -8,6 +8,7 @@ using UnityEngine;
 /// </summary>
 public static class FileUtilities
 {
+    public static readonly string RESOURCES         = Path.Combine("Assets", "Resources");
     public static readonly string SOUNDS            = "Sounds";
     public static readonly string MATERIALS         = "Materials";
     public static readonly string OBJECT_MATERIALS  = Path.Combine(MATERIALS, "Object Materials");
@@ -60,6 +61,31 @@ public static class FileUtilities
     }
 
     /// <param name="path">
+    ///     The path of the directory to check for.
+    /// </param>
+    /// <returns>
+    ///     <tt>True</tt> iff the given path points to a directory.
+    /// </returns>
+    public static bool IsDirectory(string path)
+    {
+        return Directory.Exists(Path.Combine(RESOURCES, path));
+    }
+
+    /// <param name="path">
+    ///     The path of the directory to search.
+    /// </param>
+    /// <param name="pattern">
+    ///     The pattern that enumerated files' names must match.
+    /// </param>
+    /// <returns>
+    ///     The number of files in the given directory that match the given pattern.
+    /// </returns>
+    public static int CountFiles(string path, string pattern = "*")
+    {
+        return Directory.GetFiles(Path.Combine(RESOURCES, path), pattern).Length;
+    }
+
+    /// <param name="path">
     ///     The path of the directory to search.
     /// </param>
     /// <param name="pattern">
@@ -75,12 +101,33 @@ public static class FileUtilities
                                                bool withExtension = false)
     {
         foreach (string fileName in Directory.EnumerateFiles(
-            Path.Combine("Assets", "Resources", path), pattern
+            Path.Combine(RESOURCES, path), pattern
         ).Select(
             file => withExtension ? Path.GetFileName(file):  Path.GetFileNameWithoutExtension(file)
         ))
         {
             yield return fileName;
+        }
+    }
+
+    /// <param name="path">
+    ///     The path of the directory to search.
+    /// </param>
+    /// <param name="pattern">
+    ///     The pattern that enumerated files' names must match.
+    /// </param>
+    /// <param name="withExtension">
+    ///     Iff <tt>true</tt>, leave the enumerated file's extensions appended to their names.
+    /// </param>
+    /// <returns>
+    ///     An enumerable over all resources in the given directory.
+    /// </returns>
+    public static IEnumerable<string> GetResources(string path, string pattern = "*",
+                                               bool withExtension = false)
+    {
+        foreach (string fileName in GetFiles(path, pattern, withExtension))
+        {
+            yield return Path.Combine(path, fileName);
         }
     }
 

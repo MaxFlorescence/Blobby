@@ -34,31 +34,45 @@ public abstract class BlobMaterialDataClass
     // ---------------------------------------------------------------------------------------------
     // SOUNDS
     // ---------------------------------------------------------------------------------------------
-    protected static readonly BlobSoundDataStruct NO_SOUNDS = new();
-    protected static readonly BlobSoundDataStruct SQUISH_SOUNDS = new(
-        family: "Squish",
-        collideVolume: 0.05f,
-        backgroundVolume: 0.5f
+    protected static readonly SoundFamily SQUISH_FAMILY = new(
+        name: "Squish",
+        volume: 0.05f,
+        pitchBounds: new(0.5f, 1.5f)
     );
-    protected static readonly BlobSoundDataStruct RUMBLE_SOUNDS = new(
-        family: "Rumble",
-        collideVolume: 0.25f,
-        collidePitchBounds: new(0.25f, 1f)
+    protected static readonly SoundFamily RUMBLE_FAMILY = new(
+        name: "Rumble",
+        volume: 0.25f,
+        pitchBounds: new(0.25f, 1f)
     );
-    protected static readonly BlobSoundDataStruct CLINK_CRUNCH_SOUNDS = new(
-        family: "Clink Crunch",
-        collideVolume: 0.8f
+    protected static readonly SoundFamily CLINK_CRUNCH_FAMILY = new(
+        name: "Clink Crunch",
+        volume: 0.8f,
+        pitchBounds: new(0.5f, 1.5f)
     );
-    protected static readonly BlobSoundDataStruct WET_CRUNCH_SOUNDS = new(
-        family: "Wet Crunch",
-        collideVolume: 0.8f
+    protected static readonly SoundFamily WET_CRUNCH_FAMILY = new(
+        name: "Wet Crunch",
+        volume: 0.8f,
+        pitchBounds: new(0.5f, 1.5f)
     );
-    protected static readonly BlobSoundDataStruct DRY_CRUNCH_SOUNDS = new(
-        family: "Dry Crunch",
-        collideVolume: 0.8f
+    protected static readonly SoundFamily DRY_CRUNCH_FAMILY = new(
+        name: "Dry Crunch",
+        volume: 0.8f,
+        pitchBounds: new(0.5f, 1.5f)
+    );
+    protected static readonly SoundFamily BLAZE_SOUND = new(
+        name: "Blaze",
+        volume: 0.1f
+    );
+    protected static readonly SoundFamily IGNITE_SOUND = new(
+        name: "Fire Ignite",
+        volume: 0.3f
+    );
+    protected static readonly SoundFamily EXTINGUISH_SOUND = new(
+        name: "Fire Extinguish",
+        volume: 0.3f
     );
     
-    public virtual BlobSoundDataStruct SoundData { get; } = NO_SOUNDS;
+    public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new();
     
     // ---------------------------------------------------------------------------------------------
     // PARTICLES

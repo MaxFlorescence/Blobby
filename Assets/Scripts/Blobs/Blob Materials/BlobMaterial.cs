@@ -139,11 +139,11 @@ public static class BlobMaterialExtensions
     /// <returns>
     ///     The body material associated with the given blob material.
     /// </returns>
-    public static BlobSoundDataStruct SoundData(this BlobMaterial blobMaterial)
+    public static BlobSoundFamiliesStruct SoundData(this BlobMaterial blobMaterial)
     {
         return MaterialToData.GetValueOrDefault(
             blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
-        ).SoundData;
+        ).SoundFamilies;
     }
 
     /// <returns>
