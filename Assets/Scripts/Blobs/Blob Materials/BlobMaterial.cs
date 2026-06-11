@@ -74,7 +74,8 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Burning_Oil,     new BurningOilBlobMaterial()},
         {BlobMaterial.Rubber,          new RubberBlobMaterial()},
         {BlobMaterial.Burning_Rubber,  new BurningRubberBlobMaterial()},
-        {BlobMaterial.Liquid_Nitrogen,  new LiquidNitrogenBlobMaterial()}
+        {BlobMaterial.Liquid_Nitrogen, new LiquidNitrogenBlobMaterial()},
+        {BlobMaterial.Ferrofluid,      new FerrofluidBlobMaterial()}
 
         // {BlobMaterial.Liquid_Nitrogen, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Can_Freeze
