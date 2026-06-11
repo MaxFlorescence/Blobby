@@ -65,7 +65,9 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Rock,            new RockBlobMaterial()},
         {BlobMaterial.Honey,           new HoneyBlobMaterial()},
         {BlobMaterial.Burning_Honey,   new BurningHoneyBlobMaterial()},
-        {BlobMaterial.Crystal_Honey,   new CrystalHoneyBlobMaterial()}
+        {BlobMaterial.Crystal_Honey,   new CrystalHoneyBlobMaterial()},
+        {BlobMaterial.Soda,            new SodaBlobMaterial()},
+        {BlobMaterial.Frozen_Soda,     new FrozenSodaBlobMaterial()}
 
         // {BlobMaterial.Acid, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Watery | BlobMaterialProperties.Can_Dissolve,
@@ -83,16 +85,6 @@ public static class BlobMaterialExtensions
         // {BlobMaterial.Burning_Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Can_Ignite | BlobMaterialProperties.Glowing
         //     | BlobMaterialProperties.Cold_Transition | BlobMaterialProperties.Slippery,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-
-        // {BlobMaterial.Soda, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Watery | BlobMaterialProperties.Sweet
-        //     | BlobMaterialProperties.Light,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-        // {BlobMaterial.Frozen_Soda, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Icy | BlobMaterialProperties.Light,
         //     FileUtilities.MISSING_MATERIAL
         // )},
 

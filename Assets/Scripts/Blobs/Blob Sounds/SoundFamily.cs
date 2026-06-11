@@ -52,14 +52,14 @@ public class SoundFamily
     /// <summary>
     ///     <tt>True</tt> iff this sound family has no sounds.
     /// </summary>
-    public bool IsNone => Name == null;
+    public bool IsNone => Name == "NONE";
 
     /// <summary>
     ///     <tt>False</tt> iff this sound family has only one sound.
     /// </summary>
     public bool IsFamily { get; private set; } = true;
 
-    public SoundFamily(string name = null, float? volume = null, Vector2? pitchBounds = null)
+    public SoundFamily(string name = "NONE", float? volume = null, Vector2? pitchBounds = null)
     {
         Name = name;
         Volume = volume ?? DEFAULT_VOLUME;

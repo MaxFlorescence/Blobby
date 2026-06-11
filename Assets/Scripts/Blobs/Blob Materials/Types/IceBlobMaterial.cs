@@ -4,7 +4,7 @@ public class IceBlobMaterial : BlobMaterialDataClass
 
     public override BlobSoundFamiliesStruct SoundFamilies => new(collision: CLINK_CRUNCH_FAMILY);
     
-    public override AtomParticleBehaviorStruct ParticleBehavior => SPARKLE_BEHAVIOR;
+    public override AtomParticleBehaviorStruct ParticleBehavior => FLUTTER_BEHAVIOR;
 
     public IceBlobMaterial() : base(
         bodyMaterial: "IceJelly",

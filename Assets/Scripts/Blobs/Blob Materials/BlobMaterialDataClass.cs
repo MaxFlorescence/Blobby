@@ -80,8 +80,12 @@ public abstract class BlobMaterialDataClass
         name: "Fire Extinguish",
         volume: 0.3f
     );
+    protected static readonly SoundFamily FIZZING_SOUND = new(
+        name: "Fizzing",
+        volume: 2f
+    );
     
-    public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new();
+    public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new(SoundFamily.NONE);
     
     // ---------------------------------------------------------------------------------------------
     // PARTICLES
@@ -131,9 +135,9 @@ public abstract class BlobMaterialDataClass
     };
     
     /// <summary>
-    ///     The particle behavior for sparkles.
+    ///     The particle behavior for fluttering particles.
     /// </summary>
-    protected static readonly AtomParticleBehaviorStruct SPARKLE_BEHAVIOR = new() {
+    protected static readonly AtomParticleBehaviorStruct FLUTTER_BEHAVIOR = new() {
         emission = true,
         gravity = 0,
         startSpeed = 1f,
@@ -147,6 +151,23 @@ public abstract class BlobMaterialDataClass
         collision = true
     };
     
+    /// <summary>
+    ///     The particle behavior for sparkles.
+    /// </summary>
+    protected static readonly AtomParticleBehaviorStruct SPARKLE_BEHAVIOR = new() {
+        emission = true,
+        gravity = 0,
+        startSpeed = 1f,
+        rateOverTime = 1f,
+        radius = 1,
+        alignToDirection = false,
+        inheritVelocity = false,
+        initialSize = 0.5f,
+        persistTime = 0,
+        fadeTime = 1,
+        collision = true
+    };
+
     /// <summary>
     ///     The particle behavior for flames.
     /// </summary>
