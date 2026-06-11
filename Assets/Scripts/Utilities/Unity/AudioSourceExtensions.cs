@@ -22,12 +22,9 @@ public static class AudioSourceExtensions
     {
         if (audioClip == null) return;
         
-        float originalPitch = audioSource.pitch;
         audioSource.pitch = Random.Range(pitchBounds?.x ?? 1, pitchBounds?.y ?? 1);
 
         audioSource.PlayOneShot(audioClip, volume ?? 1);
-        
-        audioSource.pitch = originalPitch;
     }
 
     /// <summary>

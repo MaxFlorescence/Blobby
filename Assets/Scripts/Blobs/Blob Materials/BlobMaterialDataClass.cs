@@ -40,9 +40,9 @@ public abstract class BlobMaterialDataClass
         pitchBounds: new(0.5f, 1.5f)
     );
     protected static readonly SoundFamily DEEP_SQUISH_FAMILY = new(
-        name: "Deep Squish",
+        name: "Squish",
         volume: 0.05f,
-        pitchBounds: new(0.5f, 1.5f)
+        pitchBounds: new(0.25f, 0.75f)
     );
     protected static readonly SoundFamily RUMBLE_FAMILY = new(
         name: "Rumble",
@@ -51,18 +51,17 @@ public abstract class BlobMaterialDataClass
     );
     protected static readonly SoundFamily CLINK_CRUNCH_FAMILY = new(
         name: "Clink Crunch",
-        volume: 0.8f,
-        pitchBounds: new(0.5f, 1.5f)
+        volume: 0.8f
     );
     protected static readonly SoundFamily WET_CRUNCH_FAMILY = new(
         name: "Wet Crunch",
         volume: 0.8f,
-        pitchBounds: new(0.5f, 1.5f)
+        pitchBounds: new(0.8f, 1.2f)
     );
     protected static readonly SoundFamily DRY_CRUNCH_FAMILY = new(
         name: "Dry Crunch",
         volume: 0.8f,
-        pitchBounds: new(0.5f, 1.5f)
+        pitchBounds: new(0.8f, 1.2f)
     );
     protected static readonly SoundFamily LAVA_SOUND = new(
         name: "Lava",
@@ -91,7 +90,7 @@ public abstract class BlobMaterialDataClass
     protected static readonly SoundFamily DODGEBALL_SOUND = new(
         name: "Dodgeball",
         volume: 0.5f,
-        pitchBounds: new(0.5f, 1.5f)
+        pitchBounds: new(0.8f, 1.2f)
     );
     
     public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new(SoundFamily.NONE);
