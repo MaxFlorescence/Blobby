@@ -4,7 +4,7 @@ public class SodaBlobMaterial : BlobMaterialDataClass
         | BlobMaterialProperties.Sweet | BlobMaterialProperties.Light;
 
     public override BlobSoundFamiliesStruct SoundFamilies => new(
-        collision: SQUISH_FAMILY,
+        collision: HIGH_SQUISH_FAMILY,
         background: FIZZING_SOUND
     );
     

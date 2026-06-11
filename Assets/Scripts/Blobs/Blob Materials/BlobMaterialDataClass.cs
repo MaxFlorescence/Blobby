@@ -44,6 +44,11 @@ public abstract class BlobMaterialDataClass
         volume: 0.05f,
         pitchBounds: new(0.25f, 0.75f)
     );
+    protected static readonly SoundFamily HIGH_SQUISH_FAMILY = new(
+        name: "Squish",
+        volume: 0.05f,
+        pitchBounds: new(1f, 2f)
+    );
     protected static readonly SoundFamily RUMBLE_FAMILY = new(
         name: "Rumble",
         volume: 0.25f,
@@ -91,6 +96,10 @@ public abstract class BlobMaterialDataClass
         name: "Dodgeball",
         volume: 0.5f,
         pitchBounds: new(0.8f, 1.2f)
+    );
+    protected static readonly SoundFamily WIND_SOUND = new(
+        name: "Wind",
+        volume: 0.3f
     );
     
     public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new(SoundFamily.NONE);

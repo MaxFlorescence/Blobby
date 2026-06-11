@@ -73,17 +73,8 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Oil,             new OilBlobMaterial()},
         {BlobMaterial.Burning_Oil,     new BurningOilBlobMaterial()},
         {BlobMaterial.Rubber,          new RubberBlobMaterial()},
-        {BlobMaterial.Burning_Rubber,  new BurningRubberBlobMaterial()}
-
-        // {BlobMaterial.Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Heat_Transition | BlobMaterialProperties.Slippery,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-        // {BlobMaterial.Burning_Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Can_Ignite | BlobMaterialProperties.Glowing
-        //     | BlobMaterialProperties.Cold_Transition | BlobMaterialProperties.Slippery,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
+        {BlobMaterial.Burning_Rubber,  new BurningRubberBlobMaterial()},
+        {BlobMaterial.Liquid_Nitrogen,  new LiquidNitrogenBlobMaterial()}
 
         // {BlobMaterial.Liquid_Nitrogen, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Can_Extinguish | BlobMaterialProperties.Can_Freeze
@@ -94,17 +85,6 @@ public static class BlobMaterialExtensions
         // {BlobMaterial.Ferrofluid, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Slippery | BlobMaterialProperties.Magnetic
         //     | BlobMaterialProperties.Conductive,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-
-        // {BlobMaterial.Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy
-        //     | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Heat_Transition,
-        //     FileUtilities.MISSING_MATERIAL
-        // )},
-        // {BlobMaterial.Burning_Rubber, new BlobMaterialDataStruct( // TODO: add body/drop materials
-        //     BlobMaterialProperties.Solid | BlobMaterialProperties.Bouncy
-        //     | BlobMaterialProperties.Non_Stick | BlobMaterialProperties.Firey,
         //     FileUtilities.MISSING_MATERIAL
         // )},
         
