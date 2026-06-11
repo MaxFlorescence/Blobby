@@ -88,6 +88,11 @@ public abstract class BlobMaterialDataClass
         name: "Bubbles Fizzing",
         volume: 0.5f
     );
+    protected static readonly SoundFamily DODGEBALL_SOUND = new(
+        name: "Dodgeball",
+        volume: 0.5f,
+        pitchBounds: new(0.5f, 1.5f)
+    );
     
     public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new(SoundFamily.NONE);
     

@@ -69,7 +69,11 @@ public static class BlobMaterialExtensions
         {BlobMaterial.Soda,            new SodaBlobMaterial()},
         {BlobMaterial.Frozen_Soda,     new FrozenSodaBlobMaterial()},
         {BlobMaterial.Acid,            new AcidBlobMaterial()},
-        {BlobMaterial.Frozen_Acid,     new FrozenAcidBlobMaterial()}
+        {BlobMaterial.Frozen_Acid,     new FrozenAcidBlobMaterial()},
+        {BlobMaterial.Oil,             new OilBlobMaterial()},
+        {BlobMaterial.Burning_Oil,     new BurningOilBlobMaterial()},
+        {BlobMaterial.Rubber,          new RubberBlobMaterial()},
+        {BlobMaterial.Burning_Rubber,  new BurningRubberBlobMaterial()}
 
         // {BlobMaterial.Oil, new BlobMaterialDataStruct( // TODO: add body/drop materials
         //     BlobMaterialProperties.Heat_Transition | BlobMaterialProperties.Slippery,
