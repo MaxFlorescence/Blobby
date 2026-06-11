@@ -4,7 +4,7 @@ public class CrystalHoneyBlobMaterial : BlobMaterialDataClass
         | BlobMaterialProperties.Sweet | BlobMaterialProperties.Solid
         | BlobMaterialProperties.Heat_Transition;
 
-    public override BlobSoundDataStruct SoundData => SQUISH_SOUNDS;
+    public override BlobSoundDataStruct SoundData => WET_CRUNCH_SOUNDS;
 
     public CrystalHoneyBlobMaterial() : base(
         bodyMaterial: "HoneyJelly"
