@@ -22,7 +22,7 @@ public class BurningOilBlobMaterial : BlobMaterialDataClass
     {
         Transitions = new (BlobMaterialProperties, BlobMaterial)[]
         {
-            (BlobMaterialProperties.Cold_Transition, BlobMaterial.Oil)
+            (BlobMaterialProperties.Cold_Transition, BlobMaterial.Rubber)
         };
     }
 }

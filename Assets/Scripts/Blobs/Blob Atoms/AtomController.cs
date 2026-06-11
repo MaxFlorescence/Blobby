@@ -32,6 +32,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     ///     The collider of this atom.
     /// </summary>
     private Collider atomCollider;
+    private readonly Timer collideSoundTimer = new(1);
 
     //----------------------------------------------------------------------------------------------
     // MOVEMENT
@@ -117,6 +118,11 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
         SetVisible(false);
     }
 
+    void Update()
+    {
+        collideSoundTimer.Update(mode: TimerMode.Toggle);
+    }
+
     /// <summary>
     ///     Apply forces to the atom. Impulse forces reset immediately.
     /// </summary>
@@ -133,7 +139,10 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
 
         if (!blobController.atoms.Contains(obj))
         { // do nothing special when colliding with other atoms
-            blobController.SoundController.CollideSound();
+            if (!collideSoundTimer.Running) {
+                blobController.SoundController.CollideSound();
+                collideSoundTimer.Reset();
+            }
 
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.
