@@ -21,6 +21,11 @@ public class BlobMeshController : MonoBehaviour
     /// </summary>
     public Vector3Int rightTriangle;
     
+    /// <summary>
+    ///     The minimum size at which cosmetics can be displayed normally.
+    /// </summary>
+    private const float LOWER_COSMETIC_THRESHOLD = 0.75f;
+    
     // ---------------------------------------------------------------------------------------------
     // ATOMS
     // ---------------------------------------------------------------------------------------------
@@ -190,13 +195,16 @@ public class BlobMeshController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Determines what the mesh's scale should be to cover all of the blob's atoms.
+    ///     Determines what the mesh's scale should be to cover all of the blob's atoms,
+    ///     and modifies cosmetics if necessary.
     /// </summary>
     /// <param name="lengthScaleFactor">
     ///     The scale factor currently applied to the blob's joints.
     /// </param>
-    public void CalculateScaleFactor(float lengthScaleFactor)
+    public void Rescale(float lengthScaleFactor)
     {
         ScaleFactor = 1 + 3 * atoms.AtomScale / (2 * lengthScaleFactor * atoms.DefaultLength);
+
+        rightEye.SetActive(lengthScaleFactor > LOWER_COSMETIC_THRESHOLD);
     }
 }

@@ -103,7 +103,7 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
 
     void Start()
     {
-        meshController.CalculateScaleFactor(Data.LengthFactor.Value);
+        meshController.Rescale(Data.LengthFactor.Value);
     }
 
     /// <summary>
@@ -195,7 +195,7 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
             joints[i].SetLinearLimit(previousMotionLimit);
         }
 
-        meshController.CalculateScaleFactor(Data.LengthFactor.Value);
+        meshController.Rescale(Data.LengthFactor.Value);
     }
 
     /// <summary>
