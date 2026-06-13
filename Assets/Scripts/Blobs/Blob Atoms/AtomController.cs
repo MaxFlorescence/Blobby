@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 /// <summary>
 ///    This class defines the behavior of each individual atom in the blob.
@@ -77,7 +76,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     /// <summary>
     ///     Dynamically created joint to allow this atom to be stuck to an object.
     /// </summary>
-    public SpringJoint StickyJoint { get; set; }
+    public ConfigurableJoint StickyJoint { get; set; }
 
     //----------------------------------------------------------------------------------------------
     // PARTICLES

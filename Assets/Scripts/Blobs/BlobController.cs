@@ -526,35 +526,33 @@ public class BlobController : MonoBehaviour, IControllable
     {
         if (!force && Material == newBlobMaterials) return;
 
-        Material = newBlobMaterials;
+        bool isGlowing = newBlobMaterials.HasAll(BlobMaterialProperties.Glowing);
+        bool isSolid = newBlobMaterials.HasAll(BlobMaterialProperties.Solid);
+        bool isSticky = newBlobMaterials.HasAll(BlobMaterialProperties.Sticky);
+        bool isNonStick = newBlobMaterials.HasAll(BlobMaterialProperties.Non_Stick);
+        bool wasSticky = Material.HasAll(BlobMaterialProperties.Sticky);
 
-        Lights[BlobLightType.Material_Glow].SetValue(
-            newBlobMaterials.HasAll(BlobMaterialProperties.Glowing)
-        );
+        Lights[BlobLightType.Material_Glow].SetValue(isGlowing);
 
-        joints.SetValue(new(
-            isFixedJoint: newBlobMaterials.HasAll(BlobMaterialProperties.Solid)
-        ));
+        joints.SetValue(new(isFixedJoint: isSolid));
+
+        stickies.Resize(isSolid ? 1 : 2);
+        stickies.SetMotionLock(isSolid);
         
-        if (newBlobMaterials.HasAll(BlobMaterialProperties.Sticky))
+        if (isSticky)
         {
             stickies.SetValue(true);
         }
-        else if (newBlobMaterials.HasAll(BlobMaterialProperties.Non_Stick))
+        else if (isNonStick || wasSticky)
         {
             stickies.SetValue(false);
         }
 
-        int newStickyCount = newBlobMaterials.HasAll(
-            BlobMaterialProperties.Solid | BlobMaterialProperties.Sticky
-        ) ? 1 : 2;
-        stickies.Resize(newStickyCount);
-        stickies.BreakForceMultiplier = 3 - newStickyCount;
-
         meshController.SetMaterials(newBlobMaterials.BodyMaterial());
         atoms.SetParticles(newBlobMaterials.ParticleData());
-
         SoundController.SetClips(newBlobMaterials.SoundData());
+
+        Material = newBlobMaterials;
 
         if (GameInfo.DebugMode) GameInfo.AlertSystem.Send($"Set material to {newBlobMaterials}");
     }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -16,15 +17,9 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     private int stickyCount = 2;
 
     /// <summary>
-    ///     Spring constant for when the atom sticks to an object.
-    /// </summary>
-    private const float STICKY_STRENGTH = 1000;
-
-    /// <summary>
     ///     Force needed to break the joint between a sticky atom and an object.
     /// </summary>
-    private const float BREAK_FORCE = 500;
-    public float BreakForceMultiplier { get; set; } = 1;
+    private const float BREAK_FORCE = 1000;
 
     /// <summary>
     ///     Index of the last sticky atom, or null if fewer than <tt>STICKY_COUNT</tt> atoms are
@@ -38,6 +33,13 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
     ///     Circular buffer of capacity <tt>STICKY_COUNT</tt> for holding sticky atoms.
     /// </summary>
     private AtomController[] atomStickies;
+
+    /// <summary>
+    ///     The current motion type of the sticky joints. One of 
+    ///     <tt>ConfigurableJointMotion.Locked</tt> or <tt>ConfigurableJointMotion.Limited</tt>.
+    /// </summary>
+
+    private ConfigurableJointMotion currentMotionType = ConfigurableJointMotion.Limited;
 
     //----------------------------------------------------------------------------------------------
     // ENABLING/DISABLING
@@ -84,12 +86,14 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
             atomStickies[stickyHead] = atom;
             stickyHead = (stickyHead + 1) % stickyCount;
 
-            atom.StickyJoint = atom.gameObject.AddComponent<SpringJoint>();
+            atom.StickyJoint = atom.gameObject.AddComponent<ConfigurableJoint>();
             atom.StickyJoint.connectedBody = rigidbody;
 
             atom.StickyJoint.enableCollision = true;
-            atom.StickyJoint.spring = STICKY_STRENGTH;
-            atom.StickyJoint.breakForce = BREAK_FORCE * BreakForceMultiplier;
+            atom.StickyJoint.SetLinearLimit(0.1f);
+            atom.StickyJoint.SetAllMotionConstraints(currentMotionType);
+            atom.StickyJoint.SetAllAngularMotionConstraints(ConfigurableJointMotion.Free);
+            atom.StickyJoint.breakForce = BREAK_FORCE;
 
             // manually set anchor positions
             atom.StickyJoint.autoConfigureConnectedAnchor = false;
@@ -259,6 +263,32 @@ public class AtomStickyController : MonoBehaviour, IOverridable<bool>
         {
             stickyCount = newSize;
             Compact();
+        }
+    }
+
+    /// <summary>
+    ///     Updates the motion type of the sticky joints.
+    /// </summary>
+    /// <param name="locked">
+    ///     If <tt>true</tt>, lock the motion of sticky atoms. If <tt>false</tt>, set their motion
+    ///     to be limited instead.
+    /// </param>
+    public void SetMotionLock(bool locked)
+    {
+        currentMotionType = locked ? ConfigurableJointMotion.Locked
+                                   : ConfigurableJointMotion.Limited;
+                                   
+        ForEach(joint => joint.SetAllMotionConstraints(currentMotionType));
+    }
+
+    public void ForEach(Action<ConfigurableJoint> action)
+    {
+        for (int i = 1; i <= stickyCount; i++)
+        {
+            int ii = (stickyHead - i + stickyCount) % stickyCount;
+            if (atomStickies[ii] == null) break;
+
+            action.Invoke(atomStickies[ii].StickyJoint);
         }
     }
 
