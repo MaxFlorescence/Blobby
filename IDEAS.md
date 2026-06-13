@@ -1,13 +1,5 @@
 # Mechanics
-- Add liquids
-    * Each liquid has different properties
-        - Slime
-        - Magma
-        - Soda
-        - Honey
-        - Acid
-        - Ferrofluid
-    * Allow blob to abosorb liquid
+- Allow blob to abosorb liquid
 - Add materials
     * Wood
     * Stone
@@ -19,7 +11,6 @@
     * Half size blobs, one eye each
     * Health system? Heal by touching current liquid
 - Googly eye customization
-- Add rigidity?
 
 # Todo
 - Actual level design
