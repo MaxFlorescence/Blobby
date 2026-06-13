@@ -127,6 +127,8 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     /// </summary>
     void FixedUpdate()
     {
+        if (IsTouching()) return;
+
         atomRigidBody.AddForce(force, ForceMode.Force);
         atomRigidBody.AddForce(impulse, ForceMode.Impulse);
         impulse = Vector3.zero;
@@ -307,6 +309,14 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
         atomCollider.enabled = enabled;
 
         if (!enabled) touching.Clear();
+    }
+    
+    /// <summary>
+    ///     Sets the physic material used by the atom's collider.
+    /// </summary>
+    public void SetPhysicMaterial(PhysicMaterial physicMaterial)
+    {
+        atomCollider.material = physicMaterial;
     }
 
     /// <summary>

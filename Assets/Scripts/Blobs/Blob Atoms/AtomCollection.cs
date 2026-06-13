@@ -252,6 +252,13 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         });
     }
 
+    public void SetPhysicMaterials(string materialPath)
+    {
+        PhysicMaterial physicMaterial = Resources.Load<PhysicMaterial>(materialPath);
+
+        ForEach(atom => atom.SetPhysicMaterial(physicMaterial));
+    }
+
     public void SetColliders(bool enabled)
     {
         ForEach(atom => atom.SetCollider(enabled));

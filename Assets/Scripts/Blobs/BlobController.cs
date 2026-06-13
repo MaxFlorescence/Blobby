@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -530,6 +531,7 @@ public class BlobController : MonoBehaviour, IControllable
         bool isSolid = newBlobMaterials.HasAll(BlobMaterialProperties.Solid);
         bool isSticky = newBlobMaterials.HasAll(BlobMaterialProperties.Sticky);
         bool isNonStick = newBlobMaterials.HasAll(BlobMaterialProperties.Non_Stick);
+        bool isLowFriction = newBlobMaterials.HasAll(BlobMaterialProperties.Low_Friction);
         bool wasSticky = Material.HasAll(BlobMaterialProperties.Sticky);
 
         Lights[BlobLightType.Material_Glow].SetValue(isGlowing);
@@ -547,6 +549,11 @@ public class BlobController : MonoBehaviour, IControllable
         {
             stickies.SetValue(false);
         }
+
+        atoms.SetPhysicMaterials(Path.Combine(FileUtilities.PHYSIC_MATERIALS, isLowFriction
+            ? "Slippery"
+            : "Jelly"
+        ));
 
         meshController.SetMaterials(newBlobMaterials.BodyMaterial());
         atoms.SetParticles(newBlobMaterials.ParticleData());

@@ -1,14 +1,13 @@
 # Mechanics
 - Allow blob to abosorb liquid
-- Add materials
-    * Wood
-    * Stone
-    * Metal
-    * Glass
-    * Ice
-    * Force-wall
+- Add object material properties
+    * Wood burns, dissolves
+    * Stone dissolves
+    * Metal conducts
+    * Glass melts
+    * Ice melts
+    * Force-wall inert
 - Add splitting
-    * Half size blobs, one eye each
     * Health system? Heal by touching current liquid
 - Googly eye customization
 
