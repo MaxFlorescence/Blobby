@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -342,59 +341,59 @@ public class BlobController : MonoBehaviour, IControllable
 
         if (Input.GetKey(KeyCode.M))
         {
-            if (Input.GetKeyDown(KeyCode.Keypad1))
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 SetBlobMaterials(BlobMaterial.Water);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad2))
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
             {
                 SetBlobMaterials(BlobMaterial.Lava);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad3))
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
             {
                 SetBlobMaterials(BlobMaterial.Acid);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad4))
+            else if (Input.GetKeyDown(KeyCode.Alpha4))
             {
                 SetBlobMaterials(BlobMaterial.Oil);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad5))
+            else if (Input.GetKeyDown(KeyCode.Alpha5))
             {
                 SetBlobMaterials(BlobMaterial.Honey);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad6))
+            else if (Input.GetKeyDown(KeyCode.Alpha6))
             {
                 SetBlobMaterials(BlobMaterial.Soda);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad7))
+            else if (Input.GetKeyDown(KeyCode.Alpha7))
             {
                 SetBlobMaterials(BlobMaterial.Liquid_Nitrogen);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad8))
+            else if (Input.GetKeyDown(KeyCode.Alpha8))
             {
                 SetBlobMaterials(BlobMaterial.Ferrofluid);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad9))
+            else if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 SetBlobMaterials(BlobMaterial.Rubber);
             }
-            else if (Input.GetKeyDown(KeyCode.Keypad0))
+            else if (Input.GetKeyDown(KeyCode.Alpha0))
             {
                 SetBlobMaterials(BlobMaterial.Aerogel);
             }
-            else if (Input.GetKeyDown(KeyCode.KeypadDivide))
+            else if (Input.GetKeyDown(KeyCode.Minus))
             {
                 SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Cold_Transition
                 ));
             }
-            else if (Input.GetKeyDown(KeyCode.KeypadMultiply))
+            else if (Input.GetKeyDown(KeyCode.Plus))
             {
                 SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Heat_Transition
                 ));
             }
-            else if (Input.GetKeyDown(KeyCode.KeypadMinus))
+            else if (Input.GetKeyDown(KeyCode.Tilde))
             {
                 SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Wet_Transition
@@ -550,10 +549,7 @@ public class BlobController : MonoBehaviour, IControllable
             stickies.SetValue(false);
         }
 
-        atoms.SetPhysicMaterials(Path.Combine(FileUtilities.PHYSIC_MATERIALS, isLowFriction
-            ? "Slippery"
-            : "Jelly"
-        ));
+        atoms.SetPhysicMaterials(isLowFriction ? "Slippery" : "Jelly");
 
         meshController.SetMaterials(newBlobMaterials.BodyMaterial());
         atoms.SetParticles(newBlobMaterials.ParticleData());

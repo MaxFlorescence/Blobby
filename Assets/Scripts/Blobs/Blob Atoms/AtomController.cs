@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -48,7 +49,10 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     ///     Set of objects that this atom is currently colliding with. Movement input only registers 
     ///     if this is non-empty.
     /// </summary>
-    public HashSet<GameObject> touching = new();
+    private readonly HashSet<GameObject> touchingNotSlippery = new();
+    private readonly HashSet<GameObject> touchingSlippery = new();
+    private PhysicMaterial SLIPPERY_PHYSIC_MATERIAL;
+    private PhysicMaterial JELLY_PHYSIC_MATERIAL;
 
     //----------------------------------------------------------------------------------------------
     // MESH
@@ -105,6 +109,13 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
 
     void Awake() {
         gameObject.TryGetComponent(out ParticleController);
+
+        SLIPPERY_PHYSIC_MATERIAL = Resources.Load<PhysicMaterial>(
+            Path.Combine(FileUtilities.PHYSIC_MATERIALS, "Slippery")
+        );
+        JELLY_PHYSIC_MATERIAL = Resources.Load<PhysicMaterial>(
+            Path.Combine(FileUtilities.PHYSIC_MATERIALS, "Jelly")
+        );
     }
 
     void Start()
@@ -129,7 +140,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     {
         if (IsTouching()) return;
 
-        atomRigidBody.AddForce(force, ForceMode.Force);
+        atomRigidBody.AddForce(force * atoms.GetMovementMultiplier(), ForceMode.Force);
         atomRigidBody.AddForce(impulse, ForceMode.Impulse);
         impulse = Vector3.zero;
     }
@@ -147,12 +158,12 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
 
             // Boundaries do not affect the touch count to prevent the blob from moving solely by
             // touching them. This prevents players from skipping sections by moving along the boundaries.
-            if (NotBounds(obj) && !touching.Contains(obj))
+            if (NotBounds(obj) && !IsTouching(obj))
             {
                 // keep track of the touch count
                 if (!blobController.Inventory.Contains(obj) && atomCollider.enabled)
                 { // don't count grabbed objects as touching
-                    touching.Add(obj);
+                    AddTouch(obj);
                 }
 
                 if (obj.TryGetComponent<Interactable>(out var interactableObj))
@@ -173,9 +184,9 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
         GameObject obj = collision.gameObject;
     
         // keep track of the touch count
-        if (!blobController.atoms.Contains(obj) && NotBounds(obj) && touching.Contains(obj))
+        if (!blobController.atoms.Contains(obj) && NotBounds(obj))
         {
-            touching.Remove(obj);
+            RemoveTouch(obj);
         }
         
         if (!blobController.IsTouching(obj) && obj.TryGetComponent<Interactable>(out var interactableObj))
@@ -209,14 +220,43 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     ///     <br/>
     ///     (If object is null) True iff atom is touching anything.
     /// </returns>
-    public bool IsTouching(GameObject obj = null)
+    public bool IsTouching(GameObject obj = null, bool includeSlippery = true)
     {
         if (obj == null)
         {
-            return touching.Count > 0;
+            return touchingNotSlippery.Count + (includeSlippery ? touchingSlippery.Count : 0) > 0;
         }
 
-        return touching.Contains(obj);
+        return touchingNotSlippery.Contains(obj)
+            || (includeSlippery && touchingSlippery.Contains(obj));
+    }
+
+    private void AddTouch(GameObject obj)
+    {
+        if (obj.TryGetComponent(out Collider collider) && collider.sharedMaterial == SLIPPERY_PHYSIC_MATERIAL)
+        {
+            touchingSlippery.Add(obj);
+            return;
+        }
+
+        touchingNotSlippery.Add(obj);
+    }
+
+    private void RemoveTouch(GameObject obj)
+    {
+        if (obj.TryGetComponent(out Collider collider) && collider.sharedMaterial == SLIPPERY_PHYSIC_MATERIAL)
+        {
+            touchingSlippery.Remove(obj);
+            return;
+        }
+
+        touchingNotSlippery.Remove(obj);
+    }
+
+    private void ClearTouch()
+    {
+        touchingSlippery.Clear();
+        touchingNotSlippery.Clear();
     }
 
     /// <summary>
@@ -308,15 +348,19 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     {
         atomCollider.enabled = enabled;
 
-        if (!enabled) touching.Clear();
+        if (!enabled) ClearTouch();
     }
     
     /// <summary>
     ///     Sets the physic material used by the atom's collider.
     /// </summary>
-    public void SetPhysicMaterial(PhysicMaterial physicMaterial)
+    public void SetPhysicMaterial(string physicMaterialName)
     {
-        atomCollider.material = physicMaterial;
+        atomCollider.material = physicMaterialName switch
+        {
+            "Slippery" => SLIPPERY_PHYSIC_MATERIAL,
+            _ => JELLY_PHYSIC_MATERIAL
+        };
     }
 
     /// <summary>

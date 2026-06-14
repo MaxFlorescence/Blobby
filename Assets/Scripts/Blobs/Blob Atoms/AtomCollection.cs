@@ -93,6 +93,13 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         SetAllVisible(GameInfo.DebugMode);
     }
 
+    public float GetMovementMultiplier()
+    {
+        bool hasFriction = Controllers.Any(atom => atom.IsTouching(includeSlippery: false));
+        // Debug.Log(hasFriction);
+        return hasFriction ? 1 : 0.5f;
+    }
+
     public IEnumerator GetEnumerator()
     {
         foreach (Transform atom in Transforms) yield return atom;
@@ -252,11 +259,9 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         });
     }
 
-    public void SetPhysicMaterials(string materialPath)
+    public void SetPhysicMaterials(string physicMaterialName)
     {
-        PhysicMaterial physicMaterial = Resources.Load<PhysicMaterial>(materialPath);
-
-        ForEach(atom => atom.SetPhysicMaterial(physicMaterial));
+        ForEach(atom => atom.SetPhysicMaterial(physicMaterialName));
     }
 
     public void SetColliders(bool enabled)
