@@ -1,12 +1,11 @@
 using System;
-using System.Collections;
 using System.Linq;
 using UnityEngine;
 
 /// <summary>
 ///     A class for controlling a collection of atoms.
 /// </summary>
-public class AtomCollection : MonoBehaviour, IEnumerable
+public class AtomCollection : MonoBehaviour
 {
     /// <summary>
     ///     The atoms belonging to this collection.
@@ -93,16 +92,15 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         SetAllVisible(GameInfo.DebugMode);
     }
 
+    /// <returns>
+    ///     Different multipliers depending on if all atoms are on a slippery surface or not.
+    /// </returns>
     public float GetMovementMultiplier()
     {
-        bool hasFriction = Controllers.Any(atom => atom.IsTouching(includeSlippery: false));
-        // Debug.Log(hasFriction);
-        return hasFriction ? 1 : 0.5f;
-    }
-
-    public IEnumerator GetEnumerator()
-    {
-        foreach (Transform atom in Transforms) yield return atom;
+        bool normalMovement = !CenterController.IsSlippery
+            && Controllers.Any(atom => atom.IsTouching(includeSlippery: false));
+        
+        return normalMovement ? 1 : 0.5f;
     }
 
     /// <param name="obj">
@@ -117,15 +115,15 @@ public class AtomCollection : MonoBehaviour, IEnumerable
         return Contains(obj.transform);
     }
 
-    /// <param name="trans">
+    /// <param name="transform">
     ///     The Transform to check.
     /// </param>
     /// <returns>
     ///     <tt>True</tt> iff the given transform is one of this blob's atoms.
     /// </returns>
-    public bool Contains(Transform trans)
+    public bool Contains(Transform transform)
     {
-        return Transforms.Contains(trans);
+        return Transforms.Contains(transform);
     }
     
     /// <summary>

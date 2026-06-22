@@ -53,6 +53,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     private readonly HashSet<GameObject> touchingSlippery = new();
     private PhysicMaterial SLIPPERY_PHYSIC_MATERIAL;
     private PhysicMaterial JELLY_PHYSIC_MATERIAL;
+    public bool IsSlippery { get; private set; } = false;
 
     //----------------------------------------------------------------------------------------------
     // MESH
@@ -215,6 +216,9 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     /// <param name="obj">
     ///     The object to test for. If null, test if the atom is touching anything.
     /// </param>
+    /// <param name="includeSlippery">
+    ///     Iff <tt>false</tt>, exclude all objects that use the <tt>Slippery</tt> physic material.
+    /// </param>
     /// <returns>
     ///     (If object is not null) True iff atom is touching the object.
     ///     <br/>
@@ -231,9 +235,13 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
             || (includeSlippery && touchingSlippery.Contains(obj));
     }
 
+    /// <summary>
+    ///     Add the given object to the appropriate touching set.
+    /// </summary>
     private void AddTouch(GameObject obj)
     {
-        if (obj.TryGetComponent(out Collider collider) && collider.sharedMaterial == SLIPPERY_PHYSIC_MATERIAL)
+        if (obj.TryGetComponent(out Collider collider)
+            && collider.sharedMaterial == SLIPPERY_PHYSIC_MATERIAL)
         {
             touchingSlippery.Add(obj);
             return;
@@ -242,9 +250,13 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
         touchingNotSlippery.Add(obj);
     }
 
+    /// <summary>
+    ///     Remove the given object from the appropriate touching set.
+    /// </summary>
     private void RemoveTouch(GameObject obj)
     {
-        if (obj.TryGetComponent(out Collider collider) && collider.sharedMaterial == SLIPPERY_PHYSIC_MATERIAL)
+        if (obj.TryGetComponent(out Collider collider)
+            && collider.sharedMaterial == SLIPPERY_PHYSIC_MATERIAL)
         {
             touchingSlippery.Remove(obj);
             return;
@@ -253,6 +265,9 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
         touchingNotSlippery.Remove(obj);
     }
 
+    /// <summary>
+    ///     Clear both touching sets.
+    /// </summary>
     private void ClearTouch()
     {
         touchingSlippery.Clear();
@@ -361,6 +376,8 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
             "Slippery" => SLIPPERY_PHYSIC_MATERIAL,
             _ => JELLY_PHYSIC_MATERIAL
         };
+
+        IsSlippery = physicMaterialName == "Slippery";
     }
 
     /// <summary>
@@ -371,11 +388,17 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    ///     Override this atom's vertex position.
+    /// </summary>
     public void SetOverride(Vector3 newOverride)
     {
         overrideVertex = newOverride;
     }
 
+    /// <summary>
+    ///     Clear any override to this atom's vertex position.
+    /// </summary>
     public void ClearOverride()
     {
         overrideVertex = null;
