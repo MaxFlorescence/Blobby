@@ -551,7 +551,7 @@ public class BlobController : MonoBehaviour, IControllable
 
         atoms.SetPhysicMaterials(isLowFriction ? "Slippery" : "Jelly");
 
-        meshController.SetMaterials(newBlobMaterials.BodyMaterial());
+        meshController.SetMaterial(newBlobMaterials.BodyData());
         atoms.SetParticles(newBlobMaterials.ParticleData());
         SoundController.SetClips(newBlobMaterials.SoundData());
 

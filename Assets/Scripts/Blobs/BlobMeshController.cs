@@ -59,10 +59,34 @@ public class BlobMeshController : MonoBehaviour
     /// </summary>
     private int[] vertexToAtomMap;
 
+    // ---------------------------------------------------------------------------------------------
+    // MATERIAL TRANSITIONS
+    // ---------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     The default amount of time it takes for the mesh to transition between materials.
+    /// </summary>
+    private const float DEFAULT_TRANSITION_TIME = 1f;
+
+    /// <summary>
+    ///     The default alpha values for the materials currently used by the mesh.
+    /// </summary>
+    private readonly float[] materialAlphas = new float[2];
+
+    /// <summary>
+    ///     The timer for controlling materials fading in and out during transitions.
+    /// </summary>
+    private readonly StagedTimer transitionTimer = new(
+        DEFAULT_TRANSITION_TIME, 2,
+        new string[] {FADE_NEW_MATERIAL, FADE_OLD_MATERIAL}
+    );
+    private const string FADE_NEW_MATERIAL = "Fade New Material";
+    private const string FADE_OLD_MATERIAL = "Fade Old Material";
+
     void Awake()
     {
         mesh = GetComponent<MeshFilter>().mesh;
         meshRenderer = GetComponent<MeshRenderer>();
+        transitionTimer.Skip(false);
 
         MapVertices();
     }
@@ -99,6 +123,26 @@ public class BlobMeshController : MonoBehaviour
 
         SnapToTriangle(leftEye, leftTriangle);
         SnapToTriangle(rightEye, rightTriangle);
+
+        if (transitionTimer.Update(mode: TimerMode.Pulse)) SimplifyMaterials();
+
+        if (transitionTimer.Running)
+        {
+            StagedTimerState timerState = transitionTimer.State;
+
+            if (timerState.stageName == FADE_NEW_MATERIAL)
+            {
+                meshRenderer.materials[0].SetFloat("_Alpha",
+                    timerState.progress * materialAlphas[0]
+                );
+            }
+            else if (timerState.stageName == FADE_OLD_MATERIAL)
+            {
+                meshRenderer.materials[1].SetFloat("_Alpha",
+                    timerState.RemainingProgress * materialAlphas[1]
+                );
+            }
+        }
     }
 
     void FixedUpdate()
@@ -187,11 +231,49 @@ public class BlobMeshController : MonoBehaviour
     }
 
     /// <summary>
-    ///     Sets the materials array of the blob's mesh renderer.
+    ///     Sets the material of the blob's mesh renderer. If the given duration is positive, then
+    ///     transitions smoothly from the old material to the new material.
     /// </summary>
-    public void SetMaterials(params Material[] materials)
+    /// <param name="bodyData">
+    ///     The pair that defines the new material and its default alpha value.
+    /// </param>
+    /// <param name="duration">
+    ///     How long to take during the transition from the mesh's old material to the new one.
+    /// </param>
+    public void SetMaterial((Material material, float alpha) bodyData,
+                            float duration = DEFAULT_TRANSITION_TIME)
     {
-        meshRenderer.materials = materials;
+        if (transitionTimer.Running) return;
+        
+        if (duration > 0 && !meshRenderer.materials[0].name.HasPrefix(bodyData.material.name))
+        {
+            transitionTimer.Reset(duration.Approx(transitionTimer.Interval) ? 0 : duration);
+
+            meshRenderer.materials = new Material[] {
+                bodyData.material,
+                meshRenderer.materials[0]
+            };
+            meshRenderer.materials[0].SetFloat("_Alpha", 0);
+
+            materialAlphas[1] = materialAlphas[0];
+        }
+        else
+        {
+            meshRenderer.materials = new Material[] {bodyData.material};
+        }
+
+        materialAlphas[0] = bodyData.alpha;
+    }
+
+    /// <summary>
+    ///     Removes all but the first material defined in the mesh's material array, setting its
+    ///     alpha value to the stored default.
+    /// </summary>
+    private void SimplifyMaterials()
+    {
+        meshRenderer.materials = new Material[] {meshRenderer.materials[0]};
+        meshRenderer.materials[0].SetFloat("_Alpha", materialAlphas[0]);
+        materialAlphas[1] = 0;
     }
 
     /// <summary>
