@@ -140,7 +140,7 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
         else if (lerpTimer.Running)
         {
             updateMotionLimit = lerpTimer.RemainingProgress() * lerpMotionLimitStart
-                                + lerpTimer.Progress() * Data.MotionLimit.Value;
+                              + lerpTimer.Progress() * Data.MotionLimit.Value;
         }
         else if (lerpMotionLimitStart != Data.MotionLimit.Value)
         {
@@ -155,11 +155,12 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
             previousMotionLimit = updateMotionLimit;
         }
 
-        if (Data.MotionLimit.Value == BlobJointData.MINIMUM_MOTION_LIMIT)
+        if (lerpMotionLimitStart == BlobJointData.MINIMUM_MOTION_LIMIT && !atoms.AreOverridden())
         {
             atoms.SetOverrides(Data.LengthFactor.Value);
         }
-        else if (Data.MotionLimit.Value != BlobJointData.MINIMUM_MOTION_LIMIT && atoms.AreOverridden())
+        
+        if (Data.MotionLimit.Value != BlobJointData.MINIMUM_MOTION_LIMIT && atoms.AreOverridden())
         {
             atoms.ClearOverrides();
         }
