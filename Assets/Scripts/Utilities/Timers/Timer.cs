@@ -109,7 +109,11 @@ public class Timer
     public void Reset(float interval = 0)
     {
         if (interval > 0) SetInterval(interval);
-
+        GoReset();
+    }
+    
+    protected void GoReset()
+    {
         Time = 0;
         Running = true;
     }
@@ -163,7 +167,7 @@ public class Timer
     /// <returns>
     ///     <tt>True</tt> iff the timer is complete.
     /// </returns>
-    public bool Complete()
+    public bool IsComplete()
     {
         return Time >= Interval;
     }

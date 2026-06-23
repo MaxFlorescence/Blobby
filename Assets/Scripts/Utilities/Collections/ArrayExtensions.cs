@@ -87,4 +87,20 @@ public static class ArrayExtensions
 
         return indices;
     }
+
+    /// <returns>
+    ///     An array containing <tt>n</tt> items, each equal to the given <tt>value</tt>.
+    /// </returns>
+    public static T[] Repeat<T>(T value, int n)
+    {
+        T[] data = new T[n];
+        for (int i = 0; i < n; i++) data[i] = value;
+
+        return data;
+    }
+
+    public static string AsString<T>(this T[] data)
+    {
+        return $"{typeof(T).Name}[] {{{string.Join(", ", data)}}}";
+    }
 }

@@ -46,16 +46,39 @@ public class StagedTimer : Timer
         SetIntervals(subintervals, stageNames);
     }
 
+    /// <param name="interval">
+    ///     The total interval of the timer. This will be split into <tt>subintervalCount</tt> equal
+    ///     stages.
+    /// </param>
+    /// <param name="subintervalCount">
+    ///     The number of subintervals to create.
+    /// </param>
+    /// <param name="stageNames">
+    ///     Optional names by which to refer to each stage.
+    /// </param>
+    public StagedTimer(float interval, int subintervalCount, string[] stageNames = null)
+    {
+        this.subintervalCount = subintervalCount;
+        SetIntervals(interval, stageNames);
+    }
+
     public override void SetInterval(float interval)
     {
         throw new InvalidOperationException("Cannot manually set the main interval of a StagedTimer!");   
     }
 
+    public void SetIntervals(float interval, string[] stageNames = null)
+    {
+        SetIntervals(
+            ArrayExtensions.Repeat(interval / subintervalCount, subintervalCount),
+            stageNames
+        );
+    }
+
     public void SetIntervals(float[] subintervals, string[] stageNames = null)
     {
         Assert.AreEqual(subintervalCount, subintervals.Length);
-        if (stageNames != null)
-            Assert.AreEqual(subintervalCount, stageNames.Length);
+        if (stageNames != null) Assert.AreEqual(subintervalCount, stageNames.Length);
 
         foreach (float subinterval in subintervals)
             Assert.IsTrue(subinterval > 0);
@@ -70,16 +93,10 @@ public class StagedTimer : Timer
         for (int i = 1; i < subintervalCount + 1; i++)
         {
             subintervalsCumulative[i] = subintervalsCumulative[i-1] + subintervals[i-1];
-            this.stageNames[i-1] = stageNames?[i-1] ?? $"Stage {i-1}";
+            this.stageNames[i-1] = stageNames?[i-1] ?? this.stageNames[i-1] ?? $"Stage {i-1}";
         }
 
-        State = new() {
-            stage = 0,
-            stageName = stageNames[0],
-            progress = 0,
-            rolledOver = false
-        };
-
+        ResetState();
         GoSetInterval(subintervalsCumulative[subintervalCount]);
     }
 
@@ -110,6 +127,63 @@ public class StagedTimer : Timer
 
         State.progress = (Time - subintervalsCumulative[State.stage]) / Subintervals[State.stage];
         State.stageName = stageNames[State.stage];
+    }
+
+    private void ResetState()
+    {
+        State.stage = 0;
+        State.stageName = stageNames[0];
+        State.progress = 0;
+        State.rolledOver = false;
+    }
+
+    /// <summary>
+    ///     Restart the timer. If the given interval is positive, set the timer's interval to it
+    ///     before restarting. The subintervals will be equal portions of the interval.
+    /// </summary>
+    /// <param name="resetStage">
+    ///     If <tt>true</tt> and the timer is not complete, then reset the current stage. Otherwise
+    ///     reset the timer to the beginning.
+    /// </param>
+    /// <param name="interval">
+    ///     The time interval to use. If non-positive, then use the previous interval. The
+    ///     subintervals will be equal portions of the interval.
+    /// </param>
+    public void Reset(float interval, bool resetStage = false)
+    {
+        if (interval > 0) SetIntervals(interval);
+        GoResetStage(resetStage);
+    }
+
+    /// <summary>
+    ///     Restart the timer either from the beginning or from the current stage. If given an array
+    ///     of intervals, then set the timer's intervals to them before restarting.
+    /// </summary>
+    /// <param name="resetStage">
+    ///     If <tt>true</tt> and the timer is not complete, then reset the current stage. Otherwise
+    ///     reset the timer to the beginning.
+    /// </param>
+    /// <param name="subintervals">
+    ///     The time subintervals to use. If <tt>null</tt>, then use the previous subintervals.
+    /// </param>
+    public void Reset(float[] subintervals = null, bool resetStage = false)
+    {
+        if (subintervals != null) SetIntervals(subintervals);
+        GoResetStage(resetStage);
+    }
+
+    private void GoResetStage(bool resetStage)
+    {
+        if (resetStage && !IsComplete())
+        {
+            GoToStage(State.stage);
+        }
+        else
+        {
+            GoReset();
+        }
+
+        ResetState();
     }
 
     /// <returns>

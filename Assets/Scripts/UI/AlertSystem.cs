@@ -107,7 +107,7 @@ public class AlertSystem : MonoBehaviour
     /// </summary>
     public void TryPostNext()
     {
-        if (alertBoxTimers[headIndex].Complete() && alertQueue.Count > 0) {
+        if (alertBoxTimers[headIndex].IsComplete() && alertQueue.Count > 0) {
             (string content, Color color) = alertQueue.Dequeue();
 
             alertBoxTimers[headIndex].Reset();

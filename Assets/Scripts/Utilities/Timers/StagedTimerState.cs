@@ -9,9 +9,14 @@ public struct StagedTimerState
     public int stage;
     public string stageName;
     /// <summary>
-    ///     The progression of the StagedTime through its current stage.
+    ///     The progression of the StagedTimer through its current stage.
     /// </summary>
     public float progress;
+    /// <summary>
+    ///     The progress that the StagedTimer has remaining for its current stage.
+    /// </summary>
+    public readonly float RemainingProgress => 1 - progress;
+
     /// <summary>
     ///     <tt>True</tt> iff the previous update caused the StagedTimer to move to its next stage.
     /// </summary>
