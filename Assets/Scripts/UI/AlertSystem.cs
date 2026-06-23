@@ -37,7 +37,7 @@ public class AlertSystem : MonoBehaviour
     /// <summary>
     ///     The queue of alerts that need to be displayed and in what color to display them.
     /// </summary>
-    private Queue<(string, Color)> alertQueue = new();
+    private readonly Queue<(string, Color)> alertQueue = new();
     /// <summary>
     ///     StagedTimers corresponding to each alert box that keeps track of its fading status.
     /// </summary>
@@ -78,6 +78,7 @@ public class AlertSystem : MonoBehaviour
             alertBoxes[i].color = DEFAULT_COLOR;
             alertBoxes[i].text = "";
             alertBoxTimers[i] = new(timerIntervals, stageNames);
+            alertBoxTimers[i].Skip(false);
         }
 
         // assumes all alert boxes are the same height
