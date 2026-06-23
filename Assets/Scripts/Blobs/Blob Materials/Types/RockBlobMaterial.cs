@@ -5,12 +5,11 @@ public class RockBlobMaterial : BlobMaterialDataClass
         | BlobMaterialProperties.Heat_Transition;
 
     public override BlobSoundFamiliesStruct SoundFamilies => new(collision: RUMBLE_FAMILY);
-        
+
     public override AtomParticleBehaviorStruct ParticleBehavior => DUST_BEHAVIOR;
 
     public RockBlobMaterial() : base(
-        bodyMaterial: "Dungeon Stone",
-        bodyDirectory: FileUtilities.DUNGEON_MATERIALS,
+        bodyMaterial: "StoneJelly",
         particleMaterial: "Dust"
     )
     {

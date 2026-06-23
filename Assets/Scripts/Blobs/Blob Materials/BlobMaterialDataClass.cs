@@ -17,7 +17,14 @@ public abstract class BlobMaterialDataClass
     /// <summary>
     ///     The material that is applied to the blob's body.
     /// </summary>
-    public Material BodyMaterial { get; private set; }
+    protected Material BodyMaterial;
+
+    /// <summary>
+    ///     The default alpha value for the blob's body material.
+    /// </summary>
+    protected float BodyAlpha;
+
+    public (Material, float) BodyData => (BodyMaterial, BodyAlpha);
 
     /// <summary>
     ///     The properties of this blob material.
@@ -254,7 +261,7 @@ public abstract class BlobMaterialDataClass
     /// <param name="particleDirectory">
     ///     The directory in which to find the <tt>particleMaterial</tt>. Defaults to match
     ///     <tt>bodyDirectory</tt> if <tt>particleMaterial</tt> defaulted, otherwise defaults to
-    ///     <tt>FileUtilities.BLOB_MATERIALS</tt>.
+    ///     <tt>FileUtilities.BLOB_PARTICLES</tt>.
     /// </param>
     /// <param name="particleMesh">
     ///     The name of the mesh to use for the blob's particles. Defaults to the particles having
@@ -268,10 +275,11 @@ public abstract class BlobMaterialDataClass
             ? FileUtilities.MISSING_MATERIAL
             : Path.Combine(bodyDirectory ?? FileUtilities.BLOB_MATERIALS, bodyMaterial);
         BodyMaterial = Resources.Load<Material>(bodyMaterialPath);
+        BodyAlpha = BodyMaterial.GetFloat("_Alpha");
         
         string particleMaterialPath = (particleMaterial == null)
             ? bodyMaterialPath
-            : Path.Combine(particleDirectory ?? FileUtilities.BLOB_MATERIALS, particleMaterial);
+            : Path.Combine(particleDirectory ?? FileUtilities.BLOB_PARTICLES, particleMaterial);
         ParticleMaterial = Resources.Load<Material>(particleMaterialPath);
 
         ParticleMesh = particleMesh switch

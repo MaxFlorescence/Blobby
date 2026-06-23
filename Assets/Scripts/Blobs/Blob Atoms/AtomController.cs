@@ -33,7 +33,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     /// </summary>
     private Collider atomCollider;
     private readonly Timer collideSoundTimer = new(1);
-
+ 
     //----------------------------------------------------------------------------------------------
     // MOVEMENT
     //----------------------------------------------------------------------------------------------

@@ -15,6 +15,7 @@ public static class FileUtilities
     public static readonly string OBJECT_MATERIALS  = Path.Combine(MATERIALS, "Object Materials");
     public static readonly string DUNGEON_MATERIALS = Path.Combine(MATERIALS, "Dungeon Materials");
     public static readonly string BLOB_MATERIALS    = Path.Combine(MATERIALS, "Blob Materials");
+    public static readonly string BLOB_PARTICLES    = Path.Combine(BLOB_MATERIALS, "Blob Particles");
     public static readonly string BASIC_MATERIALS   = Path.Combine(MATERIALS, "Basic Materials");
     public static readonly string DEBUG_MATERIALS   = Path.Combine(MATERIALS, "Debug Materials");
     public static readonly string MISSING_MATERIAL  = Path.Combine(DEBUG_MATERIALS, "MISSING");
