@@ -12,8 +12,28 @@ public class AtomParticleController : MonoBehaviour
     /// </summary>
     private ParticleSystem atomParticles;
 
+    /// <summary>
+    ///     How long a particle persists for.
+    /// </summary>
+    private const float PARTICLE_LIFETIME = 2;
+
+    /// <summary>
+    ///     How often a particle attempts to spawn.
+    /// </summary>
+    private const float PARTICLE_FREQUENCY = 1f / 12;
+ 
     void Awake() {
         atomParticles = GetComponent<ParticleSystem>();
+    }
+
+    public void ChangeParticles((AtomParticleBehaviorStruct, Material, Mesh) particleData)
+    {
+        atomParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+        this.DelayedExecute(PARTICLE_LIFETIME, () => {
+            SetParticles(particleData);
+            atomParticles.Play();
+        });
     }
 
     public void SetParticles(
@@ -39,7 +59,12 @@ public class AtomParticleController : MonoBehaviour
     private void SetEmission(AtomParticleBehaviorStruct particleData)
     {
         var emission = atomParticles.emission;
-        emission.rateOverTime = particleData.rateOverTime;
+        ParticleSystem.Burst burst = new(0, 1, 1, 0, PARTICLE_FREQUENCY)
+        {
+            probability = particleData.rateOverTime * PARTICLE_FREQUENCY
+        };
+
+        emission.SetBurst(0, burst);
     }
 
     private void SetShape(AtomParticleBehaviorStruct particleData)

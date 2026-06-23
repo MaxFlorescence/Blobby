@@ -387,7 +387,7 @@ public class BlobController : MonoBehaviour, IControllable
                     Material, BlobMaterialProperties.Cold_Transition
                 ));
             }
-            else if (Input.GetKeyDown(KeyCode.Plus))
+            else if (Input.GetKeyDown(KeyCode.Equals))
             {
                 SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Heat_Transition
@@ -551,8 +551,16 @@ public class BlobController : MonoBehaviour, IControllable
 
         atoms.SetPhysicMaterials(isLowFriction ? "Slippery" : "Jelly");
 
+        if (force)
+        {
+            atoms.SetParticles(newBlobMaterials.ParticleData());
+        }
+        else
+        {
+            atoms.ChangeParticles(newBlobMaterials.ParticleData());
+        }
+
         meshController.SetMaterial(newBlobMaterials.BodyData());
-        atoms.SetParticles(newBlobMaterials.ParticleData());
         SoundController.SetClips(newBlobMaterials.SoundData());
 
         Material = newBlobMaterials;

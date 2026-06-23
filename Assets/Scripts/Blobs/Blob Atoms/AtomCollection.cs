@@ -257,6 +257,13 @@ public class AtomCollection : MonoBehaviour
         });
     }
 
+    public void ChangeParticles((AtomParticleBehaviorStruct, Material, Mesh) particleData)
+    {
+        ForEach(atom => {
+            if (atom.ParticleController != null) atom.ParticleController.ChangeParticles(particleData);
+        });
+    }
+
     public void SetPhysicMaterials(string physicMaterialName)
     {
         ForEach(atom => atom.SetPhysicMaterial(physicMaterialName));
