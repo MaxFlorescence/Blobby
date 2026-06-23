@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public enum BlobMaterial
 {
+    None,
     Water, Ice,
     Lava, Rock,
     Honey, Burning_Honey, Crystal_Honey,
@@ -82,11 +83,11 @@ public static class BlobMaterialExtensions
     /// <returns>
     ///     The body material associated with the given blob material.
     /// </returns>
-    public static Material BodyMaterial(this BlobMaterial blobMaterial)
+    public static (Material, float) BodyData(this BlobMaterial blobMaterial)
     {
         return MaterialToData.GetValueOrDefault(
             blobMaterial, BlobMaterialDataClass.MISSING_BLOB_MATERIAL
-        ).BodyMaterial;
+        ).BodyData;
     }
 
     /// <returns>
@@ -209,7 +210,11 @@ public static class BlobMaterialExtensions
     /// </returns>
     public static BlobMaterial TransistionUsing(this BlobMaterial fromMaterial, BlobMaterialProperties transitionProperty)
     {
-        if (!fromMaterial.HasAll(transitionProperty)) return fromMaterial;
+        if (!fromMaterial.HasAll(transitionProperty)
+            || transitionProperty == BlobMaterialProperties.None)
+        {
+            return fromMaterial;
+        }
 
         foreach (
             (BlobMaterialProperties properties, BlobMaterial toMaterial)

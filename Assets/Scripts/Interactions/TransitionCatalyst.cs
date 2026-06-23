@@ -8,7 +8,18 @@ public class TransitionCatalyst : Interactable
     ///     for the entire time to transition.
     /// </summary>
     public float transitionDuration = 0;
-    public BlobMaterialProperties transitionProperty = BlobMaterialProperties.Heat_Transition;
+
+    /// <summary>
+    ///     The property to use when determining the material to transition the target to. Ignored
+    ///     if <tt>forceMaterial</tt> is not <tt>BlobMaterial.None</tt>.
+    /// </summary>
+    public BlobMaterialProperties transitionProperty = BlobMaterialProperties.None;
+
+    /// <summary>
+    ///     The material to forcibly transition the target to. If this is not
+    ///     <tt>BlobMaterial.None</tt>, then <tt>transitionProperty</tt> will be ignored.
+    /// </summary>
+    public BlobMaterial forceMaterial = BlobMaterial.None;
 
     /// <summary>
     ///     The blob that is being transitioned.
@@ -34,14 +45,17 @@ public class TransitionCatalyst : Interactable
     }
 
     /// <summary>
-    ///     Complete heat transition
+    ///     Complete the transition
     /// </summary>
     protected override void OnInteractionCooldownEnd()
     {
         if (transitionTarget != null && transitionTarget.IsTouching(gameObject)) {
-            transitionTarget.SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
-                transitionTarget.Material, transitionProperty
-            ));
+            transitionTarget.SetBlobMaterials(forceMaterial != BlobMaterial.None
+                ? forceMaterial
+                : BlobMaterialExtensions.TransistionUsing(
+                    transitionTarget.Material, transitionProperty
+                )
+            );
         }
     }
 }

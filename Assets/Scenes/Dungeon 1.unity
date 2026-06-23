@@ -1891,6 +1891,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   transitionDuration: 1
   transitionProperty: 64
+  forceMaterial: 0
 --- !u!65 &984922696
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2139,6 +2140,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   transitionDuration: 1
   transitionProperty: 32
+  forceMaterial: 0
 --- !u!1001 &1080040783
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3275,6 +3277,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   transitionDuration: 1
   transitionProperty: 128
+  forceMaterial: 0
 --- !u!65 &1453816790
 BoxCollider:
   m_ObjectHideFlags: 0
