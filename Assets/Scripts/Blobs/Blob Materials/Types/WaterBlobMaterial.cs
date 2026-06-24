@@ -7,7 +7,8 @@ public class WaterBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 
     public WaterBlobMaterial() : base(
-        bodyMaterial:"WaterJelly",
+        bodyMaterial: "WaterJelly",
+        particleMaterial: "Water Drop",
         particleMesh: "icosahedron"
     )
     {

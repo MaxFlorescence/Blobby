@@ -13,7 +13,7 @@ public class BurningHoneyBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => FLAME_BEHAVIOR;
 
     public BurningHoneyBlobMaterial() : base(
-        bodyMaterial:"HoneyJelly",
+        bodyMaterial: "HoneyJelly",
         particleMaterial: "Flame",
         particleDirectory: FileUtilities.OBJECT_MATERIALS,
         particleMesh: "soft_cube"

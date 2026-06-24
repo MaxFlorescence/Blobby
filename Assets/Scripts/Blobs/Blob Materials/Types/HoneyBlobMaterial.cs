@@ -9,7 +9,8 @@ public class HoneyBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 
     public HoneyBlobMaterial() : base(
-        bodyMaterial:"HoneyJelly",
+        bodyMaterial: "HoneyJelly",
+        particleMaterial: "Honey Drop",
         particleMesh: "icosahedron"
     )
     {

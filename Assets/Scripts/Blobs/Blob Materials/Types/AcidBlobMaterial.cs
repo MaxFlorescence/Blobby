@@ -11,7 +11,8 @@ public class AcidBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 
     public AcidBlobMaterial() : base(
-        bodyMaterial:"AcidJelly",
+        bodyMaterial: "AcidJelly",
+        particleMaterial: "Acid Drop",
         particleMesh: "icosahedron"
     )
     {

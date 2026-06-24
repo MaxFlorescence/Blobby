@@ -11,7 +11,7 @@ public class SodaBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => SPARKLE_BEHAVIOR;
 
     public SodaBlobMaterial() : base(
-        bodyMaterial:"SodaJelly",
+        bodyMaterial: "SodaJelly",
         particleMaterial: "Bubble"
     )
     {

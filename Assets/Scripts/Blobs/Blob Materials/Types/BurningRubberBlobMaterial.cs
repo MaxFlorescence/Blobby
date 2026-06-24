@@ -14,7 +14,7 @@ public class BurningRubberBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => FLAME_BEHAVIOR;
 
     public BurningRubberBlobMaterial() : base(
-        bodyMaterial:"RubberJelly",
+        bodyMaterial: "RubberJelly",
         particleMaterial: "Flame",
         particleDirectory: FileUtilities.OBJECT_MATERIALS,
         particleMesh: "soft_cube"

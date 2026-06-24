@@ -8,7 +8,7 @@ public class OilBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => DROPLET_BEHAVIOR;
 
     public OilBlobMaterial() : base(
-        bodyMaterial:"OilJelly",
+        bodyMaterial: "OilJelly",
         particleMesh: "icosahedron"
     )
     {

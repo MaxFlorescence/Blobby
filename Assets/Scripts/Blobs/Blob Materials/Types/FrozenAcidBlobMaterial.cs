@@ -9,7 +9,7 @@ public class FrozenAcidBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => FLUTTER_BEHAVIOR;
 
     public FrozenAcidBlobMaterial() : base(
-        bodyMaterial:"FrozenAcidJelly",
+        bodyMaterial: "FrozenAcidJelly",
         particleMaterial: "Snowflake"
     )
     {

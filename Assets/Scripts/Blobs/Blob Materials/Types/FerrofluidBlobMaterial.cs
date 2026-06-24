@@ -8,7 +8,7 @@ public class FerrofluidBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => SPARKLE_BEHAVIOR;
 
     public FerrofluidBlobMaterial() : base(
-        bodyMaterial:"OilJelly",
+        bodyMaterial: "OilJelly",
         particleMaterial: "Spike"
     ) {}
 }

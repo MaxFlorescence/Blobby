@@ -11,7 +11,7 @@ public class LiquidNitrogenBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => FLUTTER_BEHAVIOR;
 
     public LiquidNitrogenBlobMaterial() : base(
-        bodyMaterial:"LiquidNitrogenJelly",
+        bodyMaterial: "LiquidNitrogenJelly",
         particleMaterial: "Snowflake"
     ) {}
 }

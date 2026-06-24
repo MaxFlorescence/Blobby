@@ -9,7 +9,7 @@ public class RubberBlobMaterial : BlobMaterialDataClass
     public override AtomParticleBehaviorStruct ParticleBehavior => NONE_BEHAVIOR;
 
     public RubberBlobMaterial() : base(
-        bodyMaterial:"RubberJelly"
+        bodyMaterial: "RubberJelly"
     )
     {
         Transitions = new (BlobMaterialProperties, BlobMaterial)[]
