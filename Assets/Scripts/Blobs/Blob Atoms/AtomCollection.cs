@@ -264,6 +264,13 @@ public class AtomCollection : MonoBehaviour
         });
     }
 
+    public bool ParticlesBusy()
+    {
+        return Controllers.Any(
+            atom => atom.ParticleController != null && atom.ParticleController.Busy
+        );
+    }
+
     public void SetPhysicMaterials(string physicMaterialName)
     {
         ForEach(atom => atom.SetPhysicMaterial(physicMaterialName));
@@ -281,7 +288,7 @@ public class AtomCollection : MonoBehaviour
 
     public bool AreOverridden()
     {
-        return CenterController.IsOverridden;
+        return Controllers.Any(atom => atom.IsOverridden);
     }
 
     public void ClearOverrides()

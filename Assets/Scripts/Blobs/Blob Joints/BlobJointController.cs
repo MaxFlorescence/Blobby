@@ -17,7 +17,7 @@ public static class BlobSize
 ///     A class that controls all the configurable joints for a blob.
 /// </summary>
 [RequireComponent(typeof(AtomCollection))]
-public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
+public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>, IBusyable
 {
     //----------------------------------------------------------------------------------------------
     // ATOMS
@@ -71,6 +71,8 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
     private Vector3[] connectedAnchors;
     
     public bool IsOverridden { get => SavedData != null; }
+    
+    public bool Busy { get => lerpTimer.Running; }
 
     //----------------------------------------------------------------------------------------------
     // MOTION LIMITS
@@ -78,7 +80,7 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
     /// <summary>
     ///     The last motion limit value that was applied to the joints.
     /// </summary>
-    private float previousMotionLimit;
+    private float lastMotionLimit;
     /// <summary>
     ///     The motion limit value from which to start lerping.
     /// </summary>
@@ -86,12 +88,12 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
     /// <summary>
     ///     The timer for lerping between the previous motion limit and the current motion limit.
     /// </summary>
-    private readonly Timer lerpTimer = new(1);
+    private readonly Timer lerpTimer = new(0.5f);
 
     void Awake()
     {
         DEFAULT_JOINT_DATA.CalculateMotionLimit();
-        previousMotionLimit = DEFAULT_JOINT_DATA.MotionLimit.Value;
+        lastMotionLimit = DEFAULT_JOINT_DATA.MotionLimit.Value;
         Data = DEFAULT_JOINT_DATA;
 
         atoms = GetComponent<AtomCollection>();
@@ -131,35 +133,41 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
 
     void Update()
     {
-        float updateMotionLimit = previousMotionLimit;
+        float nextMotionLimit = lastMotionLimit;
 
         if (lerpTimer.Update(0, TimerMode.Pulse))
         {
             lerpMotionLimitStart = Data.MotionLimit.Value;
+            nextMotionLimit = lerpMotionLimitStart;
         }
         else if (lerpTimer.Running)
         {
-            updateMotionLimit = lerpTimer.RemainingProgress() * lerpMotionLimitStart
+            nextMotionLimit = lerpTimer.RemainingProgress() * lerpMotionLimitStart
                               + lerpTimer.Progress() * Data.MotionLimit.Value;
         }
-        else if (lerpMotionLimitStart != Data.MotionLimit.Value)
+        else if (lastMotionLimit != Data.MotionLimit.Value && (
+                    lastMotionLimit != BlobJointData.MINIMUM_MOTION_LIMIT
+                    || Data.MotionLimit.Value != BlobJointData.MINIMUM_MOTION_LIMIT
+                ))
         {
             lerpTimer.Reset();
         }
 
-        if (updateMotionLimit != previousMotionLimit) {
+        if (nextMotionLimit != lastMotionLimit) {
             foreach (ConfigurableJoint joint in joints)
             {
-                joint.SetLinearLimit(updateMotionLimit);
+                joint.SetLinearLimit(nextMotionLimit);
             }
-            previousMotionLimit = updateMotionLimit;
+            lastMotionLimit = nextMotionLimit;
         }
 
-        if (Data.MotionLimit.Value == BlobJointData.MINIMUM_MOTION_LIMIT && !lerpTimer.Running)
+        if (Data.MotionLimit.Value == BlobJointData.MINIMUM_MOTION_LIMIT
+            && !lerpTimer.Running)
         {
             atoms.SetOverrides(Data.LengthFactor.Value);
         }
-        else if (Data.MotionLimit.Value != BlobJointData.MINIMUM_MOTION_LIMIT && atoms.AreOverridden())
+        else if (Data.MotionLimit.Value != BlobJointData.MINIMUM_MOTION_LIMIT
+                 && atoms.AreOverridden())
         {
             atoms.ClearOverrides();
         }
@@ -186,13 +194,17 @@ public class BlobJointController : MonoBehaviour, IOverridable<BlobJointData>
         
         Data.UpdateWith(jointData);
 
-        if (Data.Snap) previousMotionLimit = BlobJointData.MINIMUM_MOTION_LIMIT;
+        if (Data.Snap)
+        {
+            lastMotionLimit = BlobJointData.MINIMUM_MOTION_LIMIT;
+            lerpMotionLimitStart = BlobJointData.MINIMUM_MOTION_LIMIT;
+        }
         
         for (int i = 0; i < jointCount; i++)
         {
             joints[i].connectedAnchor = Data.LengthFactor.Value * connectedAnchors[i];
             joints[i].SetAllSpringForces(Data.SpringForce.Value);
-            joints[i].SetLinearLimit(previousMotionLimit);
+            joints[i].SetLinearLimit(lastMotionLimit);
         }
 
         meshController.Rescale(Data.LengthFactor.Value);

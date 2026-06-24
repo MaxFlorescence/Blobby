@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
-public class BlobMeshController : MonoBehaviour
+public class BlobMeshController : MonoBehaviour, IBusyable
 {
     // ---------------------------------------------------------------------------------------------
     // EYES
@@ -81,6 +81,8 @@ public class BlobMeshController : MonoBehaviour
     );
     private const string FADE_NEW_MATERIAL = "Fade New Material";
     private const string FADE_OLD_MATERIAL = "Fade Old Material";
+
+    public bool Busy { get => transitionTimer.Running; }
 
     void Awake()
     {

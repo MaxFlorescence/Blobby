@@ -299,7 +299,7 @@ public class BlobController : MonoBehaviour, IControllable
     ///     Allow the player to control blob size.
     /// </summary>
     private void HandleSizeControls() {
-        if (Material.HasAll(BlobMaterialProperties.Solid)) return;
+        if (Material.HasAll(BlobMaterialProperties.Solid) || joints.Busy) return;
 
         // left mouse shrinks, right mouse grows
         if (Input.GetMouseButton(0))
@@ -393,7 +393,7 @@ public class BlobController : MonoBehaviour, IControllable
                     Material, BlobMaterialProperties.Heat_Transition
                 ));
             }
-            else if (Input.GetKeyDown(KeyCode.Tilde))
+            else if (Input.GetKeyDown(KeyCode.BackQuote))
             {
                 SetBlobMaterials(BlobMaterialExtensions.TransistionUsing(
                     Material, BlobMaterialProperties.Wet_Transition
@@ -525,6 +525,7 @@ public class BlobController : MonoBehaviour, IControllable
     public void SetBlobMaterials(BlobMaterial newBlobMaterials, bool force = false)
     {
         if (!force && Material == newBlobMaterials) return;
+        if (joints.Busy || atoms.ParticlesBusy() || meshController.Busy) return;
 
         bool isGlowing = newBlobMaterials.HasAll(BlobMaterialProperties.Glowing);
         bool isSolid = newBlobMaterials.HasAll(BlobMaterialProperties.Solid);

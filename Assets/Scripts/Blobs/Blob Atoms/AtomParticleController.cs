@@ -5,7 +5,7 @@ using UnityEngine;
 ///     A class that controls the particles for each atom of a blob.
 /// </summary>
 [RequireComponent(typeof(ParticleSystem))]
-public class AtomParticleController : MonoBehaviour
+public class AtomParticleController : MonoBehaviour, IBusyable
 {
     /// <summary>
     ///     Particle system controlling dripping from the blob's atoms.
@@ -13,27 +13,47 @@ public class AtomParticleController : MonoBehaviour
     private ParticleSystem atomParticles;
 
     /// <summary>
+    ///     How often a particle attempts to spawn.
+    /// </summary>
+    private const float PARTICLE_FREQUENCY = 1f / 12;
+
+    /// <summary>
     ///     How long a particle persists for.
     /// </summary>
     private const float PARTICLE_LIFETIME = 2;
 
     /// <summary>
-    ///     How often a particle attempts to spawn.
+    ///     A timer to prevent particles from changing while alive.
     /// </summary>
-    private const float PARTICLE_FREQUENCY = 1f / 12;
+    private readonly Timer particleLifeTimer = new(PARTICLE_LIFETIME);
+
+    /// <summary>
+    ///     Particle data to set at the end of the <tt>particleLifeTimer</tt>.
+    /// </summary>
+    private (AtomParticleBehaviorStruct, Material, Mesh) newParticleData;
+
+    public bool Busy { get => particleLifeTimer.Running; }
  
     void Awake() {
         atomParticles = GetComponent<ParticleSystem>();
+        particleLifeTimer.Skip(false);
+    }
+
+    void Update()
+    {
+        if (particleLifeTimer.Update(mode: TimerMode.Pulse))
+        {
+            SetParticles(newParticleData);
+            atomParticles.Play();
+        }
     }
 
     public void ChangeParticles((AtomParticleBehaviorStruct, Material, Mesh) particleData)
     {
         atomParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 
-        this.DelayedExecute(PARTICLE_LIFETIME, () => {
-            SetParticles(particleData);
-            atomParticles.Play();
-        });
+        newParticleData = particleData;
+        particleLifeTimer.Reset();
     }
 
     public void SetParticles(

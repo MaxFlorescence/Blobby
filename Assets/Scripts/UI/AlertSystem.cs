@@ -15,16 +15,19 @@ public class AlertSystem : MonoBehaviour
     ///     The default color of alert text.
     /// </summary>
     private static readonly Color DEFAULT_COLOR = Color.white.WithAlpha(0);
+
     /// <summary>
     ///     The amount of time it takes for an alert to fade in once its received.
     /// </summary>
     public float fadeInTime = 0.25f;
     private const string FADING_IN = "Fading in";
+
     /// <summary>
     ///     The amount of time for which to display an alert at full opacity.
     /// </summary>
     public float displayTime = 3f;
     private const string DISPLAYING = "Displaying";
+    
     /// <summary>
     ///     The amount of time it takes for an alert to fade out once its done playing.
     /// </summary>
@@ -38,11 +41,13 @@ public class AlertSystem : MonoBehaviour
     ///     The queue of alerts that need to be displayed and in what color to display them.
     /// </summary>
     private readonly Queue<(string, Color)> alertQueue = new();
+
     /// <summary>
     ///     StagedTimers corresponding to each alert box that keeps track of its fading status.
     /// </summary>
     private StagedTimer[] alertBoxTimers;
     private int alertBoxCount;
+
     /// <summary>
     ///     The index of the alert box that is currently at the highest position on-screen.
     /// </summary>
@@ -55,10 +60,12 @@ public class AlertSystem : MonoBehaviour
     ///     The text boxes available to display alerts in.
     /// </summary>
     private TMP_Text[] alertBoxes;
+
     /// <summary>
     ///     The position at which to display the head alert box.
     /// </summary>
     private Vector3 screenPosition;
+
     /// <summary>
     ///     A vector with y component equal to the height of an alert box and zero x/z components.
     /// </summary>

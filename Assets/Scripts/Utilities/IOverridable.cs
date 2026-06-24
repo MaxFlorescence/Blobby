@@ -1,3 +1,6 @@
+/// <summary>
+///     An interface for classes with values that can be set and overridden.
+/// </summary>
 public interface IOverridable<T>
 {
     /// <summary>
