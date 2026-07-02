@@ -115,6 +115,15 @@ public abstract class BlobMaterialDataClass
         volume: 0.3f,
         blobSounds: false
     );
+    protected static readonly SoundFamily WET_SPLAT_SOUND = new(
+        name: "wet_splat",
+        volume: 0.3f
+    );
+    protected static readonly SoundFamily WET_DAMAGE_SOUND = new(
+        name: "wet_damage",
+        volume: 0.3f,
+        pitchBounds: new(0.8f, 1.2f)
+    );
     
     public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new(SoundFamily.NONE);
     

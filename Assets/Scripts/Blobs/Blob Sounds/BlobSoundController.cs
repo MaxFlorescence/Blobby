@@ -41,6 +41,24 @@ public class BlobSoundController : MonoBehaviour
     }
 
     /// <summary>
+    ///     Play a random damage noise with a random pitch.
+    /// </summary>
+    public void DamageSound() {
+        if (GameInfo.StartCutscene || soundFamilies.damage.IsNone) return;
+        
+        audioSource.PlayOneShot(soundFamilies.damage);
+    }
+
+    /// <summary>
+    ///     Play a random death noise with a random pitch.
+    /// </summary>
+    public void DeathSound() {
+        if (GameInfo.StartCutscene || soundFamilies.death.IsNone) return;
+        
+        audioSource.PlayOneShot(soundFamilies.death);
+    }
+
+    /// <summary>
     ///     Load the different sound clips that can be played by this <tt>BlobSoundController</tt>,
     ///     and set their volumes and pitches.
     /// </summary>

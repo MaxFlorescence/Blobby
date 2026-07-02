@@ -16,7 +16,7 @@ public abstract class Stat<T> : IOverridable<StatValues<T>> where T : struct, IC
 
     public abstract float Proportion { get; }
 
-    public void SetCallback(Action<StatValues<T>, StatValues<T>, StatValues<T>> callback = null)
+    public void SetCallback(Action<StatValues<T>, StatValues<T>> callback = null)
     {
         state.callback = callback;
     }

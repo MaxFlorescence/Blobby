@@ -6,7 +6,7 @@ public class StatValues<T> where T : struct, IComparable
     public T? max;
     public T? raw;
 
-    public Action<StatValues<T>, StatValues<T>, StatValues<T>> callback = null;
+    public Action<StatValues<T>, StatValues<T>> callback = null;
 
     public T? Val => BoundsActive
         ? raw.Value.Clamp(min, max)
@@ -28,17 +28,22 @@ public class StatValues<T> where T : struct, IComparable
 
     public void UpdateWith(StatValues<T> other)
     {
-        StatValues<T> old = callback == null ? Copy() : null;
+        StatValues<T> old = callback == null ? null : Copy();
 
         if (other.min != null) min = other.min;
         if (other.max != null) max = other.max;
         if (other.raw != null) raw = other.raw;
 
-        callback?.Invoke(old, this, other);
+        callback?.Invoke(old, this);
     }
 
     public StatValues<T> Copy()
     {
         return new(raw, min, max);
+    }
+
+    public override string ToString()
+    {
+        return $"StatValues<{typeof(T)}>(raw={raw}, min={min}, max={max}, val={Val})";
     }
 }

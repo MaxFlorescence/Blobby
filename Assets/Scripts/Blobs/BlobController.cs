@@ -160,6 +160,18 @@ public class BlobController : MonoBehaviour, IControllable
         Lights = GetComponent<BlobLightCollection>();
         
         SetBlobMaterials(BlobMaterial.Water, true);
+
+        Stats.GetInt("Health").SetCallback((from, to) =>
+        {
+            if (to.Val == 0 && from.Val > 0)
+            {
+                SoundController.DeathSound();
+            }
+            else if (to.Val < from.Val)
+            {
+                SoundController.DamageSound();
+            }
+        });
     }
 
     void FixedUpdate()
