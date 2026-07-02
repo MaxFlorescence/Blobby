@@ -42,71 +42,78 @@ public abstract class BlobMaterialDataClass
     // SOUNDS
     // ---------------------------------------------------------------------------------------------
     protected static readonly SoundFamily SQUISH_FAMILY = new(
-        name: "Squish",
+        name: "squish",
         volume: 0.05f,
         pitchBounds: new(0.5f, 1.5f)
     );
     protected static readonly SoundFamily DEEP_SQUISH_FAMILY = new(
-        name: "Squish",
+        name: "squish",
         volume: 0.05f,
         pitchBounds: new(0.25f, 0.75f)
     );
     protected static readonly SoundFamily HIGH_SQUISH_FAMILY = new(
-        name: "Squish",
+        name: "squish",
         volume: 0.05f,
         pitchBounds: new(1f, 2f)
     );
     protected static readonly SoundFamily RUMBLE_FAMILY = new(
-        name: "Rumble",
+        name: "rumble",
         volume: 0.25f,
         pitchBounds: new(0.25f, 1f)
     );
     protected static readonly SoundFamily CLINK_CRUNCH_FAMILY = new(
-        name: "Clink Crunch",
+        name: "clink_crunch",
         volume: 0.8f
     );
     protected static readonly SoundFamily WET_CRUNCH_FAMILY = new(
-        name: "Wet Crunch",
+        name: "wet_crunch",
         volume: 0.8f,
         pitchBounds: new(0.8f, 1.2f)
     );
     protected static readonly SoundFamily DRY_CRUNCH_FAMILY = new(
-        name: "Dry Crunch",
+        name: "dry_crunch",
         volume: 0.8f,
         pitchBounds: new(0.8f, 1.2f)
     );
     protected static readonly SoundFamily LAVA_SOUND = new(
-        name: "Lava",
-        volume: 0.5f
+        name: "lava",
+        volume: 0.5f,
+        blobSounds: false
     );
     protected static readonly SoundFamily BLAZE_SOUND = new(
-        name: "Blaze",
-        volume: 0.1f
+        name: "blaze",
+        volume: 0.1f,
+        blobSounds: false
     );
     protected static readonly SoundFamily IGNITE_SOUND = new(
-        name: "Fire Ignite",
-        volume: 0.3f
+        name: "fire_ignite",
+        volume: 0.3f,
+        blobSounds: false
     );
     protected static readonly SoundFamily EXTINGUISH_SOUND = new(
-        name: "Fire Extinguish",
-        volume: 0.3f
+        name: "fire_extinguish",
+        volume: 0.3f,
+        blobSounds: false
     );
     protected static readonly SoundFamily FIZZING_SOUND = new(
-        name: "Fizzing",
-        volume: 2f
+        name: "fizzing",
+        volume: 2f,
+        blobSounds: false
     );
     protected static readonly SoundFamily BUBBLES_FIZZING_SOUND = new(
-        name: "Bubbles Fizzing",
-        volume: 0.5f
+        name: "bubbles_fizzing",
+        volume: 0.5f,
+        blobSounds: false
     );
     protected static readonly SoundFamily DODGEBALL_SOUND = new(
-        name: "Dodgeball",
+        name: "dodgeball",
         volume: 0.5f,
         pitchBounds: new(0.8f, 1.2f)
     );
     protected static readonly SoundFamily WIND_SOUND = new(
-        name: "Wind",
-        volume: 0.3f
+        name: "wind",
+        volume: 0.3f,
+        blobSounds: false
     );
     
     public virtual BlobSoundFamiliesStruct SoundFamilies { get; } = new(SoundFamily.NONE);

@@ -177,13 +177,14 @@ public class Inventory : MonoBehaviour
     ///     The volume to use for this inventory's audio source.
     /// </param>
     public void SetAudio(string addSoundResource = "", string removeSoundResource = "",
-                         Vector2? audioPitchBounds = null, float volume = 1f)
+                         Vector2? audioPitchBounds = null, float volume = 1f,
+                         string baseDirectory = null)
     {
         addAudioClip = Resources.Load<AudioClip>(
-            Path.Combine(FileUtilities.SOUNDS, addSoundResource)
+            Path.Combine(baseDirectory ?? FileUtilities.SOUNDS, addSoundResource)
         );
         removeAudioClip = Resources.Load<AudioClip>(
-            Path.Combine(FileUtilities.SOUNDS, removeSoundResource)
+            Path.Combine(baseDirectory ?? FileUtilities.SOUNDS, removeSoundResource)
         );
 
         this.audioPitchBounds = audioPitchBounds;

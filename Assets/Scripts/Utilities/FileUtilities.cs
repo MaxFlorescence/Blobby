@@ -10,6 +10,7 @@ public static class FileUtilities
 {
     public static readonly string RESOURCES         = Path.Combine("Assets", "Resources");
     public static readonly string SOUNDS            = "Sounds";
+    public static readonly string BLOB_SOUNDS       = Path.Combine(SOUNDS, "Blob");
     public static readonly string MATERIALS         = "Materials";
     public static readonly string PHYSIC_MATERIALS  = Path.Combine(MATERIALS, "Physic Materials");
     public static readonly string OBJECT_MATERIALS  = Path.Combine(MATERIALS, "Object Materials");

@@ -152,7 +152,11 @@ public class BlobController : MonoBehaviour, IControllable
     {
         inventoryCamera = transform.GetComponentInParents<Camera>(true);
         inventoryCamera.enabled = true;
-        Inventory.SetAudio(PICK_UP_SOUND, DROP_SOUND, INVENTORY_PITCH_BOUNDS);
+        Inventory.SetAudio(
+            PICK_UP_SOUND, DROP_SOUND,
+            INVENTORY_PITCH_BOUNDS,
+            baseDirectory: FileUtilities.BLOB_SOUNDS
+        );
         Lights = GetComponent<BlobLightCollection>();
         
         SetBlobMaterials(BlobMaterial.Water, true);

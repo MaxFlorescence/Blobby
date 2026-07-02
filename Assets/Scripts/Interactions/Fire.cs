@@ -53,8 +53,8 @@ public class Fire : Interactable
         fireParticles = GetComponentsInChildren<ParticleSystem>()[0];
 
         audioSource = GetComponent<AudioSource>();
-        fireIgnite = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, "Fire Ignite"));
-        fireSizzle = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, "Fire Extinguish"));
+        fireIgnite = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, "fire_ignite"));
+        fireSizzle = Resources.Load<AudioClip>(Path.Combine(FileUtilities.SOUNDS, "fire_extinguish"));
 
         fireRenderers = flames.GetComponentsInChildren<Renderer>().ToArray();
         timer = new(fadeTime);

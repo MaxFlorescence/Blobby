@@ -59,20 +59,23 @@ public class SoundFamily
     /// </summary>
     public bool IsFamily { get; private set; } = true;
 
-    public SoundFamily(string name = "NONE", float? volume = null, Vector2? pitchBounds = null)
+    public SoundFamily(string name = "NONE", float? volume = null, Vector2? pitchBounds = null, bool blobSounds = true)
     {
         Name = name;
         Volume = volume ?? DEFAULT_VOLUME;
         PitchBounds = pitchBounds ?? DEFAULT_PITCH_BOUNDS;
 
-        if (!IsNone) LoadClips();
+        if (!IsNone) LoadClips(blobSounds);
     }
 
     /// <summary>
     ///     Loads the audio clips specified by this sound family's parameters.
     /// </summary>
-    private void LoadClips() {
-        string resourcePath = Path.Combine(FileUtilities.SOUNDS, Name);
+    private void LoadClips(bool blobSounds) {
+        string resourcePath = Path.Combine(
+            blobSounds ? FileUtilities.BLOB_SOUNDS : FileUtilities.SOUNDS,
+            Name
+        );
         IsFamily = FileUtilities.IsDirectory(resourcePath);
 
         if (!IsFamily)
