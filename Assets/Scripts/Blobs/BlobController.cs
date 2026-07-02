@@ -9,6 +9,15 @@ using UnityEngine;
 public class BlobController : MonoBehaviour, IControllable
 {
     //----------------------------------------------------------------------------------------------
+    // STATS
+    //----------------------------------------------------------------------------------------------
+    public Stats Stats = new Stats()
+        .SetInt("Health", new(val: 40, min: 0, max: 40))
+        .SetFloat("Speed", new(val: 10, min: 0, max: 20))
+        .SetFloat("Jump", new(val:  8, min: 0, max:  16))
+        .SetInt("Capacity", new(val: 10, min: 0, max: 20));
+
+    //----------------------------------------------------------------------------------------------
     // MOTION
     //----------------------------------------------------------------------------------------------
     public bool controlled { get; set; } = false;
@@ -25,17 +34,9 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     private bool movementInputEnabled = true;
     /// <summary>
-    ///     Multiplier for the blob's movement speed.
-    /// </summary>
-    private const float MOVEMENT_MULTIPLIER = 10f;
-    /// <summary>
     ///     Iff <tt>true</tt>, cause the blob to jump on the next fixed update, then reset.
     /// </summary>
     private bool jumpOnNextFixedUpdate = false;
-    /// <summary>
-    ///     Multiplier for the blob's jump power.
-    /// </summary>
-    private const float JUMP_MULTIPLIER = 8f;
     /// <summary>
     ///     The direction that the blob jumps in.
     /// </summary>
@@ -74,10 +75,6 @@ public class BlobController : MonoBehaviour, IControllable
     ///     The list of gameObjects carried by the blob.
     /// </summary>
     public Inventory Inventory { get; private set; }
-    /// <summary>
-    ///     How much burden the blob can carry in its inventory.
-    /// </summary>
-    private const int CARRYING_CAPACITY = 10;
     /// <summary>
     ///     The camera providing an image of the inventory display to the UI.
     /// </summary>
@@ -147,7 +144,7 @@ public class BlobController : MonoBehaviour, IControllable
         meshController = GetComponentInChildren<BlobMeshController>();
 
         Inventory = gameObject.AddComponent<Inventory>();
-        Inventory.SetCapacity(CARRYING_CAPACITY);
+        Inventory.SetCapacity(Stats.GetInt("Capacity").Val);
         Inventory.SetDisplayMode(DisplayMode.UI_Only);
     }
 
@@ -172,11 +169,11 @@ public class BlobController : MonoBehaviour, IControllable
         // Constrain initial movementForce to the unit disk.
         Vector3 movementForce = forwardForce + rightwardForce;
         if (movementForce.sqrMagnitude > 1) movementForce = movementForce.normalized;
-        movementForce *= MOVEMENT_MULTIPLIER * (stickies.Sticky ? STICKY_MOVEMENT_MULTIPLIER : 1);
+        movementForce *= Stats.GetFloat("Speed").Val * (stickies.Sticky ? STICKY_MOVEMENT_MULTIPLIER : 1);
 
         // Jumps should only require a single keypress which might not align with physics updates,
         // so detect the keypress in Update() and perform the action in FixedUpdate().
-        Vector3 jumpForce = jumpOnNextFixedUpdate ? (JUMP_MULTIPLIER * JUMP_DIRECTION)
+        Vector3 jumpForce = jumpOnNextFixedUpdate ? (Stats.GetFloat("Jump").Val * JUMP_DIRECTION)
                                                   : Vector3.zero;
         jumpOnNextFixedUpdate = false;
 
@@ -577,6 +574,7 @@ public class BlobController : MonoBehaviour, IControllable
         + $" stickyMode: {stickies.Sticky}\n"
         + $" joints: {joints}\n"
         + $" touchingSomething: {IsTouching()}\n"
+        + $" stats:\n{Stats}"
         + $" inventory: {Inventory}";
     }
 }

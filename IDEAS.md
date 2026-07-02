@@ -10,6 +10,8 @@
 - Add splitting
     * Health system? Heal by touching current liquid
 - Googly eye customization
+- Add traps
+- Add mobs
 
 # Todo
 - Actual level design

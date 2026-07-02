@@ -28,10 +28,10 @@ public static class ComparableExtensions
     /// <returns>
     ///     The value within the range <tt>[min, max]</tt> that is closest to the given value.
     /// </returns>
-    public static T Clamp<T>(this T value, T min, T max) where T : IComparable
+    public static T Clamp<T>(this T value, T? min, T? max) where T : struct, IComparable
     {
-        if (value.CompareTo(min) <= 0) return min;
-        if (value.CompareTo(max) >= 0) return max;
+        if (min.HasValue && value.CompareTo(min) <= 0) return min.Value;
+        if (max.HasValue && value.CompareTo(max) >= 0) return max.Value;
         return value;
     }
 }
