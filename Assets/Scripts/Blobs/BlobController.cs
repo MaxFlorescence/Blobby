@@ -247,6 +247,8 @@ public class BlobController : MonoBehaviour, IControllable
     {
         MoveInventoryCamera();
 
+        UpdateBlobSize();
+
         if (!controlled || GameInfo.StartCutscene || GameInfo.GameStatus == GameState.Paused)
             return;
 
@@ -255,8 +257,6 @@ public class BlobController : MonoBehaviour, IControllable
         HandleMovementControls();
 
         HandleStickyControls();
-
-        HandleSizeControls();
 
         HandleDebugControls();
     }
@@ -293,23 +293,24 @@ public class BlobController : MonoBehaviour, IControllable
     }
 
     /// <summary>
-    ///     Allow the player to control blob size.
+    ///     Change the blob's size based on its health.
     /// </summary>
-    private void HandleSizeControls() {
+    private void UpdateBlobSize() {
         if (Material.HasAll(BlobMaterialProperties.Solid) || joints.Busy) return;
 
-        // left mouse shrinks, right mouse grows
-        if (Input.GetMouseButton(0))
-        {
-            joints.SetValue(new(BlobSize.Small));
-        }
-        else if (Input.GetMouseButton(1))
+        float healthProportion = Stats.GetInt("Health").Proportion;
+
+        if (healthProportion > 0.9)
         {
             joints.SetValue(new(BlobSize.Large));
         }
-        else
+        else if (healthProportion > 0.25)
         {
             joints.SetValue(new(BlobSize.Medium));
+        }
+        else
+        {
+            joints.SetValue(new(BlobSize.Small));
         }
     }
 
