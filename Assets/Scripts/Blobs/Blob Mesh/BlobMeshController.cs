@@ -296,6 +296,11 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     public void Rescale(float lengthScaleFactor)
     {
         ScaleFactor = 1 + 3 * atoms.AtomScale / (2 * lengthScaleFactor * atoms.DefaultLength);
+        
+        foreach (BlobCosmetic cosmetic in Cosmetics)
+        {
+            cosmetic.SetScale(lengthScaleFactor);
+        }
     }
 
     /// <summary>

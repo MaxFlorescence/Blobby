@@ -57,10 +57,17 @@ public class BlobCosmetic : MonoBehaviour
     private Collider cosmeticCollider;
     private Rigidbody cosmeticRigidbody;
 
+    /// <summary>
+    ///     The initial scale of this cosmetic.
+    /// </summary>
+    private Vector3 initialScale;
+
     void Awake()
     {
         cosmeticCollider = GetComponent<Collider>();
         cosmeticRigidbody = GetComponent<Rigidbody>();
+
+        initialScale = gameObject.transform.localScale;
     }
 
     /// <summary>
@@ -86,5 +93,13 @@ public class BlobCosmetic : MonoBehaviour
 
         cosmeticRigidbody.AddForce(flingForce * flingDirection, ForceMode.Impulse);
         cosmeticRigidbody.AddTorque(flingDirection);
+    }
+
+    /// <summary>
+    ///     Sets the scale of the cosmetic.
+    /// </summary>
+    public void SetScale(float scale)
+    {
+        gameObject.transform.localScale = initialScale * scale;
     }
 }
