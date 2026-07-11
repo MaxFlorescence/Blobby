@@ -58,6 +58,7 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     ///     has more than one vertex per atom.
     /// </summary>
     private int[] vertexToAtomMap;
+    private float[] atomOffsets;
 
     // ---------------------------------------------------------------------------------------------
     // MATERIAL TRANSITIONS
@@ -91,6 +92,8 @@ public class BlobMeshController : MonoBehaviour, IBusyable
         transitionTimer.Skip(false);
 
         MapVertices();
+        atomOffsets = new float[atoms.Count];
+        Jolt(0);
     }
 
     /// <summary>
@@ -125,6 +128,8 @@ public class BlobMeshController : MonoBehaviour, IBusyable
 
         SnapToTriangle(leftEye, leftTriangle);
         SnapToTriangle(rightEye, rightTriangle);
+
+        if (atomOffsets[0] > 0) atomOffsets[0] -= .05f;
 
         if (transitionTimer.Update(mode: TimerMode.Pulse)) SimplifyMaterials();
 
@@ -177,13 +182,13 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     /// </returns>
     private Vector3 ScaledBarycenter(Vector3Int triangle)
     {
-        Vector3 barycenter = (
-            atoms.GetVertex(triangle.x) +
-            atoms.GetVertex(triangle.y) +
-            atoms.GetVertex(triangle.z)
+        Vector3 localBarycenter = (
+            GetOffset(triangle.x) * transform.InverseTransformPoint(atoms.GetVertex(triangle.x)) +
+            GetOffset(triangle.y) * transform.InverseTransformPoint(atoms.GetVertex(triangle.y)) +
+            GetOffset(triangle.z) * transform.InverseTransformPoint(atoms.GetVertex(triangle.z))
         ) / 3;
 
-        return (barycenter - transform.position) * ScaleFactor + transform.position;
+        return transform.TransformPoint(localBarycenter * ScaleFactor);
     }
 
     /// <summary>
@@ -198,10 +203,12 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     /// </returns>
     private Vector3 NormalVector(Vector3Int triangle, Vector3 barycenter)
     {
-        Vector3 dirXY = atoms.GetVertex(triangle.y) - atoms.GetVertex(triangle.x);
-        Vector3 dirXZ = atoms.GetVertex(triangle.z) - atoms.GetVertex(triangle.x);
+        Vector3 dirXY = GetOffset(triangle.y) * transform.InverseTransformPoint(atoms.GetVertex(triangle.y))
+                      - GetOffset(triangle.x) * transform.InverseTransformPoint(atoms.GetVertex(triangle.x));
+        Vector3 dirXZ = GetOffset(triangle.z) * transform.InverseTransformPoint(atoms.GetVertex(triangle.z))
+                      - GetOffset(triangle.x) * transform.InverseTransformPoint(atoms.GetVertex(triangle.x));
 
-        Vector3 normal = Vector3.Cross(dirXY, dirXZ).normalized;
+        Vector3 normal = transform.TransformDirection(Vector3.Cross(dirXY, dirXZ).normalized);
 
         if (Vector3.Angle(normal, barycenter - transform.position) > 90)
         {
@@ -223,10 +230,13 @@ public class BlobMeshController : MonoBehaviour, IBusyable
 
         for (int i = 0; i < newVertices.Length; i++)
         {
-            Vector3 worldPosition = atoms.GetVertex(vertexToAtomMap[i]);
+            int atomIndex = vertexToAtomMap[i];
+            Vector3 worldPosition = atoms.GetVertex(atomIndex);
 
             // Calculate local position of mesh vertices.
-            newVertices[i] = transform.InverseTransformPoint(worldPosition) * ScaleFactor;
+            newVertices[i] = GetOffset(atomIndex) * ScaleFactor * transform.InverseTransformPoint(
+                worldPosition
+            );
         }
 
         mesh.vertices = newVertices;
@@ -290,5 +300,34 @@ public class BlobMeshController : MonoBehaviour, IBusyable
         ScaleFactor = 1 + 3 * atoms.AtomScale / (2 * lengthScaleFactor * atoms.DefaultLength);
 
         rightEye.SetActive(lengthScaleFactor > LOWER_COSMETIC_THRESHOLD);
+    }
+
+    /// <summary>
+    ///     Apply a temporary random offset to the mesh's vertices.
+    /// </summary>
+    /// <param name="maxOffset">
+    ///     The maximum offset as a proportion of the normal offset that can be applied.
+    /// </param>
+    public void Jolt(float maxOffset = 0.5f)
+    {
+        for (int i = 1; i < atoms.Count; i++)
+        {
+            atomOffsets[i] = maxOffset * (2 * Random.value - 1);
+        }
+
+        atomOffsets[0] = maxOffset.Approx(0) ? 0 : 1;
+    }
+
+    /// <param name="atomIndex">
+    ///     The index of the atom to get the offset of.
+    /// </param>
+    /// <returns>
+    ///     The offset associated with the given atom index.
+    /// </returns>
+    private float GetOffset(int atomIndex)
+    {
+        if (atomOffsets[0] < FloatExtensions.EPSILON) atomOffsets[0] = 0;
+
+        return 1 + atomOffsets[atomIndex] * atomOffsets[0];
     }
 }

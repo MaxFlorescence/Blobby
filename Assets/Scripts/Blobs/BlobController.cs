@@ -170,6 +170,7 @@ public class BlobController : MonoBehaviour, IControllable
             else if (to.Val < from.Val)
             {
                 SoundController.DamageSound();
+                meshController.Jolt();
             }
         });
     }
