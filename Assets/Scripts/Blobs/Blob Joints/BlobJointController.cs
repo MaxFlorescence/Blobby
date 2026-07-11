@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -5,12 +6,26 @@ using UnityEngine;
 /// </summary>
 public static class BlobSize
 {
-    public static readonly float Tiny = 0.3f;
-    public static readonly float Small = 0.6f;
+    public static readonly float Tiny = 1/3f;
+    public static readonly float Small = 2/3f;
     public static readonly float Medium = 1f;
-    public static readonly float Large = 1.5f;
-    public static readonly float Huge = 2f;
-    public static readonly float Giant = 2.5f;
+    public static readonly float Large = 4/3f;
+    public static readonly float Huge = 5/3f;
+    public static readonly float Giant = 2f;
+
+    public static float Get(int i)
+    {
+        return i.Clamp(0, 5) switch
+        {
+            0 => Tiny,
+            1 => Small,
+            2 => Medium,
+            3 => Large,
+            4 => Huge,
+            5 => Giant,
+            _ => throw new ArgumentException("Invalid blob size!")
+        };
+    }
 }
 
 /// <summary>

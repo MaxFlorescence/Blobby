@@ -1451,7 +1451,7 @@ GameObject:
   - component: {fileID: 850580067}
   - component: {fileID: 850580066}
   m_Layer: 0
-  m_Name: Wet Plate (2)
+  m_Name: Damage Plate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4127,7 +4127,7 @@ GameObject:
   - component: {fileID: 1965607008}
   - component: {fileID: 1965607007}
   m_Layer: 0
-  m_Name: Wet Plate (1)
+  m_Name: Health Plate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

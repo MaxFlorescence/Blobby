@@ -56,6 +56,21 @@ public class BlobController : MonoBehaviour, IControllable
     /// </summary>
     public BlobJointController joints;
 
+    /// <summary>
+    ///     The default size index of the blob.
+    /// </summary>
+    private const int DEFAULT_SIZE = 3;
+
+    /// <summary>
+    ///     The size that the blob is without any player input.
+    /// </summary>
+    private int normalSize;
+
+    /// <summary>
+    ///     The health thresholds at which the blob's normal size changes.
+    /// </summary>
+    private readonly (float High, float Low) HealthThreshold = (0.9f, 0.25f);
+
     //----------------------------------------------------------------------------------------------
     // STICKING
     //----------------------------------------------------------------------------------------------
@@ -316,19 +331,18 @@ public class BlobController : MonoBehaviour, IControllable
         if (Material.HasAll(BlobMaterialProperties.Solid) || joints.Busy) return;
 
         float healthProportion = Stats.GetInt("Health").Proportion;
+        normalSize = DEFAULT_SIZE + (
+            healthProportion > HealthThreshold.High ? 1
+            : healthProportion < HealthThreshold.Low ? -1
+            : 0
+        );
 
-        if (healthProportion > 0.9)
-        {
-            joints.SetValue(new(BlobSize.Large));
-        }
-        else if (healthProportion > 0.25)
-        {
-            joints.SetValue(new(BlobSize.Medium));
-        }
-        else
-        {
-            joints.SetValue(new(BlobSize.Small));
-        }
+        int size = normalSize + (
+            Input.GetMouseButton(0) ? -1
+            : Input.GetMouseButton(1) ? 1
+            : 0
+        );
+        joints.SetValue(new(BlobSize.Get(size)));
     }
 
     /// <summary>
