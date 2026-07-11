@@ -109,6 +109,10 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
     public Material[] neonMaterials;
 
     void Awake() {
+        atomRigidBody = GetComponent<Rigidbody>();
+        atomCollider = GetComponent<Collider>();
+        meshRenderer = GetComponent<MeshRenderer>();
+
         gameObject.TryGetComponent(out ParticleController);
 
         SLIPPERY_PHYSIC_MATERIAL = Resources.Load<PhysicMaterial>(
@@ -121,11 +125,7 @@ public class AtomController : MonoBehaviour, IOverridable<Vector3>
 
     void Start()
     {
-        atomRigidBody = GetComponent<Rigidbody>();
-        atomCollider = GetComponent<Collider>();
-        meshRenderer = GetComponent<MeshRenderer>();
         Highlight(false);
-
         SetVisible(false);
     }
 
