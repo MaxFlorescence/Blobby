@@ -181,6 +181,8 @@ public class BlobController : MonoBehaviour, IControllable
             if (to.Val == 0 && from.Val > 0)
             {
                 SoundController.DeathSound();
+                meshController.DropCosmetics();
+                joints.SetValue(new(springForce: 0));
             }
             else if (to.Val < from.Val)
             {

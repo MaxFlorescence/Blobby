@@ -8,19 +8,10 @@ using UnityEngine;
 public class BlobMeshController : MonoBehaviour, IBusyable
 {
     // ---------------------------------------------------------------------------------------------
-    // EYES
-    // ---------------------------------------------------------------------------------------------
-    public GameObject leftEye;
-    /// <summary>
-    ///     The triangle of atoms that the left eye will snap to the barycenter of.
-    /// </summary>
-    public Vector3Int leftTriangle;
-    public GameObject rightEye;
-    /// <summary>
-    ///     The triangle of atoms that the right eye will snap to the barycenter of.
-    /// </summary>
-    public Vector3Int rightTriangle;
-    
+    // COSMETICS
+    // --------------------------------------------------------------------------------------------- 
+    public BlobCosmetic[] Cosmetics;
+
     /// <summary>
     ///     The minimum size at which cosmetics can be displayed normally.
     /// </summary>
@@ -94,6 +85,11 @@ public class BlobMeshController : MonoBehaviour, IBusyable
         MapVertices();
         atomOffsets = new float[atoms.Count];
         Jolt(0);
+
+        foreach (BlobCosmetic cosmetic in Cosmetics)
+        {
+            cosmetic.SetEquipped(true);
+        }
     }
 
     /// <summary>
@@ -126,8 +122,10 @@ public class BlobMeshController : MonoBehaviour, IBusyable
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
-        SnapToTriangle(leftEye, leftTriangle);
-        SnapToTriangle(rightEye, rightTriangle);
+        foreach (BlobCosmetic cosmetic in Cosmetics)
+        {
+            if (cosmetic.Equipped) SnapToTriangle(cosmetic.gameObject, cosmetic.Triangle);
+        }
 
         if (atomOffsets[0] > 0) atomOffsets[0] -= .05f;
 
@@ -298,8 +296,6 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     public void Rescale(float lengthScaleFactor)
     {
         ScaleFactor = 1 + 3 * atoms.AtomScale / (2 * lengthScaleFactor * atoms.DefaultLength);
-
-        rightEye.SetActive(lengthScaleFactor > LOWER_COSMETIC_THRESHOLD);
     }
 
     /// <summary>
@@ -329,5 +325,16 @@ public class BlobMeshController : MonoBehaviour, IBusyable
         if (atomOffsets[0] < FloatExtensions.EPSILON) atomOffsets[0] = 0;
 
         return 1 + atomOffsets[atomIndex] * atomOffsets[0];
+    }
+
+    /// <summary>
+    ///     Unequip all cosmetics currently on the blob.
+    /// </summary>
+    public void DropCosmetics()
+    {
+        foreach (BlobCosmetic cosmetic in Cosmetics)
+        {
+            cosmetic.SetEquipped(false, fling: true);
+        }
     }
 }
