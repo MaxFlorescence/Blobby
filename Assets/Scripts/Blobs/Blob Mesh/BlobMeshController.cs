@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 ///     A class that controls the mesh for a blob.
@@ -164,8 +166,24 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     /// </param>
     private void SnapToTriangle(GameObject cosmetic, Vector3Int triangle)
     {
-        Vector3 position = ScaledBarycenter(triangle);
-        Vector3 direction = NormalVector(triangle, position);
+        (float[] offset, Vector3[] vertex) triangleAtoms = (
+            new float[]
+            {
+                GetOffset(triangle.x),
+                GetOffset(triangle.y),
+                GetOffset(triangle.z)
+            },
+            new Vector3[]
+            {
+                atoms.GetVertex(triangle.x),
+                atoms.GetVertex(triangle.y),
+                atoms.GetVertex(triangle.z)
+            }
+        );
+        transform.InverseTransformPoints(new Span<Vector3>(triangleAtoms.vertex));
+
+        Vector3 position = ScaledBarycenter(triangleAtoms);
+        Vector3 direction = NormalVector(triangleAtoms, position);
 
         cosmetic.transform.position = position;
         cosmetic.transform.LookAt(position + direction, Vector3.up);
@@ -178,12 +196,12 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     /// <returns>
     ///     The barycenter of the triangle as a Vector3, scaled away from the center.
     /// </returns>
-    private Vector3 ScaledBarycenter(Vector3Int triangle)
+    private Vector3 ScaledBarycenter((float[] offset, Vector3[] vertex) triangle)
     {
         Vector3 localBarycenter = (
-            GetOffset(triangle.x) * transform.InverseTransformPoint(atoms.GetVertex(triangle.x)) +
-            GetOffset(triangle.y) * transform.InverseTransformPoint(atoms.GetVertex(triangle.y)) +
-            GetOffset(triangle.z) * transform.InverseTransformPoint(atoms.GetVertex(triangle.z))
+            triangle.offset[0] * triangle.vertex[0] +
+            triangle.offset[1] * triangle.vertex[1] +
+            triangle.offset[2] * triangle.vertex[2]
         ) / 3;
 
         return transform.TransformPoint(localBarycenter * ScaleFactor);
@@ -199,12 +217,12 @@ public class BlobMeshController : MonoBehaviour, IBusyable
     /// <returns>
     ///     The normal Vector3 of the triangle.
     /// </returns>
-    private Vector3 NormalVector(Vector3Int triangle, Vector3 barycenter)
+    private Vector3 NormalVector((float[] offset, Vector3[] vertex) triangle, Vector3 barycenter)
     {
-        Vector3 dirXY = GetOffset(triangle.y) * transform.InverseTransformPoint(atoms.GetVertex(triangle.y))
-                      - GetOffset(triangle.x) * transform.InverseTransformPoint(atoms.GetVertex(triangle.x));
-        Vector3 dirXZ = GetOffset(triangle.z) * transform.InverseTransformPoint(atoms.GetVertex(triangle.z))
-                      - GetOffset(triangle.x) * transform.InverseTransformPoint(atoms.GetVertex(triangle.x));
+        Vector3 dirXY = triangle.offset[1] * triangle.vertex[1]
+                      - triangle.offset[0] * triangle.vertex[0];
+        Vector3 dirXZ = triangle.offset[2] * triangle.vertex[2]
+                      - triangle.offset[0] * triangle.vertex[0];
 
         Vector3 normal = transform.TransformDirection(Vector3.Cross(dirXY, dirXZ).normalized);
 
