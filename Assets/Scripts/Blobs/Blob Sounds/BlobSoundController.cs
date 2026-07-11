@@ -3,10 +3,10 @@ using UnityEngine;
 /// <summary>
 ///     A class for playing the noises that a blob makes.
 /// </summary>
-[RequireComponent(typeof(AudioSource))]
 public class BlobSoundController : MonoBehaviour
 {
-    private AudioSource audioSource;
+    public AudioSource oneShotAudioSource;
+    public AudioSource backgroundAudioSource;
     
     /// <summary>
     ///     The different sound families that the blob can play.
@@ -18,16 +18,12 @@ public class BlobSoundController : MonoBehaviour
     /// </summary>
     private readonly Timer loopTimer = new();
 
-    void Start() {
-        audioSource = GetComponent<AudioSource>();
-    }
-
     void Update()
     {
         if (soundFamilies.background.IsNone) return;
 
         if (loopTimer.Update()) {
-            audioSource.PlayOneShot(soundFamilies.background);
+            backgroundAudioSource.PlayOneShot(soundFamilies.background);
         }
     }
 
@@ -37,7 +33,7 @@ public class BlobSoundController : MonoBehaviour
     public void CollideSound() {
         if (GameInfo.StartCutscene || soundFamilies.collision.IsNone) return;
         
-        audioSource.PlayOneShot(soundFamilies.collision);
+        oneShotAudioSource.PlayOneShot(soundFamilies.collision);
     }
 
     /// <summary>
@@ -46,7 +42,7 @@ public class BlobSoundController : MonoBehaviour
     public void DamageSound() {
         if (GameInfo.StartCutscene || soundFamilies.damage.IsNone) return;
         
-        audioSource.PlayOneShot(soundFamilies.damage);
+        oneShotAudioSource.PlayOneShot(soundFamilies.damage);
     }
 
     /// <summary>
@@ -55,7 +51,7 @@ public class BlobSoundController : MonoBehaviour
     public void DeathSound() {
         if (GameInfo.StartCutscene || soundFamilies.death.IsNone) return;
         
-        audioSource.PlayOneShot(soundFamilies.death);
+        oneShotAudioSource.PlayOneShot(soundFamilies.death);
     }
 
     /// <summary>
@@ -67,10 +63,11 @@ public class BlobSoundController : MonoBehaviour
     /// </param>
     public void SetClips(BlobSoundFamiliesStruct soundFamilies)
     {
-        audioSource.Stop();
+        oneShotAudioSource.Stop();
+        backgroundAudioSource.Stop();
 
         if (!this.soundFamilies.fromTransition?.IsNone ?? false)
-            audioSource.PlayOneShot(this.soundFamilies.fromTransition);
+            oneShotAudioSource.PlayOneShot(this.soundFamilies.fromTransition);
 
         this.soundFamilies = soundFamilies;
         
@@ -82,6 +79,6 @@ public class BlobSoundController : MonoBehaviour
         }
 
         if (!this.soundFamilies.toTransition.IsNone)
-            audioSource.PlayOneShot(this.soundFamilies.toTransition);
+            oneShotAudioSource.PlayOneShot(this.soundFamilies.toTransition);
     }
 }

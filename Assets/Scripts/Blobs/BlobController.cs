@@ -183,6 +183,7 @@ public class BlobController : MonoBehaviour, IControllable
                 SoundController.DeathSound();
                 meshController.DropCosmetics();
                 joints.SetValue(new(springForce: 0));
+                SetMovementInputEnabled(false);
             }
             else if (to.Val < from.Val)
             {

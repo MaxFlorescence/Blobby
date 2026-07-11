@@ -1680,6 +1680,10 @@ PrefabInstance:
       propertyPath: EmissionModule.m_BurstCount
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5492761646932499632, guid: ad1b2b30531bc5642ad83ed3ac4ef317, type: 3}
+      propertyPath: Loop
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6533246546920701166, guid: ad1b2b30531bc5642ad83ed3ac4ef317, type: 3}
       propertyPath: EmissionModule.m_BurstCount
       value: 1
