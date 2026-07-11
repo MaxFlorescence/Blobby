@@ -61,6 +61,7 @@ public class BlobCosmetic : MonoBehaviour
     ///     The initial scale of this cosmetic.
     /// </summary>
     private Vector3 initialScale;
+    private const float FLING_POWER = 15;
 
     void Awake()
     {
@@ -89,7 +90,7 @@ public class BlobCosmetic : MonoBehaviour
 
         Vector3 flingDirection = Random.onUnitSphere;
         flingDirection.y = Mathf.Abs(flingDirection.y);
-        float flingForce = 20 * (Random.value + 0.5f);
+        float flingForce = FLING_POWER * (Random.value + 0.5f);
 
         cosmeticRigidbody.AddForce(flingForce * flingDirection, ForceMode.Impulse);
         cosmeticRigidbody.AddTorque(flingDirection);

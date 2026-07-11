@@ -87,7 +87,9 @@ public class BlobMeshController : MonoBehaviour, IBusyable
         MapVertices();
         atomOffsets = new float[atoms.Count];
         Jolt(0);
-
+    }
+        
+    void Start() {
         foreach (BlobCosmetic cosmetic in Cosmetics)
         {
             cosmetic.SetEquipped(true);
